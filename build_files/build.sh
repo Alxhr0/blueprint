@@ -7,8 +7,9 @@ cp -avf "/ctx/system_files"/. /
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
   | sh -s -- install linux \
     --init none \
+    --no-confirm \
     --no-modify-profile \
-    --no-confirm  
+    --prefer-upstream-nix
 
 mkdir -p /nix
 
@@ -17,8 +18,6 @@ dnf5 install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra
 dnf5 -y copr enable ublue-os/packages
 dnf5 -y copr enable lionheartp/Hyprland 
 dnf5 -y config-manager setopt google-chrome.enabled=1
-rpm --import https://packages.microsoft.com/keys/microsoft.asc
-sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
 
 PACKAGES=(
     hyprland
@@ -41,6 +40,19 @@ dnf5 -y install "${PACKAGES[@]}"
 
 dnf5 -y copr disable lionheartp/Hyprland 
 dnf5 -y copr disable ublue-os/packages
+
+mkdir -p /usr/etc/flatpak/system
+
+cat <<EOF >> /usr/etc/flatpak/system/install
+org.mozilla.firefox
+org.kde.okular
+org.gnome.Calculator
+com.valvesoftware.Steam
+EOF
+
+cat <<EOF >> /usr/etc/flatpak/system/remove
+org.gnome.Tour
+EOF
 
 dnf5 config-manager addrepo --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo
 dnf5 config-manager setopt tailscale-stable.enabled=0
