@@ -4,9 +4,10 @@ set -ouex pipefail
 
 cp -avf "/ctx/system_files"/. /
 
-curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install linux \
-  --init none \
-  --no-modify-profile
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
+  | sh -s -- install linux \
+    --init none \
+    --no-modify-profile  
 
 mkdir -p /nix
 
