@@ -19,3 +19,4 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     /ctx/build.sh
 
 RUN bootc container lint
+RUN /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh

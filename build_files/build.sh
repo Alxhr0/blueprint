@@ -7,12 +7,14 @@ cp -avf "/ctx/system_files"/. /
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
   | sh -s -- install linux \
     --init none \
-    --no-modify-profile  
+    --no-modify-profile \
+    --no-confirm  
 
 mkdir -p /nix
 
 dnf5 install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release terra-gpg-keys
 
+dnf5 -y copr enable ublue-os/packages
 dnf5 -y copr enable lionheartp/Hyprland 
 dnf5 -y config-manager setopt google-chrome.enabled=1
 rpm --import https://packages.microsoft.com/keys/microsoft.asc
@@ -32,15 +34,17 @@ PACKAGES=(
     steam
     tmux
     ghostty
+    uupd
   )
 
-dnf -y install "${PACKAGES[@]}"
+dnf5 -y install "${PACKAGES[@]}"
 
 dnf5 -y copr disable lionheartp/Hyprland 
+dnf5 -y copr disable ublue-os/packages
 
-dnf config-manager addrepo --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo
-dnf config-manager setopt tailscale-stable.enabled=0
-dnf -y install --enablerepo='tailscale-stable' tailscale
+dnf5 config-manager addrepo --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo
+dnf5 config-manager setopt tailscale-stable.enabled=0
+dnf5 -y install --enablerepo='tailscale-stable' tailscale
 
 systemctl enable podman.socket
 systemctl enable tailscaled.service
