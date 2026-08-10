@@ -1,5 +1,8 @@
-set dotenv-filename := "image-template.env"
+set dotenv-filename := "images/edward.env"
 set dotenv-load
+
+# Primary image config + shared defaults (also sources the shared vars for other variants)
+primary_env := "images/edward.env"
 
 export image_name := env_var("IMAGE_NAME")
 export repo_organization := env_var("REPO_ORGANIZATION")
@@ -93,36 +96,65 @@ sudoif command *args:
 #
 
 # Build the image using the specified parameters
-build $target_image=image_name $tag=default_tag:
+# target_image is a variant key: the name of a Containerfile.<name> + images/<name>.env
+# (e.g. edward, aira, server). Every variant is tagged ${IMAGE_NAME}:${DEFAULT_TAG},
+# e.g. blueprint:edward, blueprint:aira, blueprint:server.
+build $target_image="" $tag="":
     #!/usr/bin/env bash
 
     set -euox pipefail
+
+    # The primary variant is the env file's stem (e.g. edward)
+    PRIMARY_STEM="$(basename "{{ primary_env }}" .env)"
+    if [[ -z "${target_image}" ]]; then
+        target_image="${PRIMARY_STEM}"
+    fi
+
+    # Load shared defaults from the primary image env, then this variant's env if it exists
+    set -a
+    source "{{ primary_env }}"
+    if [[ -f "images/${target_image}.env" && "images/${target_image}.env" != "{{ primary_env }}" ]]; then
+        source "images/${target_image}.env"
+    fi
+    set +a
+
+    # Pick the Containerfile for this variant (Containerfile.<name> or the primary variant's)
+    CONTAINERFILE="Containerfile.${PRIMARY_STEM}"
+    if [[ -f "Containerfile.${target_image}" ]]; then
+        CONTAINERFILE="Containerfile.${target_image}"
+    fi
+
+    # Explicit tag arg wins, otherwise use the variant's DEFAULT_TAG
+    TAG="${DEFAULT_TAG}"
+    if [[ -n "${tag}" ]]; then
+        TAG="${tag}"
+    fi
 
     BUILD_ARGS=()
     LABELS=()
     if [[ -z "$(git status -s)" ]]; then
         GIT_SHA=$(git rev-parse --short HEAD)
-        LABELS+=("--label" "io.artifacthub.package.readme-url=https://raw.githubusercontent.com/{{ repo_organization }}/{{ image_name }}/${GIT_SHA}/README.md")
-        LABELS+=("--label" "org.opencontainers.image.documentation=https://raw.githubusercontent.com/{{ repo_organization }}/{{ image_name }}/${GIT_SHA}/README.md")
-        LABELS+=("--label" "org.opencontainers.image.source=https://github.com/{{ repo_organization }}/{{ image_name }}/blob/${GIT_SHA}/Containerfile")
-        LABELS+=("--label" "org.opencontainers.image.url=https://github.com/{{ repo_organization }}/{{ image_name }}/tree/${GIT_SHA}")
-        LABELS+=("--label" "org.opencontainers.image.version={{ default_tag }}.$(date +%Y%m%d)-${GIT_SHA}")
+        LABELS+=("--label" "io.artifacthub.package.readme-url=https://raw.githubusercontent.com/${REPO_ORGANIZATION}/${IMAGE_NAME}/${GIT_SHA}/README.md")
+        LABELS+=("--label" "org.opencontainers.image.documentation=https://raw.githubusercontent.com/${REPO_ORGANIZATION}/${IMAGE_NAME}/${GIT_SHA}/README.md")
+        LABELS+=("--label" "org.opencontainers.image.source=https://github.com/${REPO_ORGANIZATION}/${IMAGE_NAME}/blob/${GIT_SHA}/Containerfile")
+        LABELS+=("--label" "org.opencontainers.image.url=https://github.com/${REPO_ORGANIZATION}/${IMAGE_NAME}/tree/${GIT_SHA}")
+        LABELS+=("--label" "org.opencontainers.image.version=${DEFAULT_TAG}.$(date +%Y%m%d)-${GIT_SHA}")
     fi
 
     # Image metadata for https://artifacthub.io/ - This is optional but is highly recommended so we all can get a index of all the custom images
     # The metadata by itself is not going to do anything, you choose if you want your image to be on ArtifactHub or not.
     LABELS+=("--label" "io.artifacthub.package.deprecated=false")
-    LABELS+=("--label" "io.artifacthub.package.keywords={{ image_keywords }}")
+    LABELS+=("--label" "io.artifacthub.package.keywords=${IMAGE_KEYWORDS}")
     LABELS+=("--label" "io.artifacthub.package.license=Apache-2.0")
-    LABELS+=("--label" "io.artifacthub.package.logo-url={{ image_logo_url }}")
+    LABELS+=("--label" "io.artifacthub.package.logo-url=${IMAGE_LOGO_URL}")
     LABELS+=("--label" "io.artifacthub.package.prerelease=false")
     LABELS+=("--label" "org.opencontainers.image.created=$(date -u +%Y\-%m\-%d\T%H\:%M\:%S\Z)")
-    LABELS+=("--label" "org.opencontainers.image.description={{ image_desc }}")
-    LABELS+=("--label" "org.opencontainers.image.title={{ image_name }}")
-    LABELS+=("--label" "org.opencontainers.image.vendor={{ repo_organization }}")
+    LABELS+=("--label" "org.opencontainers.image.description=${IMAGE_DESC}")
+    LABELS+=("--label" "org.opencontainers.image.title=${IMAGE_NAME}")
+    LABELS+=("--label" "org.opencontainers.image.vendor=${REPO_ORGANIZATION}")
 
     # This actually builds the image!
-    PODMAN_BUILD_ARGS=("${BUILD_ARGS[@]}" "${LABELS[@]}" --pull=newer --tag "${target_image}:${tag}" --file Containerfile)
+    PODMAN_BUILD_ARGS=("${BUILD_ARGS[@]}" "${LABELS[@]}" --pull=newer --tag "${IMAGE_NAME}:${TAG}" --file "${CONTAINERFILE}")
 
     podman build "${PODMAN_BUILD_ARGS[@]}" .
 
@@ -205,18 +237,18 @@ generate-build-tags $target_image=image_name $tag=default_tag:
     #!/usr/bin/env bash
     set -eoux pipefail
 
+    # All alias tags are prefixed with the variant tag so variants sharing an
+    # image name (e.g. blueprint:latest, blueprint:aira) never overwrite each other
     DATE=$(date +%Y%m%d)
     BUILD_TAGS=()
     if [[ -z "$(git status -s)" ]]; then
         GIT_SHA=$(git rev-parse --short HEAD)
         BUILD_TAGS+=("${tag}-${GIT_SHA}")
         BUILD_TAGS+=("${tag}-${DATE}-${GIT_SHA}")
-        BUILD_TAGS+=("${DATE}-${GIT_SHA}")
     fi
 
-    BUILD_TAGS+=("${DATE}")
-    BUILD_TAGS+=("${tag}")
     BUILD_TAGS+=("${tag}-${DATE}")
+    BUILD_TAGS+=("${tag}")
 
     echo "${BUILD_TAGS[@]}"
 
@@ -246,6 +278,41 @@ image_name $target_image=image_name:
     set -eoux pipefail
 
     echo "${image_name}"
+
+# List all variant keys defined in this repo (env files with a matching Containerfile.<name>)
+[group('Utility')]
+list-images:
+    #!/usr/bin/env bash
+    set -eoux pipefail
+
+    IMAGES=()
+    for env in images/*.env; do
+        [[ -f "${env}" ]] || continue
+        stem="${env#images/}"
+        stem="${stem%.env}"
+        if [[ -f "Containerfile.${stem}" ]]; then
+            IMAGES+=("${stem}")
+        fi
+    done
+
+    printf '%s\n' "${IMAGES[@]}"
+
+# Print IMAGE_NAME and DEFAULT_TAG for a variant key
+[group('Utility')]
+[private]
+variant-env $target_image=image_name:
+    #!/usr/bin/env bash
+    set -eoux pipefail
+
+    set -a
+    source "{{ primary_env }}"
+    if [[ -f "images/${target_image}.env" ]]; then
+        source "images/${target_image}.env"
+    fi
+    set +a
+
+    echo "IMAGE_NAME=${IMAGE_NAME}"
+    echo "DEFAULT_TAG=${DEFAULT_TAG}"
 
 # Command: _rootful_load_image
 # Description: This script checks if the current user is root or running under sudo. If not, it attempts to resolve the image tag using podman inspect.

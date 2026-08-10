@@ -2,7 +2,7 @@
 FROM scratch AS ctx
 COPY build_files /
 COPY system_files /system_files
-COPY brew/packages.Brewfile /usr/share/ublue-os/homebrew/packages.Brewfile
+COPY brew/packages-edward.Brewfile /usr/share/ublue-os/homebrew/packages.Brewfile
 
 FROM ghcr.io/ublue-os/akmods:ogc-44 AS akmods
 FROM ghcr.io/ublue-os/akmods-nvidia-open:ogc-44 AS akmods-nvidia
@@ -21,7 +21,9 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=bind,from=akmods,src=/kernel-rpms,dst=/tmp/kernel-rpms \
     --mount=type=bind,from=akmods-nvidia,src=/rpms,dst=/tmp/akmods-nvidia \
     --mount=type=tmpfs,dst=/tmp \
-    /ctx/build.sh
+    /ctx/build-edward.sh
 
+RUN rm -rf /run/dnf /run/setrans /tmp/*
+RUN rm -rf /usr/etc
 RUN bootc container lint
 RUN /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
