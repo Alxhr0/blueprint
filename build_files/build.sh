@@ -34,16 +34,9 @@ PACKAGES=(
     waybar
     quickshell
     google-chrome-stable
-    code
-    google-noto-fonts-common
-    google-noto-fonts-cjk
-    google-noto-fonts-emoji
-    google-noto-fonts
-    wl-kpbtr
     steam
     tmux
     ghostty
-    uupd
   )
 
 dnf5 -y install "${PACKAGES[@]}"
