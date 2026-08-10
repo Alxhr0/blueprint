@@ -52,51 +52,45 @@ dnf5 -y copr disable scottames/ghostty
 
 mkdir -p /usr/etc/flatpak/system
 
-cat <<EOF >> /usr/etc/flatpak/system/install
-io.github.tanaybhomia.Whisp
-com.discordapp.Discord
-com.heroicgameslauncher.hgl
-md.obsidian.Obsidian
-it.mijorus.gearlever
-com.vysp3r.ProtonPlus
-org.kde.krita
-org.inkscape.Inkscape
-com.github.johnfactotum.Foliate
-org.gnome.gitlab.ilhooq.Bookup
-com.super_productivity.SuperProductivity
-com.ticktick.TickTick
-org.prismlauncher.PrismLauncher
-com.protonvpn.www
-dev.vencord.Vesktop
-us.zoom.Zoom
-io.github.Faugus.faugus-launcher
-io.podman_desktop.PodmanDesktop
-com.jeffser.Alpaca
-net.cozic.joplin_desktop
-com.logseq.Logseq
-io.github.alainm23.planify
-com.vixalien.sticky
-org.zotero.Zotero
-com.adamcake.Bolt
-io.gitlab.news_flash.NewsFlash
-moe.launcher.the-honkers-railway-launcher
-moe.launcher.sleepy-launcher
-moe.launcher.an-anime-game-launcher
-info.febvre.Komikku
-com.rafaelmardojai.Blanket
-io.github.dvlv.boxbuddyrs
-page.kramo.Cartridges
-io.github.qwersyk.Newelle
-net.runelite.RuneLite
-io.github.faridjaff.StickyNotesCanvas
-org.localsend.localsend_app
+flatpak install -y io.github.tanaybhomia.Whisp \
+com.discordapp.Discord \
+com.heroicgameslauncher.hgl \
+md.obsidian.Obsidian \
+it.mijorus.gearlever \
+com.vysp3r.ProtonPlus \
+org.kde.krita \
+org.inkscape.Inkscape \
+com.github.johnfactotum.Foliate \
+org.gnome.gitlab.ilhooq.Bookup \
+com.super_productivity.SuperProductivity \
+com.ticktick.TickTick \
+org.prismlauncher.PrismLauncher \
+com.protonvpn.www \
+us.zoom.Zoom \
+io.github.Faugus.faugus-launcher \
+io.podman_desktop.PodmanDesktop \
+com.jeffser.Alpaca \
+net.cozic.joplin_desktop \
+com.logseq.Logseq \
+io.github.alainm23.planify \
+com.vixalien.sticky \
+org.zotero.Zotero \
+com.adamcake.Bolt \
+io.gitlab.news_flash.NewsFlash \
+moe.launcher.the-honkers-railway-launcher \
+moe.launcher.sleepy-launcher \
+moe.launcher.an-anime-game-launcher \
+info.febvre.Komikku \
+com.rafaelmardojai.Blanket \
+io.github.dvlv.boxbuddyrs \
+page.kramo.Cartridges \
+io.github.qwersyk.Newelle \
+net.runelite.RuneLite \
+io.github.faridjaff.StickyNotesCanvas \
+org.localsend.localsend_app \
 net.lutris.Lutris
-EOF
 
-cat <<EOF >> /usr/etc/flatpak/system/remove
-org.mozilla.firefox
-com.ranfdev.DistroShelf
-EOF
+flatpak uninstall -y org.mozilla.firefox com.ranfdev.DistroShelf
 
 systemctl disable podman.socket
 systemctl enable docker
