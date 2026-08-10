@@ -22,6 +22,12 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 
 mkdir -p /nix
 
+cat <<EOF > /etc/profile.d/nix.sh
+if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+fi
+EOF
+
 dnf5 -y install fedora-workstation-repositories
 dnf5 -y copr enable scottames/ghostty
 dnf5 -y config-manager setopt google-chrome.enabled=1
