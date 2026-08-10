@@ -35,6 +35,11 @@ if [ -e /usr/lib64/libnvidia-ml.so.1 ]; then
     ln -sf libnvidia-ml.so.1 /usr/lib64/libnvidia-ml.so
 fi
 
+dnf5 -y remove --no-autoremove \
+    kernel kernel-core kernel-modules kernel-modules-core kernel-modules-extra
+
+dnf5 -y install /tmp/kernel-rpms/*.rpm
+
 if [ -L /root ]; then
   target=$(readlink -f /root)
   mkdir -p "$target"
