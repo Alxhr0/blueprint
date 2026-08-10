@@ -8,7 +8,7 @@ FROM ghcr.io/ublue-os/akmods:ogc-44 AS akmods
 FROM ghcr.io/ublue-os/akmods-nvidia-open:ogc-44 AS akmods-nvidia
 
 
-FROM ghcr.io/projectbluefin/bluefin-nvidia@sha256:e2c4c5643d96ad896076d10c660d239adddb8bfe650bc964b7b6f86b93fb2510
+FROM ghcr.io/projectbluefin/bluefin-nvidia@sha256:88765c10c901f35aaa6e9eb9b943d5517ee89c321095e463b43c0a2ab72c9b22
 
 COPY --from=ghcr.io/ublue-os/brew:latest /system_files /
 
