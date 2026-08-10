@@ -6,6 +6,31 @@ cp -avf "/ctx/system_files"/. /
 
 mkdir -p /var/roothome
 
+dnf5 config-manager setopt skip_if_unavailable=0
+
+dnf5 -y install \
+    egl-wayland.x86_64 \
+    egl-wayland.i686 \
+    egl-wayland2.x86_64 \
+    egl-wayland2.i686
+
+if [ -x /tmp/akmods-nvidia/ublue-os/nvidia-install.sh ]; then
+    IMAGE_NAME="${IMAGE_NAME:-edward}" \
+    AKMODNV_PATH="/tmp/akmods-nvidia" \
+    MULTILIB=1 \
+    /tmp/akmods-nvidia/ublue-os/nvidia-install.sh
+else
+    echo "ERROR: NVIDIA installer was not found in /tmp/akmods-nvidia"
+    find /tmp/akmods-nvidia -maxdepth 4 -type f -name '*nvidia*' -o -name 'nvidia-install.sh'
+    exit 1
+fi
+
+rm -f /usr/share/vulkan/icd.d/nouveau_icd.*.json
+
+if [ -e /usr/lib64/libnvidia-ml.so.1 ]; then
+    ln -sf libnvidia-ml.so.1 /usr/lib64/libnvidia-ml.so
+fi
+
 if [ -L /root ]; then
   target=$(readlink -f /root)
   mkdir -p "$target"
