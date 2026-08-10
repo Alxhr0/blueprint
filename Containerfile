@@ -5,7 +5,7 @@ COPY system_files /system_files
 COPY brew/packages.Brewfile /usr/share/ublue-os/homebrew/packages.Brewfile
 
 
-FROM ghcr.io/projectbluefin/bluefin-nvidia@sha256:0d026c193ee180d54ee18dd8b5a76b8f2c95ca1f6689dd2a828ce8d82cc78dea
+FROM ghcr.io/projectbluefin/bluefin-nvidia@sha256:e2c4c5643d96ad896076d10c660d239adddb8bfe650bc964b7b6f86b93fb2510
 
 COPY --from=ghcr.io/ublue-os/brew:latest /system_files /
 
