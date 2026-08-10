@@ -79,29 +79,29 @@ dnf5 -y install "${PACKAGES[@]}"
 
 dnf5 -y copr disable scottames/ghostty
 
-mkdir -p /usr/etc/flatpak/system
+#mkdir -p /usr/etc/flatpak/system
 
-flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+#flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
-flatpak install -y io.github.tanaybhomia.Whisp \
-com.discordapp.Discord \
-com.heroicgameslauncher.hgl \
-it.mijorus.gearlever \
-org.kde.krita \
-com.ticktick.TickTick \
-com.jeffser.Alpaca \
-io.github.alainm23.planify \
-io.gitlab.news_flash.NewsFlash \
-moe.launcher.the-honkers-railway-launcher \
-moe.launcher.sleepy-launcher \
-moe.launcher.an-anime-game-launcher \
-io.github.dvlv.boxbuddyrs \
-net.runelite.RuneLite \
-io.github.faridjaff.StickyNotesCanvas \
-org.localsend.localsend_app \
-net.lutris.Lutris
+#flatpak install -y io.github.tanaybhomia.Whisp \
+#com.discordapp.Discord \
+#com.heroicgameslauncher.hgl \
+#it.mijorus.gearlever \
+#org.kde.krita \
+#com.ticktick.TickTick \
+#com.jeffser.Alpaca \
+#io.github.alainm23.planify \
+#io.gitlab.news_flash.NewsFlash \
+#moe.launcher.the-honkers-railway-launcher \
+#moe.launcher.sleepy-launcher \
+#moe.launcher.an-anime-game-launcher \
+#io.github.dvlv.boxbuddyrs \
+#net.runelite.RuneLite \
+#io.github.faridjaff.StickyNotesCanvas \
+#org.localsend.localsend_app \
+#net.lutris.Lutris
 
-flatpak uninstall -y org.mozilla.firefox com.ranfdev.DistroShelf
+flatpak uninstall -y org.mozilla.firefox
 
 systemctl disable podman.socket
 systemctl enable docker
