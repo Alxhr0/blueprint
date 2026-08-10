@@ -6,6 +6,10 @@ cp -avf "/ctx/system_files"/. /
 
 mkdir -p /var/roothome
 
+curl -fsSL \
+  https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo \
+  -o /etc/yum.repos.d/nvidia-container-toolkit.repo
+
 dnf5 config-manager setopt skip_if_unavailable=0
 
 dnf5 -y install \
