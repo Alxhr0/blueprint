@@ -24,8 +24,11 @@ mkdir -p /nix
 
 dnf5 install -y --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release terra-gpg-keys
 
+dnf5 config-manager addrepo --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo
+dnf5 config-manager setopt tailscale-stable.enabled=0
+dnf5 -y install --enablerepo='tailscale-stable' tailscale
+
 dnf5 -y install fedora-workstation-repositories
-dnf5 -y copr enable ublue-os/packages
 dnf5 -y copr enable lionheartp/Hyprland 
 dnf5 -y config-manager setopt google-chrome.enabled=1
 
@@ -42,7 +45,6 @@ PACKAGES=(
 dnf5 -y install "${PACKAGES[@]}"
 
 dnf5 -y copr disable lionheartp/Hyprland 
-dnf5 -y copr disable ublue-os/packages
 
 mkdir -p /usr/etc/flatpak/system
 
@@ -56,10 +58,6 @@ EOF
 cat <<EOF >> /usr/etc/flatpak/system/remove
 org.gnome.Tour
 EOF
-
-dnf5 config-manager addrepo --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo
-dnf5 config-manager setopt tailscale-stable.enabled=0
-dnf5 -y install --enablerepo='tailscale-stable' tailscale
 
 systemctl enable podman.socket
 systemctl enable tailscaled.service
