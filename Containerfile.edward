@@ -2,8 +2,6 @@
 FROM scratch AS ctx
 COPY build_files /
 COPY system_files /system_files
-RUN mkdir -p /usr/share/ublue-os/homebrew/
-COPY brew/packages-edward.Brewfile /usr/share/ublue-os/homebrew/packages.Brewfile
 
 FROM ghcr.io/ublue-os/akmods:ogc-44 AS akmods
 FROM ghcr.io/ublue-os/akmods-nvidia-open:ogc-44 AS akmods-nvidia
@@ -14,6 +12,8 @@ FROM ghcr.io/projectbluefin/bluefin-nvidia@sha256:ff1a9c6e5cd5ae2a69133aa3f8aa0d
 COPY --from=ghcr.io/ublue-os/brew:latest /system_files /
 
 RUN rm -rf /opt && mkdir /opt
+RUN mkdir -p /usr/share/ublue-os/homebrew/
+COPY brew/packages-edward.Brewfile /usr/share/ublue-os/homebrew/packages.Brewfile
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/cache \
