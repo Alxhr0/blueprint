@@ -49,6 +49,13 @@ for pkg in kernel kernel{-core,-modules,-modules-core,-modules-extra,-tools-libs
 done
 rm -rf /usr/lib/modules
 
+for pkg in kernel kernel{-core,-modules,-modules-core,-modules-extra,-tools-libs,-tools}
+do
+    if rpm -q "$pkg" &>/dev/null; then
+        rpm --erase "$pkg" --nodeps
+    fi
+done
+
 # Install the ogc kernel
 dnf5 -y install \
     /tmp/kernel-rpms/kernel-[0-9]*.rpm \
@@ -82,11 +89,17 @@ dnf5 -y config-manager addrepo --from-repofile https://download.docker.com/linux
 
 dnf5 -y install fedora-workstation-repositories
 dnf5 -y copr enable scottames/ghostty
+dnf5 -y copr enable lionheartp/Hyprland
 dnf5 -y config-manager setopt google-chrome.enabled=1
 
 PACKAGES=(
     google-chrome-stable
     steam
+    hyprland
+    waybar
+    quickshell
+    swaybg
+    pavucontrol
     ghostty
     kitty
     docker-ce 
@@ -99,6 +112,7 @@ PACKAGES=(
 dnf5 -y install "${PACKAGES[@]}"
 
 dnf5 -y copr disable scottames/ghostty
+dnf5 -y copr disable lionheartp/Hyprland
 
 #mkdir -p /usr/etc/flatpak/system
 
