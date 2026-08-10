@@ -25,6 +25,9 @@ jobs:
     name: List images to build
     runs-on: ubuntu-24.04
 
+    outputs:
+      images: ${{ steps.list.outputs.images }}
+
     permissions:
       contents: read
 
