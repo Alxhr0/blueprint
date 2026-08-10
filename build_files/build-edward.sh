@@ -28,6 +28,8 @@ if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
 fi
 EOF
 
+dnf5 -y config-manager addrepo --from-repofile https://download.docker.com/linux/fedora/docker-ce.repo
+
 dnf5 -y install fedora-workstation-repositories
 dnf5 -y copr enable scottames/ghostty
 dnf5 -y config-manager setopt google-chrome.enabled=1
@@ -36,6 +38,12 @@ PACKAGES=(
     google-chrome-stable
     steam
     ghostty
+    kitty
+    docker-ce 
+    docker-ce-cli 
+    containerd.io 
+    docker-buildx-plugin 
+    docker-compose-plugin
   )
 
 dnf5 -y install "${PACKAGES[@]}"
@@ -87,9 +95,11 @@ EOF
 
 cat <<EOF >> /usr/etc/flatpak/system/remove
 org.mozilla.firefox
+com.ranfdev.DistroShelf
 EOF
 
-systemctl enable podman.socket
+systemctl disable podman.socket
+systemctl enable docker
 systemctl enable tailscaled.service
 
 if command -v chcon > /dev/null; then
