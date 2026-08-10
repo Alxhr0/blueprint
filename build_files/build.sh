@@ -22,24 +22,24 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 
 mkdir -p /nix
 
+if [ -L /opt ]; then
+    target=$(readlink -f /opt)
+    mkdir -p "$target"
+elif [ ! -d /opt ]; then
+    mkdir -p /opt
+fi
+
 dnf5 -y install fedora-workstation-repositories
-dnf5 -y copr enable lionheartp/Hyprland 
 dnf5 -y copr enable scottames/ghostty
 dnf5 -y config-manager setopt google-chrome.enabled=1
 
 PACKAGES=(
-    hyprland
-    waybar
-    quickshell
     google-chrome-stable
     steam
-    tmux
     ghostty
   )
 
 dnf5 -y install "${PACKAGES[@]}"
-
-dnf5 -y copr disable lionheartp/Hyprland 
 dnf5 -y copr disable scottames/ghostty
 
 mkdir -p /usr/etc/flatpak/system
