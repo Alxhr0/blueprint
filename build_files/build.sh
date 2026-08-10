@@ -4,7 +4,14 @@ set -ouex pipefail
 
 cp -avf "/ctx/system_files"/. /
 
-mkdir -p /root
+mkdir -p /var/roothome
+
+if [ -L /root ]; then
+  target=$(readlink -f /root)
+  mkdir -p "$target"
+else
+  mkdir -p /root
+fi
 
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
   | sh -s -- install linux \
