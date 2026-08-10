@@ -101,7 +101,7 @@ dnf5 -y copr disable scottames/ghostty
 #org.localsend.localsend_app \
 #net.lutris.Lutris
 
-flatpak uninstall -y org.mozilla.firefox
+#flatpak uninstall -y org.mozilla.firefox
 
 systemctl disable podman.socket
 systemctl enable docker
