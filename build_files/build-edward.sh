@@ -81,6 +81,8 @@ dnf5 -y copr disable scottames/ghostty
 
 mkdir -p /usr/etc/flatpak/system
 
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
 flatpak install -y io.github.tanaybhomia.Whisp \
 com.discordapp.Discord \
 com.heroicgameslauncher.hgl \
