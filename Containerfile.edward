@@ -23,6 +23,10 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
     /ctx/build-edward.sh
 
+RUN /usr/bin/systemctl preset brew-setup.service && \
+    /usr/bin/systemctl preset brew-update.timer && \
+    /usr/bin/systemctl preset brew-upgrade.timer
+
 RUN rm -rf /run/dnf /run/setrans /tmp/*
 RUN rm -rf /usr/etc
 RUN bootc container lint
