@@ -9,7 +9,7 @@ FROM ghcr.io/projectbluefin/bluefin-nvidia@sha256:e2c4c5643d96ad896076d10c660d23
 
 COPY --from=ghcr.io/ublue-os/brew:latest /system_files /
 
-# RUN rm /opt && mkdir /opt
+RUN rm -rf /opt && mkdir /opt
 RUN mkdir -p /usr/share/ublue-os/homebrew/
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
