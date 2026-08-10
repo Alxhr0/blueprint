@@ -25,7 +25,8 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
 
 RUN /usr/bin/systemctl preset brew-setup.service && \
     /usr/bin/systemctl preset brew-update.timer && \
-    /usr/bin/systemctl preset brew-upgrade.timer
+    /usr/bin/systemctl preset brew-upgrade.timer && \
+    /usr/bin/systemctl preset brew-bundle-packages.service
 
 RUN rm -rf /run/dnf /run/setrans /tmp/*
 RUN rm -rf /usr/etc
