@@ -24,10 +24,6 @@ mkdir -p /nix
 
 dnf5 install -y --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release terra-gpg-keys
 
-dnf5 config-manager addrepo --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo
-dnf5 config-manager setopt tailscale-stable.enabled=0
-dnf5 -y install --enablerepo='tailscale-stable' tailscale
-
 dnf5 -y install fedora-workstation-repositories
 dnf5 -y copr enable lionheartp/Hyprland 
 dnf5 -y config-manager setopt google-chrome.enabled=1
