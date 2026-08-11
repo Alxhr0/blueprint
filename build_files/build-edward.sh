@@ -104,9 +104,10 @@ PACKAGES=(
     containerd.io
     docker-buildx-plugin
     docker-compose-plugin
+    libfdk-aac.x86_64 libfdk-aac.i686
 )
 
-dnf5 -y --skip-unavailable install "${PACKAGES[@]}"
+dnf5 -y install --skip-unavailable "${PACKAGES[@]}"
 
 dnf5 -y copr disable scottames/ghostty
 dnf5 -y copr disable lionheartp/Hyprland
