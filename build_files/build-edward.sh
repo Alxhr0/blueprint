@@ -4,6 +4,12 @@ set -ouex pipefail
 cp -avf "/ctx/system_files"/. /
 mkdir -p /var/roothome
 
+dnf5 -y install --nogpgcheck --repofrompath \
+  'terra,https://repos.fyralabs.com/terra$releasever' \
+  terra-release
+
+dnf5 -y config-manager setopt terra-mediaext.enabled=1
+
 curl -fsSL \
   https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo \
   -o /etc/yum.repos.d/nvidia-container-toolkit.repo
@@ -15,10 +21,6 @@ dnf5 -y install \
     egl-wayland.i686 \
     egl-wayland2.x86_64 \
     egl-wayland2.i686
-
-# --- Swap in the custom "ogc" kernel FIRST, before installing kmod-nvidia ---
-# kmod-nvidia is hard-pinned to a specific kernel-uname-r (the ogc kernel),
-# so that kernel must already be installed before nvidia-install.sh runs.
 
 for pkg in kernel kernel{-core,-modules,-modules-core,-modules-extra,-tools-libs,-tools}
 do
@@ -104,7 +106,6 @@ PACKAGES=(
     containerd.io
     docker-buildx-plugin
     docker-compose-plugin
-    libfdk-aac.x86_64 libfdk-aac.i686
 )
 
 dnf5 -y install --skip-unavailable "${PACKAGES[@]}"
