@@ -1,5 +1,4 @@
-ARG FEDORA_VERSION="44"
-ARG KERNEL_VERSION="7.0.9-ogc3.2.fc44.x86_64"
+ARG AKMODS_TAG="ogc-44-7.0.9-ogc3.2.fc44.x86_64"
 ARG NVIDIA_FLAVOR="nvidia-open"
 
 FROM scratch AS ctx
@@ -12,9 +11,9 @@ FROM quay.io/fedora/fedora:44 AS steam-sysext
 COPY sysext/steam /steam-src
 RUN chmod +x /steam-src/build.sh && /steam-src/build.sh
 
-FROM ghcr.io/ublue-os/akmods:ogc-${FEDORA_VERSION}-${KERNEL_VERSION} AS akmods
-FROM ghcr.io/ublue-os/akmods-extra:ogc-${FEDORA_VERSION}-${KERNEL_VERSION} AS akmods-extra
-FROM ghcr.io/ublue-os/akmods-${NVIDIA_FLAVOR}:ogc-${FEDORA_VERSION}-${KERNEL_VERSION} AS akmods-nvidia
+FROM ghcr.io/ublue-os/akmods:${AKMODS_TAG} AS akmods
+FROM ghcr.io/ublue-os/akmods-extra:${AKMODS_TAG} AS akmods-extra
+FROM ghcr.io/ublue-os/akmods-${NVIDIA_FLAVOR}:${AKMODS_TAG} AS akmods-nvidia
 
 FROM ghcr.io/projectbluefin/bluefin:testing
 
