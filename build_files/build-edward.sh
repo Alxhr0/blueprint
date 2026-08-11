@@ -97,7 +97,10 @@ PACKAGES=(
     docker-compose-plugin
 )
 
-dnf5 -y install --skip-unavailable "${PACKAGES[@]}"
+dnf5 -y install --skip-unavailable \
+  --setopt=install_weak_deps=False \
+  --exclude='pipewire-alsa.i686,pipewire-libs.i686,pipewire.i686' \
+  "${PACKAGES[@]}"
 
 dnf5 -y copr disable scottames/ghostty
 curl -fsSL https://ollama.com/install.sh | sh
