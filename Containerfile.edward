@@ -8,10 +8,37 @@ FROM quay.io/fedora/fedora:44 AS steam-sysext
 COPY sysext/steam /steam-src
 RUN chmod +x /steam-src/build.sh && /steam-src/build.sh
 
+ARG FEDORA_VERSION="44"
+ARG KERNEL_VERSION="7.0.9-ogc3.2.fc44.x86_64"
+ARG NVIDIA_FLAVOR="nvidia-open"
+
+FROM ghcr.io/ublue-os/akmods:ogc-${FEDORA_VERSION}-${KERNEL_VERSION} AS akmods
+FROM ghcr.io/ublue-os/akmods-extra:ogc-${FEDORA_VERSION}-${KERNEL_VERSION} AS akmods-extra
+FROM ghcr.io/ublue-os/akmods-${NVIDIA_FLAVOR}:ogc-${FEDORA_VERSION}-${KERNEL_VERSION} AS akmods-nvidia
+
 FROM ghcr.io/projectbluefin/bluefin:testing
 
 RUN rm -rf /opt && mkdir /opt
 COPY brew/packages-edward.Brewfile /usr/share/ublue-os/homebrew/preinstall.d/packages-edward.Brewfile
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=tmpfs,dst=/tmp \
+    --mount=type=bind,from=akmods,src=/kernel-rpms,dst=/tmp/kernel-rpms \
+    --mount=type=bind,from=akmods,src=/rpms/common,dst=/tmp/rpms/common \
+    --mount=type=bind,from=akmods,src=/rpms/kmods,dst=/tmp/rpms/kmods \
+    --mount=type=bind,from=akmods,src=/rpms/ublue-os,dst=/tmp/rpms/ublue-os \
+    --mount=type=bind,from=akmods-extra,src=/rpms/extra,dst=/tmp/rpms/extra \
+    --mount=type=bind,from=akmods-extra,src=/rpms/kmods,dst=/tmp/rpms/kmods-extra \
+    /ctx/install-kernel-akmods.sh
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=bind,from=akmods-nvidia,src=/rpms,dst=/tmp/rpms/nvidia \
+    --mount=type=tmpfs,dst=/tmp \
+    /ctx/install-nvidia.sh
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/cache \
