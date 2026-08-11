@@ -11,7 +11,7 @@ FROM quay.io/fedora/fedora:44 AS steam-sysext
 COPY systext/steam /steam-src
 RUN chmod +x /steam-src/build.sh && /steam-src/build.sh
 
-FROM ghcr.io/projectbluefin/bluefin:testing
+FROM ghcr.io/projectbluefin/bluefin@sha256:27857def8739f2e9f89a4e988de4c2f47895b78b5750c26651b32e9c5954c192
 
 COPY --from=ghcr.io/ublue-os/brew:latest /system_files /
 
