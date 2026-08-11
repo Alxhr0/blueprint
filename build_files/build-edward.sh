@@ -79,7 +79,6 @@ dnf5 -y config-manager addrepo --from-repofile https://download.docker.com/linux
 
 dnf5 -y install fedora-workstation-repositories
 dnf5 -y copr enable scottames/ghostty
-dnf5 -y copr enable lionheartp/Hyprland
 dnf5 -y config-manager setopt google-chrome.enabled=1
 
 dnf5 -y install --nogpgcheck --repofrompath \
@@ -90,13 +89,7 @@ dnf5 -y install terra-release-extras
 PACKAGES=(
     google-chrome-stable
     steam
-    hyprland
-    waybar
-    quickshell
-    swaybg
-    pavucontrol
     ghostty
-    kitty
     docker-ce
     docker-ce-cli
     containerd.io
@@ -107,8 +100,6 @@ PACKAGES=(
 dnf5 -y install --skip-unavailable "${PACKAGES[@]}"
 
 dnf5 -y copr disable scottames/ghostty
-dnf5 -y copr disable lionheartp/Hyprland
-
 curl -fsSL https://ollama.com/install.sh | sh
 
 systemctl disable podman.socket
