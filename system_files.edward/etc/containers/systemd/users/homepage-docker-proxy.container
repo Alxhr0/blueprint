@@ -5,6 +5,8 @@ Documentation=https://github.com/Tecnativa/docker-socket-proxy
 [Container]
 Image=docker.io/tecnativa/docker-socket-proxy:0.3.0
 ContainerName=homepage-docker-proxy
+Network=homepage.network
+SecurityLabelDisable=true
 Volume=%t/podman/podman.sock:/var/run/docker.sock:ro
 Environment=CONTAINERS=1
 Environment=POST=1

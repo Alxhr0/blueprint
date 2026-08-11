@@ -5,13 +5,15 @@ Documentation=https://gethomepage.dev/
 [Container]
 Image=homepage.build
 ContainerName=homepage
+Network=homepage.network
 PublishPort=3020:3001
-Volume=%h/.local/share/homepage:/app/data
+Volume=%h/.local/share/homepage:/app/data:Z
 Environment=NODE_ENV=production
 Environment=PORT=3001
 Environment=DOCKER_HOST=tcp://homepage-docker-proxy:2375
 
 [Service]
+ExecStartPre=/usr/bin/mkdir -p %h/.local/share/homepage
 EnvironmentFile=-%h/.config/envs/homepage/.env
 Restart=always
 TimeoutStartSec=600

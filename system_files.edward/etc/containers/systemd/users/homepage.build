@@ -5,4 +5,4 @@ Description=Build homepage dashboard image
 File=%h/src/homepage/Dockerfile
 SetWorkingDirectory=%h/src/homepage
 ImageTag=localhost/homepage:latest
-GlobalArgs=--pull=newer
+Pull=newer

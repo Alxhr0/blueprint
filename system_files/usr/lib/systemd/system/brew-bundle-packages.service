@@ -10,7 +10,6 @@ ConditionPathExists=/usr/share/ublue-os/homebrew/packages.Brewfile
 Type=oneshot
 User=1000
 Group=1000
-Environment=HOME=%h
 Environment=PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/usr/local/bin:/usr/bin:/bin
 Environment=HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar
 Environment=HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew

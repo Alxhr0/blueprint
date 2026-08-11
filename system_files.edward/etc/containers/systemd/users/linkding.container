@@ -6,9 +6,10 @@ Documentation=https://github.com/sissbruecker/linkding
 Image=docker.io/sissbruecker/linkding:latest
 ContainerName=linkding
 PublishPort=9090:9090
-Volume=%h/.local/share/linkding:/etc/linkding
+Volume=%h/.local/share/linkding:/etc/linkding/data:Z
 
 [Service]
+ExecStartPre=/usr/bin/mkdir -p %h/.local/share/linkding
 EnvironmentFile=-%h/.config/envs/linkding/.env
 Restart=always
 TimeoutStartSec=300

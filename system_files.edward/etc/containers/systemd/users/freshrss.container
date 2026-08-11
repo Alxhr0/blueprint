@@ -6,9 +6,10 @@ Documentation=https://github.com/FreshRSS/FreshRSS
 Image=docker.io/freshrss/freshrss:latest
 ContainerName=freshrss
 PublishPort=8080:80
-Volume=%h/.local/share/freshrss:/var/www/FreshRSS/data
+Volume=%h/.local/share/freshrss:/var/www/FreshRSS/data:Z
 
 [Service]
+ExecStartPre=/usr/bin/mkdir -p %h/.local/share/freshrss
 EnvironmentFile=-%h/.config/envs/freshrss/.env
 Restart=always
 TimeoutStartSec=300
