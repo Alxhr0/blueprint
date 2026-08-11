@@ -89,6 +89,9 @@ dnf5 -y config-manager setopt rpmfusion-nonfree-steam.enabled=1
 dnf5 -y install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
 dnf5 -y install https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
+# Fix multilib libfdk-aac gap before pulling in steam/pipewire i686 deps
+dnf5 -y install libfdk-aac.x86_64 libfdk-aac.i686
+
 PACKAGES=(
     google-chrome-stable
     steam
