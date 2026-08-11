@@ -6,6 +6,20 @@
 
   "rebaseWhen": "never",
 
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^Containerfile\\.edward$"],
+      "matchStrings": [
+        "ARG AKMODS_TAG=\"(?<currentValue>[^\"]+)\"",
+      ],
+      "depNameTemplate": "ublue-os akmods (OGC kernel)",
+      "datasourceTemplate": "docker",
+      "lookupNameTemplate": "ghcr.io/ublue-os/akmods",
+      "versioningTemplate": "regex:^ogc-(?<compatibility>\\d+)-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+).*\\.x86_64$",
+    },
+  ],
+
   "packageRules": [
     {
       "automerge": true,
