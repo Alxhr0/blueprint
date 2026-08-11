@@ -85,6 +85,7 @@ dnf5 -y install fedora-workstation-repositories
 dnf5 -y copr enable scottames/ghostty
 dnf5 -y copr enable lionheartp/Hyprland
 dnf5 -y config-manager setopt google-chrome.enabled=1
+dnf5 -y config-manager setopt rpmfusion-nonfree-steam.enabled=1
 
 PACKAGES=(
     google-chrome-stable
