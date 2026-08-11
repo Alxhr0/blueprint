@@ -11,7 +11,7 @@ FROM quay.io/fedora/fedora:44 AS steam-sysext
 COPY systext/steam /steam-src
 RUN chmod +x /steam-src/build.sh && /steam-src/build.sh
 
-FROM ghcr.io/projectbluefin/bluefin-nvidia:testing
+FROM ghcr.io/ublue-os/aurora-nvidia-open:stable
 
 COPY --from=ghcr.io/ublue-os/brew:latest /system_files /
 
@@ -27,11 +27,6 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=bind,from=steam-sysext,src=/sysext,dst=/tmp/steam-sysext \
     --mount=type=tmpfs,dst=/tmp \
     /ctx/build-edward.sh
-
-RUN /usr/bin/systemctl preset brew-setup.service && \
-    /usr/bin/systemctl preset brew-update.timer && \
-    /usr/bin/systemctl preset brew-upgrade.timer && \
-    /usr/bin/systemctl preset brew-bundle-packages.service
 
 RUN rm -rf /run/dnf /run/setrans /tmp/*
 RUN rm -rf /usr/etc
