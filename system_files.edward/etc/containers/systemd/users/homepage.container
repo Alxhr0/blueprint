@@ -7,13 +7,10 @@ Wants=network-online.target podman.socket
 ContainerName=tlc-homepage
 Image=localhost/tlc-homepage:latest
 Network=host
-DNS={{ dns_ip }}
 Environment=NODE_ENV=production
 Environment=PORT=3002
-EnvironmentFile=-%h/.config/envs/homepage/.env
 Volume=/srv/podman/tlc-homepage:/app/data:rw
 Volume=/run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
-HealthCmd=wget -qO /dev/null http://127.0.0.1:3002 || exit 1
 PodmanArgs=--memory=512m --cpus=0.5
 
 [Service]

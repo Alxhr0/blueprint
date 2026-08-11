@@ -68,7 +68,9 @@ systemctl enable systemd-sysext.service
 systemctl disable podman.socket
 systemctl enable docker
 systemctl enable tailscaled.service
-systemctl enable homebrew-bundle.service
+mkdir -p /etc/systemd/user/graphical-session.target.wants
+ln -sfn /usr/lib/systemd/user/brew-preinstall.service \
+    /etc/systemd/user/graphical-session.target.wants/brew-preinstall.service
 
 if command -v chcon > /dev/null; then
     chcon -R -t unconfined_mgmt_t /nix || true
