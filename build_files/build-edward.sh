@@ -8,15 +8,11 @@ mkdir -p /var/roothome
 # Recompile the dconf database so custom keybindings in distro.d take effect
 dconf update
 
-# Enable the always-on quadlet services and the podman API socket for the user
-# session. The user systemd manager only exists at runtime, so these enable
-# symlinks take effect at next login rather than at build time.
-mkdir -p /etc/xdg/systemd/user/default.target.wants
+# Quadlet auto-applies the [Install] WantedBy=default.target in the .container
+# files under /etc/containers/systemd/users/, so the always-on containers start
+# automatically in each user session. Only the podman API socket needs an
+# explicit enable symlink here, as it takes effect at next login.
 mkdir -p /etc/xdg/systemd/user/sockets.target.wants
-for svc in freshrss linkding ntfy pihole homepage homepage-docs homepage-docker-proxy; do
-    ln -sfn "/etc/xdg/systemd/user/${svc}.service" \
-        "/etc/xdg/systemd/user/default.target.wants/${svc}.service"
-done
 ln -sfn /usr/lib/systemd/user/podman.socket \
     /etc/xdg/systemd/user/sockets.target.wants/podman.socket
 
