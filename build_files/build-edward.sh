@@ -7,8 +7,7 @@ mkdir -p /var/roothome
 dnf5 -y install --nogpgcheck --repofrompath \
   'terra,https://repos.fyralabs.com/terra$releasever' \
   terra-release
-
-dnf5 -y config-manager setopt terra-mediaext.enabled=1
+dnf5 -y install terra-release-extras
 
 curl -fsSL \
   https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo \
