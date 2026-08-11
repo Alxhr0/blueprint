@@ -4,11 +4,6 @@ set -ouex pipefail
 cp -avf "/ctx/system_files"/. /
 mkdir -p /var/roothome
 
-dnf5 -y install --nogpgcheck --repofrompath \
-  'terra,https://repos.fyralabs.com/terra$releasever' \
-  terra-release
-dnf5 -y install terra-release-extras
-
 curl -fsSL \
   https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo \
   -o /etc/yum.repos.d/nvidia-container-toolkit.repo
@@ -86,9 +81,11 @@ dnf5 -y install fedora-workstation-repositories
 dnf5 -y copr enable scottames/ghostty
 dnf5 -y copr enable lionheartp/Hyprland
 dnf5 -y config-manager setopt google-chrome.enabled=1
-dnf5 -y config-manager setopt rpmfusion-nonfree-steam.enabled=1
-dnf5 -y install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
-dnf5 -y install https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+
+dnf5 -y install --nogpgcheck --repofrompath \
+  'terra,https://repos.fyralabs.com/terra$releasever' \
+  terra-release
+dnf5 -y install terra-release-extras
 
 PACKAGES=(
     google-chrome-stable
