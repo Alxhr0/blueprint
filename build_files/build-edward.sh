@@ -88,7 +88,6 @@ dnf5 -y install terra-release-extras
 
 PACKAGES=(
     google-chrome-stable
-    steam
     ghostty
     docker-ce
     docker-ce-cli
@@ -99,11 +98,14 @@ PACKAGES=(
 
 dnf5 -y install --skip-unavailable \
   --setopt=install_weak_deps=False \
-  --exclude='pipewire-alsa.i686,pipewire-libs.i686,pipewire.i686' \
   "${PACKAGES[@]}"
 
 dnf5 -y copr disable scottames/ghostty
 curl -fsSL https://ollama.com/install.sh | sh
+
+mkdir -p /var/lib/extensions
+cp -a /tmp/steam-sysext /var/lib/extensions/steam
+systemctl enable systemd-sysext.service
 
 systemctl disable podman.socket
 systemctl enable docker

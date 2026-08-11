@@ -6,6 +6,11 @@ COPY system_files /system_files
 FROM ghcr.io/ublue-os/akmods:ogc-44 AS akmods
 FROM ghcr.io/ublue-os/akmods-nvidia-open:ogc-44 AS akmods-nvidia
 
+FROM quay.io/fedora/fedora:44 AS steam-sysext
+
+COPY systext/steam /steam-src
+RUN chmod +x /steam-src/build.sh && /steam-src/build.sh
+
 FROM ghcr.io/projectbluefin/bluefin:testing
 
 COPY --from=ghcr.io/ublue-os/brew:latest /system_files /
@@ -19,6 +24,7 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/log \
     --mount=type=bind,from=akmods,src=/kernel-rpms,dst=/tmp/kernel-rpms \
     --mount=type=bind,from=akmods-nvidia,src=/rpms,dst=/tmp/akmods-nvidia \
+    --mount=type=bind,from=steam-sysext,src=/sysext,dst=/tmp/steam-sysext \
     --mount=type=tmpfs,dst=/tmp \
     /ctx/build-edward.sh
 
