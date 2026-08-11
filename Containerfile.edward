@@ -11,7 +11,7 @@ FROM quay.io/fedora/fedora:44 AS steam-sysext
 COPY systext/steam /steam-src
 RUN chmod +x /steam-src/build.sh && /steam-src/build.sh
 
-FROM ghcr.io/projectbluefin/bluefin:testing
+FROM ghcr.io/ublue-os/aurora-nvidia-open@sha256:c3abda74b6aaeb77e6b2e69425fe59cc89f16a37ea60e890730e010f76fc81a6
 
 COPY --from=ghcr.io/ublue-os/brew:latest /system_files /
 
