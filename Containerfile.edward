@@ -4,8 +4,7 @@ COPY system_files /system_files
 
 FROM quay.io/fedora/fedora:44 AS steam-sysext
 
-COPY systext/steam /steam-src
-RUN chmod +x /steam-src/build.sh && /steam-src/build.sh
+COPY sysext/steam /steam-src
 
 FROM ghcr.io/ublue-os/aurora-nvidia-open:stable
 
@@ -18,10 +17,11 @@ COPY brew/packages-edward.Brewfile /usr/share/ublue-os/homebrew/packages.Brewfil
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/cache \
     --mount=type=cache,dst=/var/log \
-    --mount=type=bind,from=steam-sysext,src=/sysext,dst=/tmp/steam-sysext \
     --mount=type=tmpfs,dst=/tmp \
+    --mount=type=bind,from=steam-sysext,src=/sysext,dst=/tmp/steam-sysext \
     /ctx/build-edward.sh
 
+RUN chmod +x /steam-src/build.sh && /steam-src/build.sh
 RUN rm -rf /run/dnf /run/setrans /tmp/*
 RUN rm -rf /usr/etc
 RUN bootc container lint

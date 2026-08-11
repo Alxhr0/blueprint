@@ -61,9 +61,9 @@ systemctl enable systemd-sysext.service
 systemctl disable podman.socket
 systemctl enable docker
 systemctl enable tailscaled.service
-systemctl preset brew-setup.service 
-systemctl preset brew-update.timer 
-systemctl preset brew-upgrade.timer
+systemctl enable brew-setup.service
+systemctl enable brew-update.timer
+systemctl enable brew-upgrade.timer
 systemctl enable brew-bundle-packages.service
 
 if command -v chcon > /dev/null; then
