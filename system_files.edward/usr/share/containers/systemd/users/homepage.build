@@ -1,0 +1,8 @@
+[Unit]
+Description=Build homepage dashboard image
+
+[Build]
+File=%h/src/homepage/Dockerfile
+SetWorkingDirectory=%h/src/homepage
+ImageTag=localhost/homepage:latest
+GlobalArgs=--pull=newer

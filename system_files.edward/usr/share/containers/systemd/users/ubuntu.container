@@ -1,0 +1,12 @@
+[Unit]
+Description=Ephemeral Ubuntu container
+Documentation=man:podman-systemd.unit(5)
+
+[Container]
+Image=docker.io/library/ubuntu:latest
+ContainerName=ubuntu
+Exec=/usr/bin/sleep infinity
+HostName=ubuntu
+
+[Service]
+TimeoutStartSec=900

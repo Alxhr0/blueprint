@@ -2,7 +2,23 @@
 set -ouex pipefail
 
 cp -avf "/ctx/system_files"/. /
+cp -avf "/ctx/system_files.edward"/. /
 mkdir -p /var/roothome
+
+# Recompile the dconf database so custom keybindings in distro.d take effect
+dconf update
+
+# Enable the always-on quadlet services and the podman API socket for the user
+# session. The user systemd manager only exists at runtime, so these enable
+# symlinks take effect at next login rather than at build time.
+mkdir -p /etc/xdg/systemd/user/default.target.wants
+mkdir -p /etc/xdg/systemd/user/sockets.target.wants
+for svc in freshrss linkding ntfy pihole homepage homepage-docs homepage-docker-proxy; do
+    ln -sfn "/etc/xdg/systemd/user/${svc}.service" \
+        "/etc/xdg/systemd/user/default.target.wants/${svc}.service"
+done
+ln -sfn /usr/lib/systemd/user/podman.socket \
+    /etc/xdg/systemd/user/sockets.target.wants/podman.socket
 
 if [ -L /root ]; then
   target=$(readlink -f /root)

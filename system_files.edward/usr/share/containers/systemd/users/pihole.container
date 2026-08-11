@@ -1,0 +1,23 @@
+[Unit]
+Description=Pi-hole ad blocker
+Documentation=https://github.com/pi-hole/docker-pi-hole
+
+[Container]
+Image=docker.io/pihole/pihole:latest
+ContainerName=pihole
+# Rootless podman cannot bind host ports below 1024; if start fails on port
+# 53, change these to 5353 and point your devices at that port.
+PublishPort=8082:80
+PublishPort=53:53/tcp
+PublishPort=53:53/udp
+AddCapability=NET_ADMIN
+Volume=%h/.local/share/pihole/etc-pihole:/etc/pihole
+Volume=%h/.local/share/pihole/etc-dnsmasq.d:/etc/dnsmasq.d
+
+[Service]
+EnvironmentFile=-%h/.config/envs/pihole/.env
+Restart=always
+TimeoutStartSec=300
+
+[Install]
+WantedBy=default.target

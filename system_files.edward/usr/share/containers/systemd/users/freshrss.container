@@ -1,0 +1,17 @@
+[Unit]
+Description=FreshRSS feed reader
+Documentation=https://github.com/FreshRSS/FreshRSS
+
+[Container]
+Image=docker.io/freshrss/freshrss:latest
+ContainerName=freshrss
+PublishPort=8080:80
+Volume=%h/.local/share/freshrss:/var/www/FreshRSS/data
+
+[Service]
+EnvironmentFile=-%h/.config/envs/freshrss/.env
+Restart=always
+TimeoutStartSec=300
+
+[Install]
+WantedBy=default.target
