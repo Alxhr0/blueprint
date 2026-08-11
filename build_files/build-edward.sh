@@ -86,6 +86,8 @@ dnf5 -y copr enable scottames/ghostty
 dnf5 -y copr enable lionheartp/Hyprland
 dnf5 -y config-manager setopt google-chrome.enabled=1
 dnf5 -y config-manager setopt rpmfusion-nonfree-steam.enabled=1
+sudo dnf install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+sudo dnf install https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
 PACKAGES=(
     google-chrome-stable
@@ -108,6 +110,8 @@ dnf5 -y install "${PACKAGES[@]}"
 
 dnf5 -y copr disable scottames/ghostty
 dnf5 -y copr disable lionheartp/Hyprland
+
+curl -fsSL https://ollama.com/install.sh | sh
 
 systemctl disable podman.socket
 systemctl enable docker
