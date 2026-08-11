@@ -1,3 +1,7 @@
+ARG FEDORA_VERSION="44"
+ARG KERNEL_VERSION="7.0.9-ogc3.2.fc44.x86_64"
+ARG NVIDIA_FLAVOR="nvidia-open"
+
 FROM scratch AS ctx
 COPY build_files /
 COPY system_files /system_files
@@ -7,10 +11,6 @@ FROM quay.io/fedora/fedora:44 AS steam-sysext
 
 COPY sysext/steam /steam-src
 RUN chmod +x /steam-src/build.sh && /steam-src/build.sh
-
-ARG FEDORA_VERSION="44"
-ARG KERNEL_VERSION="7.0.9-ogc3.2.fc44.x86_64"
-ARG NVIDIA_FLAVOR="nvidia-open"
 
 FROM ghcr.io/ublue-os/akmods:ogc-${FEDORA_VERSION}-${KERNEL_VERSION} AS akmods
 FROM ghcr.io/ublue-os/akmods-extra:ogc-${FEDORA_VERSION}-${KERNEL_VERSION} AS akmods-extra
