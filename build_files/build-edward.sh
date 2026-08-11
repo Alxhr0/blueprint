@@ -73,10 +73,6 @@ systemctl enable systemd-sysext.service
 systemctl disable podman.socket
 systemctl enable docker
 systemctl enable tailscaled.service
-systemctl enable brew-setup.service
-systemctl enable brew-update.timer
-systemctl enable brew-upgrade.timer
-systemctl enable brew-bundle-packages.service
 
 if command -v chcon > /dev/null; then
     chcon -R -t unconfined_mgmt_t /nix || true

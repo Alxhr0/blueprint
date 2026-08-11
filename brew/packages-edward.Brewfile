@@ -1,7 +1,7 @@
-tap "ublue-os/tap"
-tap "frostyard/tap"
-tap "Kilo-Org/tap"
-tap "ublue-os/experimental-tap"
+tap "ublue-os/tap", trusted: true
+tap "frostyard/tap", trusted: true
+tap "Kilo-Org/tap", trusted: true
+tap "ublue-os/experimental-tap", trusted: true
 cask "jetbrains-toolbox-linux"
 cask "lm-studio-linux"
 cask "zed-linux"
