@@ -30,7 +30,6 @@ dnf5 -y config-manager addrepo --from-repofile https://download.docker.com/linux
 
 dnf5 -y install fedora-workstation-repositories
 dnf5 -y copr enable scottames/ghostty
-dnf5 -y config-manager setopt google-chrome.enabled=1
 
 dnf5 -y install --nogpgcheck --repofrompath \
   'terra,https://repos.fyralabs.com/terra$releasever' \
@@ -38,7 +37,6 @@ dnf5 -y install --nogpgcheck --repofrompath \
 dnf5 -y install terra-release-extras
 
 PACKAGES=(
-    google-chrome-stable
     ghostty
     docker-ce
     docker-ce-cli
