@@ -41,7 +41,6 @@ dnf5 -y install /tmp/rpms/ublue-os/ublue-os-akmods-addons-*.rpm
 /ctx/install-kmods \
     /tmp/rpms/{extra,kmods-extra}/*zenergy*.rpm \
     /tmp/rpms/{extra,kmods-extra}/*gcadapter*.rpm \
-    /tmp/rpms/{extra,kmods-extra}/*evdi*.rpm \
     /tmp/rpms/{extra,kmods-extra}/*kvmfr*.rpm \
     /tmp/rpms/{extra,kmods-extra}/*new-lg4ff*.rpm \
     /tmp/rpms/{extra,kmods-extra}/*hid-tmff2*.rpm \

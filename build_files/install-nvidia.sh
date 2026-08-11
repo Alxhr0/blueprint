@@ -5,7 +5,7 @@ if rpm -q nvidia-gpu-firmware &>/dev/null; then
     dnf5 -y remove nvidia-gpu-firmware
 fi
 
-AKMODNV_PATH="/tmp/rpms/nvidia" MULTILIB=1 \
+IMAGE_NAME="bluefin" AKMODNV_PATH="/tmp/rpms/nvidia" MULTILIB=0 \
     /tmp/rpms/nvidia/ublue-os/nvidia-install.sh
 
 rm -f /usr/share/vulkan/icd.d/nouveau_icd.*.json
