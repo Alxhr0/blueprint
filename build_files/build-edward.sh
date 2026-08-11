@@ -101,6 +101,7 @@ dnf5 -y install --skip-unavailable \
   "${PACKAGES[@]}"
 
 dnf5 -y copr disable scottames/ghostty
+OLLAMA_INSTALL_DIR=/usr/lib/ollama-install \
 curl -fsSL https://ollama.com/install.sh | sh
 
 mkdir -p /var/lib/extensions
