@@ -1,27 +1,18 @@
 [Unit]
-Description=Install Homebrew packages from Brewfile
+Description=Preinstall OS-managed Homebrew packages
 After=network-online.target
 Wants=network-online.target
+ConditionUser=!@system
+ConditionPathExists=/var/home/linuxbrew/.linuxbrew/bin/brew
+StartLimitIntervalSec=600
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c '\
-    BREWFILE="/usr/share/ublue-os/homebrew/preinstall.d/packages-${SUDO_USER:-${USER}}.Brewfile"; \
-    if [ ! -f "$BREWFILE" ]; then \
-        echo "No Brewfile found: $BREWFILE"; \
-        exit 0; \
-    fi; \
-    BREW="$(command -v brew || true)"; \
-    if [ -z "$BREW" ] && [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then \
-        BREW=/home/linuxbrew/.linuxbrew/bin/brew; \
-    fi; \
-    if [ -z "$BREW" ]; then \
-        echo "Homebrew could not be found"; \
-        exit 1; \
-    fi; \
-    "$BREW" bundle --file="$BREWFILE"'
-RemainAfterExit=yes
+ExecStart=/usr/bin/brew-preinstall
+RemainAfterExit=true
+Restart=on-failure
+RestartSec=30
+StartLimitBurst=3
 
 [Install]
-WantedBy=multi-user.target
-
+WantedBy=graphical-session.target

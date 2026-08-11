@@ -5,13 +5,8 @@ cp -avf "/ctx/system_files"/. /
 cp -avf "/ctx/system_files.edward"/. /
 mkdir -p /var/roothome
 
-# Recompile the dconf database so custom keybindings in distro.d take effect
 dconf update
 
-# Quadlet auto-applies the [Install] WantedBy=default.target in the .container
-# files under /etc/containers/systemd/users/, so the always-on containers start
-# automatically in each user session. Only the podman API socket needs an
-# explicit enable symlink here, as it takes effect at next login.
 mkdir -p /etc/xdg/systemd/user/sockets.target.wants
 ln -sfn /usr/lib/systemd/user/podman.socket \
     /etc/xdg/systemd/user/sockets.target.wants/podman.socket
