@@ -7,6 +7,7 @@ Image=docker.io/library/archlinux:latest
 ContainerName=arch
 Exec=/usr/bin/sleep infinity
 HostName=arch
+PodmanArgs=--memory=512m --cpus=0.5
 
 [Service]
 TimeoutStartSec=900

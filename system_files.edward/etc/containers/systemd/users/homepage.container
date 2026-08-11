@@ -1,22 +1,24 @@
 [Unit]
-Description=Homepage dashboard
-Documentation=https://gethomepage.dev/
+Description=TLC Homepage (rootless Podman, Quadlet) — dashboard; Network=host for server-side LAN fetch
+After=network-online.target podman.socket
+Wants=network-online.target podman.socket
 
 [Container]
-Image=homepage.build
-ContainerName=homepage
-Network=homepage.network
-PublishPort=3020:3001
-Volume=%h/.local/share/homepage:/app/data:Z
+ContainerName=tlc-homepage
+Image=localhost/tlc-homepage:latest
+Network=host
+DNS={{ dns_ip }}
 Environment=NODE_ENV=production
-Environment=PORT=3001
-Environment=DOCKER_HOST=tcp://homepage-docker-proxy:2375
+Environment=PORT=3002
+EnvironmentFile=-%h/.config/envs/homepage/.env
+Volume=/srv/podman/tlc-homepage:/app/data:rw
+Volume=/run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+HealthCmd=wget -qO /dev/null http://127.0.0.1:3002 || exit 1
+PodmanArgs=--memory=512m --cpus=0.5
 
 [Service]
-ExecStartPre=/usr/bin/mkdir -p %h/.local/share/homepage
-EnvironmentFile=-%h/.config/envs/homepage/.env
 Restart=always
-TimeoutStartSec=600
+RestartSec=5
 
 [Install]
 WantedBy=default.target

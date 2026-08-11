@@ -1,5 +1,0 @@
-[Unit]
-Description=Homepage container network
-
-[Network]
-Subnet=10.89.0.0/24
