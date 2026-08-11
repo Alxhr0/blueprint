@@ -8,11 +8,11 @@ StartLimitIntervalSec=600
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/brew-preinstall
+ExecStart=/var/home/linuxbrew/.linuxbrew/bin/brew bundle install --file=/usr/share/ublue-os/homebrew/preinstall.d/packages-edward.Brewfile
 RemainAfterExit=true
 Restart=on-failure
 RestartSec=30
 StartLimitBurst=3
 
 [Install]
-WantedBy=graphical-session.target
+WantedBy=default.target
