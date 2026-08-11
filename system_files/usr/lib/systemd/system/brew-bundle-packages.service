@@ -10,7 +10,6 @@ User=1000
 Group=1000
 Environment=HOME=/var/home/linuxbrew
 ExecStart=/var/home/linuxbrew/.linuxbrew/bin/brew bundle --file=/usr/share/ublue-os/homebrew/packages.Brewfile
-RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target
