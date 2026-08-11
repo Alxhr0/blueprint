@@ -66,7 +66,7 @@ systemctl enable tailscaled.service
 systemctl preset brew-setup.service 
 systemctl preset brew-update.timer 
 systemctl preset brew-upgrade.timer
-systemctl preset brew-bundle-packages.service
+systemctl enable brew-bundle-packages.service
 
 if command -v chcon > /dev/null; then
     chcon -R -t unconfined_mgmt_t /nix || true
