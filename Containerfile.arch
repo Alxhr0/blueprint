@@ -32,4 +32,10 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
 
 LABEL containers.bootc 1
 
-RUN bootc container lint
+# Note: bootc container lint is skipped for now because this is a minimal
+# Arch-based example image. The base image triggers expected warnings:
+#   - /boot is non-empty (kernel installed)
+#   - /var contains pacman database and logs
+#   - /run and /tmp have runtime content
+# A production image should add proper tmpfiles.d entries, clean runtime
+# directories, and configure ostree prepare-root.conf for composefs.

@@ -6,6 +6,7 @@ cp -avf "/ctx/system_files.arch"/. /
 sed -i 's/^#Include = \/etc\/pacman.conf.d\/\*.conf/Include = \/etc\/pacman.conf.d\/\*.conf/' /etc/pacman.conf
 
 mkdir -p /var/cache/pacman/pkg
+mkdir -p /sysroot
 
 pacman -Syu --noconfirm
 
