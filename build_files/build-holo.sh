@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ouex pipefail
 
-cp -avf "/ctx/system_files.arch"/. /
+cp -avf "/ctx/system_files.holo"/. /
 
 sed -i 's/^#Include = \/etc\/pacman.conf.d\/\*.conf/Include = \/etc\/pacman.conf.d\/\*.conf/' /etc/pacman.conf
 
@@ -21,19 +21,49 @@ PACKAGES=(
     linux-firmware
     networkmanager
     ostree
-    btrfs-progs
-    e2fsprogs
-    xfsprogs
-    dosfstools
-    skopeo
-    dbus
-    dbus-glib
-    glib2
-    shadow
-    openssh
-    sudo
-    systemd
-    udev
+
+    plasma-desktop
+    plasma-workspace
+    plasma-nm
+    plasma-pa
+    kdeplasma-addons
+    breeze
+    sddm
+    konsole
+    dolphin
+    firefox
+    kdeconnect
+
+    steam
+    proton
+    gamemode
+    lib32-gamemode
+    mangohud
+    lib32-mangohud
+    wine-staging
+    giflib
+    lib32-giflib
+    libpng
+    lib32-libpng
+    libldap
+    lib32-libldap
+    libvulkan
+    lib32-libvulkan
+    libxcomposite
+    lib32-libxcomposite
+    libxinerama
+    lib32-libxinerama
+    libxrandr
+    lib32-libxrandr
+    opencl-driver
+    lib32-opencl-driver
+    lib32-gnutls
+    lib32-libpulse
+    libgudev
+    lib32-libgudev
+    alsa-lib
+    lib32-alsa-lib
+    alsa-utils
 )
 
 pacman -S --noconfirm --needed "${PACKAGES[@]}"
@@ -70,6 +100,8 @@ systemctl enable systemd-boot-update.service
 systemctl mask systemd-firstboot.service
 
 systemctl enable NetworkManager.service
+
+systemctl enable sddm.service
 
 KERNEL_VERSION="$(basename "$(find /usr/lib/modules -maxdepth 1 -type d | grep -v -E '\.img$' | tail -n 1)")"
 
