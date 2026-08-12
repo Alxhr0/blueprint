@@ -1,0 +1,13 @@
+# Allow build scripts to be referenced without being copied into the final image
+FROM scratch AS ctx
+COPY build_files /
+COPY system_files.arch /system_files.arch
+
+FROM archlinux:latest
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    --mount=type=cache,dst=/var/cache/pacman/pkg \
+    --mount=type=tmpfs,dst=/tmp \
+    /ctx/build-arch.sh
+
+RUN bootc container lint
