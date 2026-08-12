@@ -292,7 +292,7 @@ list-images:
         stem="${stem%.env}"
         if [[ -f "Containerfile.${stem}" ]]; then
             case "${stem}" in
-                holo|holo-amd|holo-nvidia) continue ;;
+                holo-amd|holo-nvidia) continue ;;
             esac
             IMAGES+=("${stem}")
         fi
