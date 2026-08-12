@@ -68,7 +68,7 @@ systemctl enable systemd-sysext.service
 systemctl disable podman.socket
 systemctl enable docker
 systemctl enable tailscaled.service
-source /ctx/build_files/enable-user-services.sh
+source /ctx/enable-user-services.sh
 enable_user_service brew-preinstall.service
 
 if command -v chcon > /dev/null; then
