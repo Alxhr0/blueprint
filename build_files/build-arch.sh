@@ -10,6 +10,8 @@ mkdir -p /sysroot
 
 pacman -Syu --noconfirm
 
+sed -i 's|CacheDir = /var/cache/pacman/pkg/|CacheDir = /usr/lib/sysimage/cache/pacman/pkg/|' /etc/pacman.conf
+
 PACKAGES=(
     base
     bubblewrap
