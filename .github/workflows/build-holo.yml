@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [holo, holo-amd, holo-nvidia]
+        image: [holo-amd, holo-nvidia]
 
     permissions:
       contents: read
@@ -53,7 +53,12 @@ jobs:
 
           echo "IMAGE_REGISTRY=${IMAGE_REGISTRY,,}" >> "$GITHUB_ENV"
 
-      - name: Build Image
+      - name: Build Arch Base Image
+        run: |
+          set -euo pipefail
+          sudo -E "$(command -v just)" build arch
+
+      - name: Build Holo Image
         id: build-image
         run: |
           sudo -E "$(command -v just)" build \
