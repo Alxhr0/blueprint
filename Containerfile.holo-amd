@@ -1,8 +1,8 @@
-FROM blueprint-arch:latest AS ctx
+FROM scratch AS ctx
 COPY build_files /
 COPY system_files.holo /system_files.holo
 
-FROM ghcr.io/huntedraven7/blueprint:arch
+FROM blueprint:arch
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
