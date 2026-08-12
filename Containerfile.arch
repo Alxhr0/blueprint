@@ -17,7 +17,6 @@ RUN pacman -Syu --noconfirm \
     python-setuptools
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
-    --mount=type=cache,dst=/var/cache/pacman/pkg \
     --mount=type=tmpfs,dst=/tmp \
     /ctx/builder-arch.sh
 
@@ -26,7 +25,6 @@ FROM archlinux:latest AS system
 COPY --from=builder /output /
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
-    --mount=type=cache,dst=/var/cache/pacman/pkg \
     --mount=type=tmpfs,dst=/tmp \
     /ctx/build-arch.sh
 
