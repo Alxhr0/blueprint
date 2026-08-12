@@ -1,0 +1,11 @@
+[Unit]
+Description=Brew Preinstall
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/brew-preinstall
+RemainAfterExit=yes
+
+[Install]
+WantedBy=graphical-session.target
