@@ -59,8 +59,6 @@ dnf5 -y install --skip-unavailable \
 dnf5 -y copr disable scottames/ghostty
 mkdir -p "$(readlink -f /usr/local)"
 
-curl -fsSL https://ollama.com/install.sh | sh
-
 mkdir -p /var/lib/extensions
 cp -a /tmp/steam-sysext /var/lib/extensions/steam
 systemctl enable systemd-sysext.service

@@ -38,6 +38,8 @@ PACKAGES=(
 
 pacman -S --noconfirm --needed "${PACKAGES[@]}"
 
+pacman -Scc --noconfirm
+
 echo "uninitialized" > /etc/machine-id
 ln -sf /usr/share/zoneinfo/UTC /etc/localtime
 
@@ -55,7 +57,7 @@ find /etc/ -name "*.pacnew" -type f -delete
 grep "\= \*/var" /etc/pacman.conf | sed "/= \*\\/var/s/.\*=// ; s/ //" | \
 xargs -n1 sh -c \
 'mkdir -p "/usr/lib/sysimage/$(dirname $(echo $1 | sed "s@/var/@@"))" && \
-mv -v "$1" "/usr/lib/sysimage/$(echo "$1" | sed "s@/var/@@"))"' '' \>/dev/null
+mv -v "$1" "/usr/lib/sysimage/$(echo "$1" | sed "s@/var/@@"))"' ''
 
 sed -i -e "/= \*\\/var/ s/^#//" -e "s@= \*/var@= /usr/lib/sysimage@g" -e "/DownloadUser/d" /etc/pacman.conf
 

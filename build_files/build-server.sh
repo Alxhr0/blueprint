@@ -16,5 +16,3 @@ dnf5 -y install \
 
 systemctl enable cockpit.socket
 systemctl enable sshd.service
-source /ctx/enable-user-services.sh
-enable_user_service brew-preinstall.service
