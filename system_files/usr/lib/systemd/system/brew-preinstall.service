@@ -1,6 +1,7 @@
 [Unit]
 Description=Brew Preinstall
-After=graphical-session.target
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=oneshot
@@ -8,4 +9,4 @@ ExecStart=/usr/bin/brew-preinstall
 RemainAfterExit=yes
 
 [Install]
-WantedBy=graphical-session.target
+WantedBy=multi-user.target

@@ -66,8 +66,8 @@ systemctl enable systemd-sysext.service
 systemctl disable podman.socket
 systemctl enable docker
 systemctl enable tailscaled.service
-source /ctx/enable-user-services.sh
-enable_user_service brew-preinstall.service
+systemctl enable brew-preinstall.service
+systemctl enable brew-bundle-download.service
 
 if command -v chcon > /dev/null; then
     chcon -R -t unconfined_mgmt_t /nix || true

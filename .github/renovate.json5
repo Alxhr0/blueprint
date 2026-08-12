@@ -9,7 +9,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^Containerfile\\.edward$"],
+      "fileMatch": ["^containerfiles/Containerfile\\.edward$"],
       "matchStrings": [
         "ARG AKMODS_TAG=\"(?<currentValue>[^\"]+)\"",
       ],

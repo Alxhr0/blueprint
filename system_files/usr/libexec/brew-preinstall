@@ -5,6 +5,9 @@
 # Handles the full package lifecycle: new packages added by OS updates are installed,
 # packages removed from Brewfiles are uninstalled — without touching user-added packages.
 #
+# With the "download" argument, performs `brew bundle download` for all Brewfiles
+# to pre-cache packages without installing them.
+#
 # State: ~/.local/share/ublue-os/brew-preinstall-state.json
 #   { "hash": "<sha256 of all Brewfiles>",
 #     "packages": ["pkg1", "pkg2", ...],
@@ -15,6 +18,37 @@ set -euo pipefail
 PREINSTALL_DIR="/usr/share/ublue-os/homebrew/preinstall.d"
 STATE_FILE="${HOME}/.local/share/ublue-os/brew-preinstall-state.json"
 BREW_BIN="/var/home/linuxbrew/.linuxbrew/bin/brew"
+
+if [[ "${1:-}" == "download" ]]; then
+    if [[ ! -x "${BREW_BIN}" ]]; then
+        echo "brew-preinstall: brew not found at ${BREW_BIN}, skipping download"
+        exit 0
+    fi
+
+    if [[ ! -d "${PREINSTALL_DIR}" ]]; then
+        echo "brew-preinstall: no preinstall.d at ${PREINSTALL_DIR}, skipping download"
+        exit 0
+    fi
+
+    shopt -s nullglob
+    brewfiles=("${PREINSTALL_DIR}"/*.Brewfile)
+
+    if [[ ${#brewfiles[@]} -eq 0 ]]; then
+        echo "brew-preinstall: no Brewfiles in ${PREINSTALL_DIR}, skipping download"
+        exit 0
+    fi
+
+    eval "$("${BREW_BIN}" shellenv)"
+
+    echo "brew-preinstall: downloading Brewfile bundles..."
+    for brewfile in "${brewfiles[@]}"; do
+        echo "brew-preinstall: downloading ${brewfile}"
+        brew bundle download --file="${brewfile}"
+    done
+
+    echo "brew-preinstall: download complete"
+    exit 0
+fi
 
 if [[ ! -x "${BREW_BIN}" ]]; then
     echo "brew-preinstall: brew not found at ${BREW_BIN}, skipping"

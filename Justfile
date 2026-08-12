@@ -96,7 +96,7 @@ sudoif command *args:
 #
 
 # Build the image using the specified parameters
-# target_image is a variant key: the name of a Containerfile.<name> + images/<name>.env
+# target_image is a variant key: the name of a containerfiles/Containerfile.<name> + images/<name>.env
 # (e.g. edward, aira, server). Every variant is tagged ${IMAGE_NAME}:${DEFAULT_TAG},
 # e.g. blueprint:edward, blueprint:aira, blueprint:server.
 build $target_image="" $tag="":
@@ -118,10 +118,10 @@ build $target_image="" $tag="":
     fi
     set +a
 
-    # Pick the Containerfile for this variant (Containerfile.<name> or the primary variant's)
-    CONTAINERFILE="Containerfile.${PRIMARY_STEM}"
-    if [[ -f "Containerfile.${target_image}" ]]; then
-        CONTAINERFILE="Containerfile.${target_image}"
+    # Pick the containerfile for this variant (containerfiles/Containerfile.<name> or the primary variant's)
+    CONTAINERFILE="containerfiles/Containerfile.${PRIMARY_STEM}"
+    if [[ -f "containerfiles/Containerfile.${target_image}" ]]; then
+        CONTAINERFILE="containerfiles/Containerfile.${target_image}"
     fi
 
     # Explicit tag arg wins, otherwise use the variant's DEFAULT_TAG
@@ -136,7 +136,7 @@ build $target_image="" $tag="":
         GIT_SHA=$(git rev-parse --short HEAD)
         LABELS+=("--label" "io.artifacthub.package.readme-url=https://raw.githubusercontent.com/${REPO_ORGANIZATION}/${IMAGE_NAME}/${GIT_SHA}/README.md")
         LABELS+=("--label" "org.opencontainers.image.documentation=https://raw.githubusercontent.com/${REPO_ORGANIZATION}/${IMAGE_NAME}/${GIT_SHA}/README.md")
-        LABELS+=("--label" "org.opencontainers.image.source=https://github.com/${REPO_ORGANIZATION}/${IMAGE_NAME}/blob/${GIT_SHA}/Containerfile")
+        LABELS+=("--label" "org.opencontainers.image.source=https://github.com/${REPO_ORGANIZATION}/${IMAGE_NAME}/blob/${GIT_SHA}/containerfiles/Containerfile")
         LABELS+=("--label" "org.opencontainers.image.url=https://github.com/${REPO_ORGANIZATION}/${IMAGE_NAME}/tree/${GIT_SHA}")
         LABELS+=("--label" "org.opencontainers.image.version=${DEFAULT_TAG}.$(date +%Y%m%d)-${GIT_SHA}")
     fi
@@ -279,7 +279,7 @@ image_name $target_image=image_name:
 
     echo "${image_name}"
 
-# List all variant keys defined in this repo (env files with a matching Containerfile.<name>)
+# List all variant keys defined in this repo (env files with a matching containerfiles/Containerfile.<name>)
 [group('Utility')]
 list-images:
     #!/usr/bin/env bash
@@ -290,10 +290,11 @@ list-images:
         [[ -f "${env}" ]] || continue
         stem="${env#images/}"
         stem="${stem%.env}"
-        if [[ -f "Containerfile.${stem}" ]]; then
+        if [[ -f "containerfiles/Containerfile.${stem}" ]]; then
             case "${stem}" in
                 holo-amd|holo-nvidia) continue ;;
             esac
+            [[ "${stem}" == "ubuntu-nvidia" ]] && continue
             IMAGES+=("${stem}")
         fi
     done
