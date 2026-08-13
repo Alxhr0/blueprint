@@ -5,7 +5,7 @@ Wants=network-online.target podman.socket
 
 [Container]
 ContainerName=tlc-homepage
-Image=localhost/tlc-homepage:latest
+Image=ghcr.io/huntedraven7/homepage:latest
 Network=host
 Environment=NODE_ENV=production
 Environment=PORT=3002
