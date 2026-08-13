@@ -3,6 +3,7 @@
 set -ouex pipefail
 
 cp -avf "/ctx/system_files/global"/. /
+cp -avf "/ctx/system_files/aira"/. /
 
 mkdir -p /var/roothome
 
@@ -74,8 +75,6 @@ ln -sT var/usrlocal /usr/local
 printf 'd /var/home 0755 root root -\nd /var/srv 0755 root root -\nd /var/mnt 0755 root root -\nd /var/opt 0755 root root -\nd /var/usrlocal 0755 root root -\nd /var/roothome 0700 root root -\nd /run/media 0755 root root -\n' > /usr/lib/tmpfiles.d/bootc-base-dirs.conf
 
 rm -rf /{boot,home,root,srv,mnt,var,usr/local}
-
-cp -avf "/ctx/system_files/aira"/. /
 
 rm -rf /tmp/* /run/*
 
