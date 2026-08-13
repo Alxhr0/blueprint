@@ -9,11 +9,12 @@ Image=ghcr.io/huntedraven7/homepage:latest
 Network=host
 Environment=NODE_ENV=production
 Environment=PORT=3002
-Volume=/srv/podman/tlc-homepage:/app/data:rw
+Volume=%h/.local/share/tlc-homepage:/app/data:Z
 Volume=/run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
 PodmanArgs=--memory=512m --cpus=0.5
 
 [Service]
+ExecStartPre=/usr/bin/mkdir -p %h/.local/share/tlc-homepage
 Restart=always
 RestartSec=5
 

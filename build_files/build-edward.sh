@@ -66,8 +66,10 @@ systemctl enable systemd-sysext.service
 systemctl disable podman.socket
 systemctl enable docker
 systemctl enable tailscaled.service
-systemctl enable brew-preinstall.service
-systemctl enable brew-bundle-download.service
+
+mkdir -p /etc/systemd/user/graphical-session.target.wants
+ln -sfn /usr/lib/systemd/user/brew-preinstall.service \
+    /etc/systemd/user/graphical-session.target.wants/brew-preinstall.service
 
 mkdir -p /etc/systemd/user/default.target.wants
 ln -sfn /usr/lib/systemd/user/homepage.service \

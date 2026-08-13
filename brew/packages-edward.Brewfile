@@ -3,21 +3,23 @@ tap "frostyard/tap", trusted: true
 tap "Kilo-Org/tap", trusted: true
 tap "ublue-os/experimental-tap", trusted: true
 
-cask "ublue-os/tap/jetbrains-toolbox-linux"
-cask "ublue-os/tap/lm-studio-linux"
-cask "ublue-os/tap/framework-wallpapers"
-cask "ublue-os/tap/visual-studio-code-linux"
+# jetbrains-toolbox-linux, lm-studio-linux, framework-wallpapers,
+# visual-studio-code-linux, and zed-linux exist in multiple tapped taps and
+# cannot be resolved by `brew bundle` (Homebrew resolves bare cask names and
+# aborts). They are installed by the brew-preinstall service directly from
+# their fully-qualified tap name — see BREW_DIRECT_INSTALLS in
+# /usr/libexec/brew-preinstall.
+
 cask "ublue-os/tap/antigravity-cli-linux"
 cask "ublue-os/tap/antigravity-ide-linux"
 cask "ublue-os/tap/goose-linux"
 
-cask "ublue-os/experimental-tap/zed-linux"
 cask "ublue-os/experimental-tap/emacs-app-linux"
 cask "ublue-os/experimental-tap/opencode-desktop-linux"
 
 cask "frostyard/tap/chairlift"
 
-cask "Kilo-Org/tap/kilo"
+brew "kilo-org/tap/kilo"
 
 cask "claude-desktop-linux"
 
@@ -34,7 +36,6 @@ brew "stow"
 brew "fd"
 brew "dysk"
 brew "opencode"
-brew "kiro-cli"
 
 flatpak "io.github.tanaybhomia.Whisp"
 flatpak "com.discordapp.Discord"
