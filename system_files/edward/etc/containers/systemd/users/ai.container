@@ -12,13 +12,9 @@ Volume=%h/.local/share/ai/home:/root:Z
 Volume=%h/.local/share/ai/cache:/root/.cache:Z
 Volume=%h/.ssh:/root/.ssh:ro
 Volume=%h/.gitconfig:/root/.gitconfig:ro
-EnvironmentFile=-%h/.config/envs/ai/.env
 
 [Service]
 Restart=always
 RestartSec=5
 ExecStartPre=/usr/bin/mkdir -p %h/.local/share/ai/home %h/.local/share/ai/cache
 TimeoutStartSec=900
-
-[Install]
-WantedBy=default.target
