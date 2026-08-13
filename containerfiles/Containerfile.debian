@@ -13,14 +13,17 @@ RUN apt-get update -y && \
         curl \
         make \
         build-essential \
-        rustc \
-        cargo \
         go-md2man \
         libzstd-dev \
         pkgconf \
         dracut \
         libostree-dev \
         ostree
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+    | sh -s -- -y --default-toolchain stable --profile minimal
+
+ENV PATH=/root/.cargo/bin:${PATH}
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
