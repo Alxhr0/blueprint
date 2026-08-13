@@ -56,8 +56,8 @@ jobs:
         run: |
           DATE=$(date +%Y%m%d)
           BUILD_TAGS=()
-          BUILD_TAGS+=("${SOURCE_SHA}")
-          BUILD_TAGS+=("${DATE}-${SOURCE_SHA}")
+          BUILD_TAGS+=("${source_sha}")
+          BUILD_TAGS+=("${DATE}-${source_sha}")
           BUILD_TAGS+=("${DATE}")
           BUILD_TAGS+=("latest")
           echo "${BUILD_TAGS[*]}"
@@ -71,10 +71,10 @@ jobs:
           set -euo pipefail
 
           IMAGE_ID=$(sudo -E podman images --filter reference="homepage:latest" --format '{{.ID}}')
-          sudo -E podman tag "${IMAGE_ID}" "homepage:${SOURCE_SHA}"
+          sudo -E podman tag "${IMAGE_ID}" "homepage:${source_sha}"
 
           for tag in ${ALIAS_TAGS}; do
-            if [[ "${tag}" != "${SOURCE_SHA}" ]]; then
+            if [[ "${tag}" != "${source_sha}" ]]; then
               sudo -E podman tag "${IMAGE_ID}" "homepage:${tag}"
             fi
           done
