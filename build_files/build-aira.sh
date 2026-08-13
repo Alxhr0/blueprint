@@ -75,6 +75,7 @@ ln -sfnT var/usrlocal /usr/local
 printf 'd /var/home 0755 root root -\nd /var/srv 0755 root root -\nd /var/mnt 0755 root root -\nd /var/opt 0755 root root -\nd /var/usrlocal 0755 root root -\nd /var/roothome 0700 root root -\nd /run/media 0755 root root -\n' > /usr/lib/tmpfiles.d/bootc-base-dirs.conf
 
 rm -rf /var/cache/* /var/log/*
+find /var -mindepth 1 -maxdepth 1 ! -name cache ! -name log -exec rm -rf {} +
 rm -rf /{boot,home,root,srv,mnt,usr/local}
 
 rm -rf /tmp/* /run/*
