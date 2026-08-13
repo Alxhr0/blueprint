@@ -14,9 +14,6 @@ else
   mkdir -p /root
 fi
 
-git clone https://github.com/tmux-plugins/tpm /root/.tmux/plugins/tpm
-/root/.tmux/plugins/tpm/bin/install_plugins
-
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
   | sh -s -- install linux \
     --init none \

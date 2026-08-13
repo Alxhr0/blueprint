@@ -8,6 +8,7 @@ FROM docker.io/library/debian:trixie AS builder
 
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
+        ca-certificates \
         git \
         curl \
         make \
