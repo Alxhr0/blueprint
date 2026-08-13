@@ -3,7 +3,6 @@
 set -ouex pipefail
 
 cp -avf "/ctx/system_files/global"/. /
-cp -avf "/ctx/system_files/aira"/. /
 
 mkdir -p /var/roothome
 
@@ -42,6 +41,8 @@ dnf -y copr enable lizardbyte/stable
 
 PACKAGES=(
   git
+  tmux
+  neovim
   kitty
   alacritty
   Sunshine
@@ -54,3 +55,22 @@ dnf5 -y install --skip-unavailable \
 dnf -y copr disable lizardbyte/stable
 
 systemctl enable sshd.service
+
+mkdir -p /sysroot /boot /usr/lib/ostree /var
+
+ln -sT sysroot/ostree /ostree
+ln -sT var/roothome /root
+ln -sT var/srv /srv
+ln -sT var/mnt /mnt
+ln -sT var/opt /opt
+ln -sT var/home /home
+ln -sT var/usrlocal /usr/local
+
+printf 'd /var/home 0755 root root -\nd /var/srv 0755 root root -\nd /var/mnt 0755 root root -\nd /var/opt 0755 root root -\nd /var/usrlocal 0755 root root -\nd /var/roothome 0700 root root -\nd /run/media 0755 root root -\n' > /usr/lib/tmpfiles.d/bootc-base-dirs.conf
+
+rm -rf /{boot,home,root,srv,mnt,var,usr/local}
+
+cp -avf "/ctx/system_files/aira"/. /
+
+rm -rf /tmp/* /run/*
+
