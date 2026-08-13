@@ -5,7 +5,6 @@ set -ouex pipefail
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/edward"/. /
 
-mkdir -p /var/lib/pacman /var/cache/pacman/pkg
 if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
     printf '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist\n' >> /etc/pacman.conf
 fi

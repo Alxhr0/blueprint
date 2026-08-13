@@ -7,12 +7,12 @@ cp -avf "/ctx/system_files/arch"/. /
 
 sed -i 's/^#Include = \/etc\/pacman.conf.d\/\*.conf/Include = \/etc\/pacman.conf.d\/\*.conf/' /etc/pacman.conf
 
-mkdir -p /var/cache/pacman/pkg
+# Build against the stock pacman layout first: archlinux:latest ships its
+# installed packages tracked in /var/lib/pacman, so /var paths must stay in
+# place until after every pacman operation.
 mkdir -p /sysroot
 
 pacman -Syu --noconfirm
-
-sed -i 's|CacheDir = /var/cache/pacman/pkg/|CacheDir = /usr/lib/sysimage/cache/pacman/pkg/|' /etc/pacman.conf
 
 PACKAGES=(
     base
@@ -58,17 +58,6 @@ sed -i '/DisableSandboxNetwork/d' /etc/pacman.conf
 
 find /etc/ -name "*.pacnew" -type f -delete
 
-awk -F'=' '/\/var/ {gsub(/ /,"",$2); print $2}' /etc/pacman.conf | \
-while read -r varpath; do
-    if [ -n "$varpath" ]; then
-        newpath="/usr/lib/sysimage/${varpath#/var/}"
-        mkdir -p "$(dirname "${newpath}")"
-        mv -v "${varpath}" "${newpath}"
-    fi
-done
-
-sed -i -e "/= \*\\/var/ s/^#//" -e "s@= \*/var@= /usr/lib/sysimage@g" -e "/DownloadUser/d" /etc/pacman.conf
-
 systemctl enable systemd-boot-update.service
 
 systemctl mask systemd-firstboot.service
@@ -84,6 +73,16 @@ printf '[composefs]\nenabled = yes\n[sysroot]\nreadonly = true\n' > /usr/lib/ost
 printf 'd /var/home 0755 root root -\nd /var/srv 0755 root root -\nd /var/mnt 0755 root root -\nd /var/opt 0755 root root -\nd /var/usrlocal 0755 root root -\nd /var/roothome 0700 root root -\nd /run/media 0755 root root -\n' > /usr/lib/tmpfiles.d/bootc-base-dirs.conf
 
 rm -rf /tmp/* /run/*
+
+# Relocate pacman state into the image: /var is wiped below (and recreated
+# empty at runtime) while /usr persists. Shipping the real local DB here lets
+# derived images do proper `pacman -Syu` upgrades instead of blind installs
+# over untracked files.
+mkdir -p /usr/lib/sysimage/var/lib /usr/lib/sysimage/cache/pacman/pkg
+cp -a /var/lib/pacman /usr/lib/sysimage/var/lib/pacman
+sed -i -e 's|^#DBPath[[:space:]]*=[[:space:]]*/var/lib/pacman/|DBPath = /usr/lib/sysimage/var/lib/pacman/|' \
+       -e 's|^#CacheDir[[:space:]]*=[[:space:]]*/var/cache/pacman/pkg/|CacheDir = /usr/lib/sysimage/cache/pacman/pkg/|' \
+       /etc/pacman.conf
 
 rm -rf /{boot,home,root,srv,mnt,var,usr/local}
 
