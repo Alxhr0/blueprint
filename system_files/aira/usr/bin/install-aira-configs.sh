@@ -2,17 +2,28 @@
 set -euo pipefail
 
 SRC="/usr/share/aira-configs"
-DST="/var/roothome"
 
-mkdir -p "${DST}/.config"
-
-if [[ ! -f "${DST}/.config/tmux/tmux.conf" ]]; then
-    mkdir -p "${DST}/.config/tmux"
-    cp -avf "${SRC}/.config/tmux/tmux.conf" "${DST}/.config/tmux/"
+HOMES=()
+if [[ -d /var/roothome ]]; then
+    HOMES+=("/var/roothome")
+fi
+if [[ -d /var/home ]]; then
+    while IFS= read -r home; do
+        HOMES+=("${home}")
+    done < <(find /var/home -maxdepth 1 -mindepth 1 -type d | sort)
 fi
 
-if [[ ! -f "${DST}/.config/nvim/init.lua" ]]; then
-    mkdir -p "${DST}/.config/nvim"
-    cp -avf "${SRC}/.config/nvim/init.lua" "${DST}/.config/nvim/"
-    cp -avf "${SRC}/.config/nvim/lua" "${DST}/.config/nvim/"
-fi
+for HOME_DIR in "${HOMES[@]}"; do
+    mkdir -p "${HOME_DIR}/.config"
+
+    if [[ ! -f "${HOME_DIR}/.config/tmux/tmux.conf" ]]; then
+        mkdir -p "${HOME_DIR}/.config/tmux"
+        cp -avf "${SRC}/.config/tmux/tmux.conf" "${HOME_DIR}/.config/tmux/"
+    fi
+
+    if [[ ! -f "${HOME_DIR}/.config/nvim/init.lua" ]]; then
+        mkdir -p "${HOME_DIR}/.config/nvim"
+        cp -avf "${SRC}/.config/nvim/init.lua" "${HOME_DIR}/.config/nvim/"
+        cp -avf "${SRC}/.config/nvim/lua" "${HOME_DIR}/.config/nvim/"
+    fi
+done
