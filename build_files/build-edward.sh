@@ -69,8 +69,6 @@ systemctl enable tailscaled.service
 systemctl enable brew-preinstall.service
 systemctl enable brew-bundle-download.service
 
-rm -rf /srv
-mkdir -p /srv/podman/tlc-homepage
 mkdir -p /etc/systemd/user/default.target.wants
 ln -sfn /usr/lib/systemd/user/homepage.service \
     /etc/systemd/user/default.target.wants/homepage.service
