@@ -15,14 +15,6 @@ else
   mkdir -p /root
 fi
 
-dnf5 -y install --skip-unavailable \
-  --setopt=install_weak_deps=False \
-  git \
-  tmux \
-  neovim \
-  kitty \
-  alacritty
-
 git clone https://github.com/tmux-plugins/tpm /root/.tmux/plugins/tpm
 /root/.tmux/plugins/tpm/bin/install_plugins
 
@@ -48,6 +40,17 @@ dnf5 -y install terra-release-extras
 
 dnf -y copr enable lizardbyte/stable
 
-systemctl enable sshd.service
+PACKAGES=(
+  git
+  kitty
+  alacritty
+  Sunshine
+)
+
+dnf5 -y install --skip-unavailable \
+  --setopt=install_weak_deps=False \
+  "${PACKAGES[@]}"
 
 dnf -y copr disable lizardbyte/stable
+
+systemctl enable sshd.service
