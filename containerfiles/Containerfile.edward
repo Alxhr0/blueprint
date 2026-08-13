@@ -5,6 +5,8 @@ COPY system_files/edward /system_files/edward
 
 FROM ghcr.io/huntedraven7/blueprint:arch
 
+COPY --from=ghcr.io/ublue-os/brew:latest /system_files /
+
 COPY brew/packages-edward.Brewfile /usr/share/ublue-os/homebrew/preinstall.d/packages-edward.Brewfile
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \

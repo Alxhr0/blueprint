@@ -5,19 +5,22 @@ set -ouex pipefail
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/edward"/. /
 
+# /root is a symlink to var/roothome in the arch base; make sure the target
+# exists before anything writes to $HOME (the nix installer needs /root).
+if [ -L /root ]; then
+  target=$(readlink -f /root)
+  mkdir -p "$target"
+else
+  mkdir -p /root
+fi
+
 if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
     printf '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist\n' >> /etc/pacman.conf
 fi
 
 pacman -Syu --noconfirm
 
-pacman -S --noconfirm --needed curl git gcc make
-
-useradd -m -d /var/home/linuxbrew -s /bin/bash linuxbrew 2>/dev/null || true
-echo 'linuxbrew ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/linuxbrew
-runuser -u linuxbrew -- env NONINTERACTIVE=1 CI=1 \
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-rm -f /etc/sudoers.d/linuxbrew
+pacman -S --noconfirm --needed curl git gcc make jq
 
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
   | sh -s -- install linux \
@@ -77,12 +80,11 @@ systemctl enable docker
 systemctl enable podman
 systemctl enable tailscaled
 
-if [ -L /root ]; then
-  target=$(readlink -f /root)
-  mkdir -p "$target"
-else
-  mkdir -p /root
-fi
+# brew comes prebuilt from ghcr.io/ublue-os/brew (homebrew.tar.zst); the
+# setup service unpacks it into /home/linuxbrew on first boot.
+systemctl enable brew-setup.service
+systemctl enable brew-update.timer
+systemctl enable brew-upgrade.timer
 
 mkdir -p /etc/systemd/user/graphical-session.target.wants
 ln -sfn /usr/lib/systemd/user/brew-preinstall.service \
@@ -107,4 +109,5 @@ DRACUT_NO_XATTR=1 dracut --force --no-hostonly --reproducible --zstd --verbose \
 
 pacman -Scc --noconfirm
 find /etc/ -name "*.pacnew" -type f -delete
-rm -rf /tmp/* /run/*
+rm -rf /tmp/*
+find /run -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true

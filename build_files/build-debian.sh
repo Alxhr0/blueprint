@@ -80,4 +80,5 @@ dracut --force --no-hostonly --reproducible --zstd --verbose --kver "${KVER}" "/
 
 printf '[composefs]\nenabled = yes\n[sysroot]\nreadonly = true\n' > /usr/lib/ostree/prepare-root.conf
 
-rm -rf /var/lib/apt/lists/* /tmp/* /run/*
+rm -rf /var/lib/apt/lists/* /tmp/*
+find /run -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true

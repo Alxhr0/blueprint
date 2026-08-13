@@ -72,7 +72,8 @@ printf '[composefs]\nenabled = yes\n[sysroot]\nreadonly = true\n' > /usr/lib/ost
 
 printf 'd /var/home 0755 root root -\nd /var/srv 0755 root root -\nd /var/mnt 0755 root root -\nd /var/opt 0755 root root -\nd /var/usrlocal 0755 root root -\nd /var/roothome 0700 root root -\nd /run/media 0755 root root -\n' > /usr/lib/tmpfiles.d/bootc-base-dirs.conf
 
-rm -rf /tmp/* /run/*
+rm -rf /tmp/*
+find /run -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
 
 # Relocate pacman state into the image: /var is wiped below (and recreated
 # empty at runtime) while /usr persists. Shipping the real local DB here lets
