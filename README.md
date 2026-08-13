@@ -10,7 +10,7 @@
 
 `blueprint` builds a family of custom, container-native (bootc) OS images — one Containerfile per flavor, sharing common build scripts and system files where it makes sense.
 
-This also host images such as the AI, Edward and Aira images these are not made to be for everyone infact these are made for myself and my friends it is not recommended to use unless 
+This also host images such as the AI, Edward, Crmy and Aira images these are not made to be for everyone infact these are made for myself and my friends it is not recommended to use unless 
 unless you have read what the images do and they fit you!
 
 ## Flavors
@@ -23,6 +23,7 @@ unless you have read what the images do and they fit you!
 | server | `containerfiles/Containerfile.server` | headless/server |
 | ai | `containerfiles/Containerfile.ai` | AI tooling |
 | aira | `containerfiles/Containerfile.aira` | A custom Bazzite image for my Friend! |
+| crmy | `containerfiles/Containerfile.crmy` | A custom dev focused image for my Friend! |
 | holo-amd / holo-nvidia | `containerfiles/Containerfile.holo-*` | GPU-specific SteamOS like variants |
 
 ## Repository layout
