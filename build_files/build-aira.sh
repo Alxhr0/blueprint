@@ -54,9 +54,17 @@ dnf5 -y install --skip-unavailable \
 
 dnf -y copr disable lizardbyte/stable
 
+dnf5 -y copr enable infinality/kwin-effects-better-blur-dx || true
+dnf5 -y install kwin-effects-better-blur-dx || echo "Better Blur DX COPR package not available, skipping"
+
+dnf5 -y copr disable infinality/kwin-effects-better-blur-dx 
+/usr/bin/setup-better-blur-dx.sh /
+
 systemctl enable sshd.service
 
 systemctl enable install-aira-configs.service
+
+systemctl enable setup-kwin-effects.service
 
 
 mkdir -p /sysroot /boot /usr/lib/ostree /var
