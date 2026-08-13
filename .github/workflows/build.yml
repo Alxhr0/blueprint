@@ -117,8 +117,9 @@ jobs:
 
       - name: Generate Build Tags
         id: gen-build-tags
+        env:
+          TMPDIR: /tmp
         run: |
-          export TMPDIR=/tmp
           alias_tags="$(just generate-build-tags \
                         "${IMAGE_NAME}" \
                         "${DEFAULT_TAG}")"

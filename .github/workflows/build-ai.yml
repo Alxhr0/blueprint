@@ -7,6 +7,7 @@ on:
 
 env:
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
+  TMPDIR: /tmp
 
 jobs:
   build_ai:
@@ -32,13 +33,16 @@ jobs:
 
       - name: Build Image
         id: build-image
+        env:
+          TMPDIR: /tmp
         run: |
           sudo -E "$(command -v just)" build ai
 
       - name: Generate Build Tags
         id: gen-build-tags
+        env:
+          TMPDIR: /tmp
         run: |
-          export TMPDIR=/tmp
           alias_tags="$(just generate-build-tags \
                         blueprint \
                         ai)"
