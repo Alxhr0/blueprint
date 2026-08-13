@@ -56,6 +56,9 @@ dnf -y copr disable lizardbyte/stable
 
 systemctl enable sshd.service
 
+systemctl enable install-aira-configs.service
+
+
 mkdir -p /sysroot /boot /usr/lib/ostree /var
 
 ln -sT sysroot/ostree /ostree
