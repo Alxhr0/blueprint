@@ -29,10 +29,7 @@ if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
 fi
 EOF
 
-dnf5 -y install --nogpgcheck --repofrompath \
-  'terra,https://repos.fyralabs.com/terra$releasever' \
-  terra-release
-dnf5 -y install terra-release-extras
+dnf5 -y install terra-release terra-release-extras || true
 
 dnf -y copr enable lizardbyte/stable
 
