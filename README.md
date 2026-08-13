@@ -19,6 +19,7 @@ unless you have read what the images do and they fit you!
 |---|---|---|
 | edward | `containerfiles/Containerfile.edward` | Edward's own desktop image |
 | arch | `containerfiles/Containerfile.arch` | Arch-based |
+| debian | `containerfiles/Containerfile.debian` | Debian-based |
 | server | `containerfiles/Containerfile.server` | headless/server |
 | ai | `containerfiles/Containerfile.ai` | AI tooling |
 | aira | `containerfiles/Containerfile.aira` | A custom Bazzite image for my Friend! |
