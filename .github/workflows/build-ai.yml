@@ -40,14 +40,18 @@ jobs:
 
       - name: Generate Build Tags
         id: gen-build-tags
-        env:
-          TMPDIR: /tmp
         run: |
-          alias_tags="$(just generate-build-tags \
-                        blueprint \
-                        ai)"
-          echo "${alias_tags}"
-          echo "alias_tags=${alias_tags}" >> "$GITHUB_OUTPUT"
+          DATE=$(date +%Y%m%d)
+          BUILD_TAGS=()
+          if [[ -z "$(git status -s)" ]]; then
+              GIT_SHA=$(git rev-parse --short HEAD)
+              BUILD_TAGS+=("ai-${GIT_SHA}")
+              BUILD_TAGS+=("ai-${DATE}-${GIT_SHA}")
+          fi
+          BUILD_TAGS+=("ai-${DATE}")
+          BUILD_TAGS+=("ai")
+          echo "${BUILD_TAGS[*]}"
+          echo "alias_tags=${BUILD_TAGS[*]}" >> "$GITHUB_OUTPUT"
 
       - name: Tag Image
         id: tag-images

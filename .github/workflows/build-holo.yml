@@ -67,13 +67,17 @@ jobs:
       - name: Generate Build Tags
         id: gen-build-tags
         run: |
-          alias_tags="$(just generate-build-tags \
-                        "${IMAGE_NAME}" \
-                        "${DEFAULT_TAG}")"
-
-          echo "Tags for this Action..."
-          echo "${alias_tags}"
-          echo "alias_tags=${alias_tags}" >> "$GITHUB_OUTPUT"
+          DATE=$(date +%Y%m%d)
+          BUILD_TAGS=()
+          if [[ -z "$(git status -s)" ]]; then
+              GIT_SHA=$(git rev-parse --short HEAD)
+              BUILD_TAGS+=("${DEFAULT_TAG}-${GIT_SHA}")
+              BUILD_TAGS+=("${DEFAULT_TAG}-${DATE}-${GIT_SHA}")
+          fi
+          BUILD_TAGS+=("${DEFAULT_TAG}-${DATE}")
+          BUILD_TAGS+=("${DEFAULT_TAG}")
+          echo "${BUILD_TAGS[*]}"
+          echo "alias_tags=${BUILD_TAGS[*]}" >> "$GITHUB_OUTPUT"
 
       - name: Tag Image
         id: tag-images
