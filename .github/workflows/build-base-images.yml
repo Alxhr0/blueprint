@@ -1,17 +1,22 @@
-name: Build Arch Base Image
+name: Build Base Images
 
 on:
   schedule:
-    - cron: '0 1 */2 * *' # 1:00am UTC every 2 days
+    - cron: '0 8 */3 * *' # 8:00am UTC every 3 days
   workflow_dispatch:
 
 env:
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
 
 jobs:
-  build-arch:
-    name: Build and push arch base
+  build-base:
+    name: Build and push ${{ matrix.image }}
     runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [arch, debian]
 
     permissions:
       contents: read
@@ -41,24 +46,25 @@ jobs:
           sudo apt update
           sudo apt install -y skopeo
 
-      - name: Build Arch Base Image
+      - name: Build Base Image
         id: build-image
         run: |
           set -euo pipefail
-          sudo -E "$(command -v just)" build arch
+          sudo -E "$(command -v just)" build "${{ matrix.image }}"
 
       - name: Generate Build Tags
         id: gen-build-tags
         run: |
+          set -euo pipefail
           DATE=$(date +%Y%m%d)
           BUILD_TAGS=()
           if [[ -z "$(git status -s)" ]]; then
               GIT_SHA=$(git rev-parse --short HEAD)
-              BUILD_TAGS+=("arch-${GIT_SHA}")
-              BUILD_TAGS+=("arch-${DATE}-${GIT_SHA}")
+              BUILD_TAGS+=("${{ matrix.image }}-${GIT_SHA}")
+              BUILD_TAGS+=("${{ matrix.image }}-${DATE}-${GIT_SHA}")
           fi
-          BUILD_TAGS+=("arch-${DATE}")
-          BUILD_TAGS+=("arch")
+          BUILD_TAGS+=("${{ matrix.image }}-${DATE}")
+          BUILD_TAGS+=("${{ matrix.image }}")
           echo "${BUILD_TAGS[*]}"
           echo "alias_tags=${BUILD_TAGS[*]}" >> "$GITHUB_OUTPUT"
 
@@ -69,11 +75,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          IMAGE_ID=$(sudo -E podman images --filter reference="blueprint:arch" --format '{{.ID}}')
-          sudo -E podman tag "${IMAGE_ID}" "blueprint:arch"
+          IMAGE_ID=$(sudo -E podman images --filter reference="blueprint:${{ matrix.image }}" --format '{{.ID}}')
+          sudo -E podman tag "${IMAGE_ID}" "blueprint:${{ matrix.image }}"
 
           for tag in ${ALIAS_TAGS}; do
-            if [[ "${tag}" != "arch" ]]; then
+            if [[ "${tag}" != "${{ matrix.image }}" ]]; then
               sudo -E podman tag "${IMAGE_ID}" "blueprint:${tag}"
             fi
           done
@@ -88,7 +94,7 @@ jobs:
         with:
           image-name: blueprint
           tags: ${{ steps.gen-build-tags.outputs.alias_tags }}
-          default-tag: arch
+          default-tag: ${{ matrix.image }}
           registry: ghcr.io
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
