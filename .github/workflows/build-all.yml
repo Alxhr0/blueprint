@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [arch, edward, ai, debian, server, aira, homepage]
+        image: [edward, ai, debian, server, aira, homepage]
 
     steps:
       - name: Checkout
