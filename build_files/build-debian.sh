@@ -59,7 +59,7 @@ rm -rf /var/lib/dpkg
 mkdir -p /var/lib
 ln -sfnT ../../usr/lib/sysimage/dpkg /var/lib/dpkg
 
-rm -rf /{boot,home,root,srv,mnt,var,usr/local}
+rm -rf /{boot,home,root,srv,mnt,var,usr/local,opt}
 
 mkdir -p /sysroot /boot /usr/lib/ostree /var
 
