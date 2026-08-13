@@ -1,5 +1,5 @@
 [Unit]
-Description=Ephemeral Ubuntu AI container
+Description=Persistent Ubuntu AI container
 Documentation=man:podman-systemd.unit(5)
 
 [Container]
@@ -8,6 +8,17 @@ ContainerName=ai
 Exec=/usr/bin/sleep infinity
 HostName=ai
 PodmanArgs=--memory=512m --cpus=0.5
+Volume=%h/.local/share/ai/home:/root:Z
+Volume=%h/.local/share/ai/cache:/root/.cache:Z
+Volume=%h/.ssh:/root/.ssh:ro
+Volume=%h/.gitconfig:/root/.gitconfig:ro
+EnvironmentFile=-%h/.config/envs/ai/.env
 
 [Service]
+Restart=always
+RestartSec=5
+ExecStartPre=/usr/bin/mkdir -p %h/.local/share/ai/home %h/.local/share/ai/cache
 TimeoutStartSec=900
+
+[Install]
+WantedBy=default.target

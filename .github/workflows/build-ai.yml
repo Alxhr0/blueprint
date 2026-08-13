@@ -38,6 +38,7 @@ jobs:
       - name: Generate Build Tags
         id: gen-build-tags
         run: |
+          export TMPDIR=/tmp
           alias_tags="$(just generate-build-tags \
                         blueprint \
                         ai)"

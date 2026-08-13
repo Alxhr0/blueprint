@@ -59,8 +59,8 @@ dnf5 -y install --skip-unavailable \
 dnf5 -y copr disable scottames/ghostty
 mkdir -p "$(readlink -f /usr/local)"
 
-mkdir -p /var/lib/extensions
-cp -a /tmp/steam-sysext /var/lib/extensions/steam
+mkdir -p /usr/lib/extensions
+cp -a /tmp/steam-sysext /usr/lib/extensions/steam
 systemctl enable systemd-sysext.service
 
 systemctl disable podman.socket
