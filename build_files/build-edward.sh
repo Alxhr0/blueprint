@@ -1,8 +1,8 @@
 #!/bin/bash
 set -ouex pipefail
 
-cp -avf "/ctx/system_files"/. /
-cp -avf "/ctx/system_files.edward"/. /
+cp -avf "/ctx/system_files/global"/. /
+cp -avf "/ctx/system_files/edward"/. /
 mkdir -p /var/roothome
 
 dconf update

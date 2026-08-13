@@ -1,6 +1,6 @@
 FROM scratch AS ctx
 COPY build_files /
-COPY system_files /system_files
+COPY system_files/global /system_files/global
 
 FROM docker.io/nvidia/cuda:12.5.1-runtime-ubuntu24.04
 

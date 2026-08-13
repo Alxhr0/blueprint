@@ -1,6 +1,8 @@
 #!/bin/bash
 set -ouex pipefail
 
+cp -avf "/ctx/system_files/global"/. /
+
 PACKAGES=(
     build-essential
     git

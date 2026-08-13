@@ -2,7 +2,7 @@
 
 set -ouex pipefail
 
-cp -avf "/ctx/system_files"/. /
+cp -avf "/ctx/system_files/global"/. /
 
 mkdir -p /var/roothome
 

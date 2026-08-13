@@ -294,7 +294,7 @@ list-images:
             case "${stem}" in
                 holo-amd|holo-nvidia) continue ;;
             esac
-            [[ "${stem}" == "ubuntu-nvidia" ]] && continue
+            [[ "${stem}" == "ai" ]] && continue
             IMAGES+=("${stem}")
         fi
     done

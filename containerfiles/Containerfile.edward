@@ -3,8 +3,8 @@ ARG NVIDIA_FLAVOR="nvidia-open"
 
 FROM scratch AS ctx
 COPY build_files /
-COPY system_files /system_files
-COPY system_files.edward /system_files.edward
+COPY system_files/global /system_files/global
+COPY system_files/edward /system_files/edward
 
 FROM quay.io/fedora/fedora:44 AS steam-sysext
 

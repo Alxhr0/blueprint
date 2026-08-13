@@ -1,12 +1,12 @@
 [Unit]
-Description=Ephemeral Ubuntu NVIDIA container
+Description=Ephemeral Ubuntu AI container
 Documentation=man:podman-systemd.unit(5)
 
 [Container]
-Image=ghcr.io/huntedraven7/blueprint:ubuntu-nvidia
-ContainerName=ubuntu-nvidia
+Image=ghcr.io/huntedraven7/blueprint:ai
+ContainerName=ai
 Exec=/usr/bin/sleep infinity
-HostName=ubuntu-nvidia
+HostName=ai
 PodmanArgs=--memory=512m --cpus=0.5
 
 [Service]

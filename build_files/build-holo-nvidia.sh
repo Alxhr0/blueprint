@@ -1,7 +1,8 @@
 #!/bin/bash
 set -ouex pipefail
 
-cp -avf "/ctx/system_files.holo"/. /
+cp -avf "/ctx/system_files/global"/. /
+cp -avf "/ctx/system_files/holo"/. /
 
 sed -i 's/^#Include = \/etc\/pacman.conf.d\/\*.conf/Include = \/etc\/pacman.conf.d\/\*.conf/' /etc/pacman.conf
 

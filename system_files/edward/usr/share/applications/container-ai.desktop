@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
-Name=Open Ubuntu NVIDIA Container
-Exec=/usr/bin/container-launch ubuntu-nvidia
+Name=Open Ubuntu AI Container
+Exec=/usr/bin/container-launch ai
 Icon=applications-terminal
 NoDisplay=true
 X-KDE-Shortcuts=Ctrl+Alt+N

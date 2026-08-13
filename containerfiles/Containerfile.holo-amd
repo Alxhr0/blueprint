@@ -1,6 +1,7 @@
 FROM scratch AS ctx
 COPY build_files /
-COPY system_files.holo /system_files.holo
+COPY system_files/global /system_files/global
+COPY system_files/holo /system_files/holo
 
 FROM blueprint:arch
 
