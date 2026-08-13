@@ -4,7 +4,7 @@ COPY build_files /
 COPY system_files/global /system_files/global
 COPY system_files/debian /system_files/debian
 
-FROM docker.io/library/debian:trixie AS builder
+FROM docker.io/library/debian:unstable AS builder
 
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
@@ -20,18 +20,17 @@ RUN apt-get update -y && \
         libostree-dev \
         ostree
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
-    | sh -s -- -y --default-toolchain stable --profile minimal
-
-ENV PATH=/root/.cargo/bin:${PATH}
+ENV CARGO_HOME=/tmp/rust
+ENV RUSTUP_HOME=/tmp/rust
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
     --mount=type=tmpfs,dst=/root \
     --mount=type=tmpfs,dst=/boot \
+    curl --proto '=https' --tlsv1.2 -sSf "https://sh.rustup.rs" | sh -s -- --profile minimal -y && \
     /ctx/builder-debian.sh
 
-FROM docker.io/library/debian:trixie AS system
+FROM docker.io/library/debian:unstable AS system
 
 COPY --from=builder /output /
 
