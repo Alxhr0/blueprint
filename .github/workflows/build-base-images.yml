@@ -109,4 +109,4 @@ jobs:
             --new-bundle-format=false \
             --use-signing-config=false \
             --key env://COSIGN_PRIVATE_KEY \
-            "ghcr.io/${{ github.repository_owner }}/blueprint@${DIGEST}"
+            "ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/blueprint@${DIGEST}"

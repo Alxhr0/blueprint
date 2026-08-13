@@ -1,22 +1,24 @@
 #!/bin/bash
+
 set -ouex pipefail
 
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/edward"/. /
-mkdir -p /var/roothome
 
-dconf update
-
-mkdir -p /etc/xdg/systemd/user/sockets.target.wants
-ln -sfn /usr/lib/systemd/user/podman.socket \
-    /etc/xdg/systemd/user/sockets.target.wants/podman.socket
-
-if [ -L /root ]; then
-  target=$(readlink -f /root)
-  mkdir -p "$target"
-else
-  mkdir -p /root
+mkdir -p /var/lib/pacman /var/cache/pacman/pkg
+if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
+    printf '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist\n' >> /etc/pacman.conf
 fi
+
+pacman -Syu --noconfirm
+
+pacman -S --noconfirm --needed curl git gcc make
+
+useradd -m -d /var/home/linuxbrew -s /bin/bash linuxbrew 2>/dev/null || true
+echo 'linuxbrew ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/linuxbrew
+runuser -u linuxbrew -- env NONINTERACTIVE=1 CI=1 \
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+rm -f /etc/sudoers.d/linuxbrew
 
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
   | sh -s -- install linux \
@@ -33,39 +35,55 @@ if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
 fi
 EOF
 
-dnf5 -y config-manager addrepo --from-repofile https://download.docker.com/linux/fedora/docker-ce.repo
-
-dnf5 -y install fedora-workstation-repositories
-dnf5 -y copr enable scottames/ghostty
-
-dnf5 -y install --nogpgcheck --repofrompath \
-  'terra,https://repos.fyralabs.com/terra$releasever' \
-  terra-release
-dnf5 -y install terra-release-extras
-
 PACKAGES=(
+    gnome
+    gnome-terminal
+    gnome-tweaks
+    dconf
+    pipewire
+    pipewire-pulse
+    wireplumber
+    podman
+    docker
+    docker-buildx
+    docker-compose
     ghostty
-    docker-ce
-    docker-ce-cli
-    containerd.io
-    docker-buildx-plugin
-    docker-compose-plugin
+    tailscale
+    flatpak
+    steam
+    nvidia-open
+    nvidia-utils
+    lib32-nvidia-utils
+    nvidia-settings
+    nvidia-container-toolkit
 )
 
-dnf5 -y install --skip-unavailable \
-  --setopt=install_weak_deps=False \
-  "${PACKAGES[@]}"
+pacman -S --noconfirm --needed "${PACKAGES[@]}"
 
-dnf5 -y copr disable scottames/ghostty
-mkdir -p "$(readlink -f /usr/local)"
+flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
-mkdir -p /usr/lib/extensions
-cp -a /tmp/steam-sysext /usr/lib/extensions/steam
-systemctl enable systemd-sysext.service
+mkdir -p /var/roothome
 
-systemctl disable podman.socket
+dconf update
+
+mkdir -p /etc/xdg/systemd/user/sockets.target.wants
+ln -sfn /usr/lib/systemd/user/podman.socket \
+    /etc/xdg/systemd/user/sockets.target.wants/podman.socket
+
+# user services
+systemctl --global enable pipewire.socket pipewire.service pipewire-pulse.service wireplumber.service
+
+systemctl enable gdm
 systemctl enable docker
-systemctl enable tailscaled.service
+systemctl enable podman
+systemctl enable tailscaled
+
+if [ -L /root ]; then
+  target=$(readlink -f /root)
+  mkdir -p "$target"
+else
+  mkdir -p /root
+fi
 
 mkdir -p /etc/systemd/user/graphical-session.target.wants
 ln -sfn /usr/lib/systemd/user/brew-preinstall.service \
@@ -77,6 +95,17 @@ ln -sfn /usr/lib/systemd/user/homepage.service \
 ln -sfn /usr/lib/systemd/user/ai.service \
     /etc/systemd/user/default.target.wants/ai.service
 
-if command -v chcon > /dev/null; then
-    chcon -R -t unconfined_mgmt_t /nix || true
-fi
+mkdir -p /usr/lib/bootc/kargs.d
+cat > /usr/lib/bootc/kargs.d/00-nvidia.toml <<'EOF'
+kargs = ["rd.driver.blacklist=nouveau", "modprobe.blacklist=nouveau", "nvidia-drm.modeset=1", "initcall_blacklist=simpledrm_platform_driver_init"]
+EOF
+
+nvidia-ctk config --set nvidia-container-cli.no-cgroups --in-place
+
+KERNEL_VERSION="$(basename "$(find /usr/lib/modules -maxdepth 1 -type d | grep -v -E '\.img$' | tail -n 1)")"
+DRACUT_NO_XATTR=1 dracut --force --no-hostonly --reproducible --zstd --verbose \
+    --kver "$KERNEL_VERSION" "/usr/lib/modules/$KERNEL_VERSION/initramfs.img"
+
+pacman -Scc --noconfirm
+find /etc/ -name "*.pacnew" -type f -delete
+rm -rf /tmp/* /run/*

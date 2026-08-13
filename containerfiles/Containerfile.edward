@@ -1,51 +1,16 @@
-ARG AKMODS_TAG="ogc-44-7.0.9-ogc3.2.fc44.x86_64"
-ARG NVIDIA_FLAVOR="nvidia-open"
-
 FROM scratch AS ctx
 COPY build_files /
 COPY system_files/global /system_files/global
 COPY system_files/edward /system_files/edward
 
-FROM quay.io/fedora/fedora:44 AS steam-sysext
+FROM ghcr.io/huntedraven7/blueprint:arch
 
-COPY sysext/steam /steam-src
-RUN chmod +x /steam-src/build.sh && /steam-src/build.sh
-
-FROM ghcr.io/ublue-os/akmods:${AKMODS_TAG} AS akmods
-FROM ghcr.io/ublue-os/akmods-extra:${AKMODS_TAG} AS akmods-extra
-FROM ghcr.io/ublue-os/akmods-${NVIDIA_FLAVOR}:${AKMODS_TAG} AS akmods-nvidia
-
-FROM ghcr.io/projectbluefin/bluefin:testing
-
-RUN rm -rf /opt && mkdir /opt
 COPY brew/packages-edward.Brewfile /usr/share/ublue-os/homebrew/preinstall.d/packages-edward.Brewfile
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
-    --mount=type=cache,dst=/var/cache \
-    --mount=type=cache,dst=/var/log \
     --mount=type=tmpfs,dst=/tmp \
-    --mount=type=bind,from=akmods,src=/kernel-rpms,dst=/tmp/kernel-rpms \
-    --mount=type=bind,from=akmods,src=/rpms/common,dst=/tmp/rpms/common \
-    --mount=type=bind,from=akmods,src=/rpms/kmods,dst=/tmp/rpms/kmods \
-    --mount=type=bind,from=akmods,src=/rpms/ublue-os,dst=/tmp/rpms/ublue-os \
-    --mount=type=bind,from=akmods-extra,src=/rpms/extra,dst=/tmp/rpms/extra \
-    --mount=type=bind,from=akmods-extra,src=/rpms/kmods,dst=/tmp/rpms/kmods-extra \
-    /ctx/install-kernel-akmods.sh
-
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
-    --mount=type=cache,dst=/var/cache \
-    --mount=type=cache,dst=/var/log \
-    --mount=type=bind,from=akmods-nvidia,src=/rpms,dst=/tmp/rpms/nvidia \
-    --mount=type=tmpfs,dst=/tmp \
-    /ctx/install-nvidia.sh
-
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
-    --mount=type=cache,dst=/var/cache \
-    --mount=type=cache,dst=/var/log \
-    --mount=type=tmpfs,dst=/tmp \
-    --mount=type=bind,from=steam-sysext,src=/sysext,dst=/tmp/steam-sysext \
     /ctx/build-edward.sh
 
-RUN rm -rf /run/dnf /run/setrans /tmp/*
-RUN rm -rf /usr/etc
+LABEL containers.bootc 1
+
 RUN bootc container lint
