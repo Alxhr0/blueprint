@@ -64,6 +64,14 @@ systemctl mask systemd-firstboot.service
 
 systemctl enable NetworkManager.service
 
+# NetworkManager auto-selects the systemd-resolved plugin when the unit file is
+# present (matches the working Fedora base). Without systemd-resolved enabled,
+# DNS is completely dead even though DHCP succeeds: NM asks D-Bus to activate
+# org.freedesktop.resolve1, which fails because the service is disabled.
+systemctl enable systemd-resolved.service
+
+printf 'L! /etc/resolv.conf - - - - /run/systemd/resolve/stub-resolv.conf\n' > /usr/lib/tmpfiles.d/resolv-conf.conf
+
 KERNEL_VERSION="$(basename "$(find /usr/lib/modules -maxdepth 1 -type d | grep -v -E '\.img$' | tail -n 1)")"
 
 DRACUT_NO_XATTR=1 dracut --force --no-hostonly --reproducible --zstd --verbose --kver "$KERNEL_VERSION" "/usr/lib/modules/$KERNEL_VERSION/initramfs.img"

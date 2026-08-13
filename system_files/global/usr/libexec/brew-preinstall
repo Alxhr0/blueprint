@@ -27,9 +27,20 @@ BREW_DIRECT_INSTALLS=(
     "ublue-os/experimental-tap/zed-linux"
 )
 
+# brew-setup.service unpacks the Homebrew tarball asynchronously on first boot,
+# and a fast login can start this service before that finishes. Wait up to two
+# minutes for the binary instead of silently skipping (which left brew
+# "not found" on fresh installs).
 if [[ ! -x "${BREW_BIN}" ]]; then
-    echo "brew-preinstall: brew not found at ${BREW_BIN}, skipping"
-    exit 0
+    echo "brew-preinstall: brew not found at ${BREW_BIN}, waiting for brew-setup.service..."
+    for _ in $(seq 1 40); do
+        [[ -x "${BREW_BIN}" ]] && break
+        sleep 3
+    done
+    if [[ ! -x "${BREW_BIN}" ]]; then
+        echo "brew-preinstall: brew still not available at ${BREW_BIN} after waiting, skipping"
+        exit 0
+    fi
 fi
 
 if [[ ! -d "${PREINSTALL_DIR}" ]]; then
@@ -56,6 +67,16 @@ if [[ "${current_hash}" == "${stored_hash}" ]]; then
 fi
 
 eval "$("${BREW_BIN}" shellenv)"
+
+# Homebrew 6 refuses to load casks from taps that aren't explicitly trusted,
+# even when the Brewfile marks them `trusted: true` — the first `brew bundle`
+# run fails with "Refusing to load cask ... from untrusted tap" and only a
+# retry succeeds. Trust every tapped tap up front so the first run works.
+while IFS= read -r tap_name; do
+    [[ -z "${tap_name}" ]] && continue
+    echo "brew-preinstall: trusting tap ${tap_name}"
+    "${BREW_BIN}" trust "${tap_name}" >/dev/null 2>&1 || true
+done < <(sed -nE 's/^[[:space:]]*tap[[:space:]]+"([^"]+)".*/\1/p' "${brewfiles[@]}")
 
 echo "brew-preinstall: Brewfiles changed (${current_hash:0:12}...), applying..."
 
