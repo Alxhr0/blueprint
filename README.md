@@ -23,6 +23,7 @@ To use any of these in your Containerfile do a `FROM ghcr.io/huntedraven/bluepri
 | arch | `containerfiles/Containerfile.arch` | Arch-based |
 | debian | `containerfiles/Containerfile.debian` | Debian-based |
 | gentoo | `containerfiles/Containerfile.gentoo` | Gentoo-based |
+| gentoo | `buildstream/Containerfile.fsdk` | Distroless FSDK-based |
 | opensuse | `containerfiles/Containerfile.opensuse` | OpenSUSE Tumbleweed-based |
 | ubuntu | `containerfiles/Containerfile.ubuntu` | Ubuntu 26.04-based |
 | server | `containerfiles/Containerfile.server` | headless/server |
@@ -42,6 +43,7 @@ blueprint/
 ├── assets/                      # logos
 ├── brew/                        # Homebrew bundle files
 ├── build_files/                 # build-*.sh scripts run inside each Containerfile
+├── buildstream/                 # Everything needed for BST (Buildstream)
 ├── containerfiles/              # one Containerfile per image flavor
 ├── disk_config/                 # disk/ISO layout configs (disk.toml, iso-*.toml)
 ├── images/                      # per-flavor .env build config
