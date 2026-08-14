@@ -17,6 +17,7 @@ pacman -Syu --noconfirm
 PACKAGES=(
     base
     glibc-locales
+    bash-completion
     bubblewrap
     cpio
     dracut
