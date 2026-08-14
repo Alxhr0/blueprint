@@ -20,9 +20,9 @@ pacman -Syu --noconfirm
 
 pacman -S --noconfirm --needed curl git gcc make jq
 
-/ctx/nix-setup.sh
+/ctx/core/nix-setup.sh
 
-/ctx/arch-cachy.sh
+/ctx/core/arch-cachy.sh
 
 
 PACKAGES=(
@@ -91,7 +91,7 @@ EOF
 
 nvidia-ctk config --set nvidia-container-cli.no-cgroups --in-place
 
-/ctx/ogc-kernel.sh
+/ctx/core/ogc-kernel.sh
 
 pacman -Scc --noconfirm
 find /etc/ -name "*.pacnew" -type f -delete

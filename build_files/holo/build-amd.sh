@@ -8,7 +8,7 @@ sed -i 's/^#Include = \/etc\/pacman.conf.d\/\*.conf/Include = \/etc\/pacman.conf
 
 pacman -Syu --noconfirm
 
-/ctx/arch-cachy.sh
+/ctx/core/arch-cachy.sh
 
 PACKAGES=(
     linux-firmware
@@ -73,7 +73,7 @@ PACKAGES=(
 
 pacman -S --noconfirm --needed "${PACKAGES[@]}"
 
-/ctx/ogc-kernel.sh
+/ctx/core/ogc-kernel.sh
 
 pacman -Scc --noconfirm
 
