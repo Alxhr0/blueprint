@@ -15,3 +15,7 @@ if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
     . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 fi
 EOF
+
+if [ -d /nix/var/nix/db ]; then
+    chmod 1777 /nix/var/nix/db
+fi
