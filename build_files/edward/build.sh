@@ -12,54 +12,43 @@ else
   mkdir -p /root
 fi
 
-if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
-    printf '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist\n' >> /etc/pacman.conf
-fi
-
-pacman -Syu --noconfirm
-
-pacman -S --noconfirm --needed curl git gcc make jq
-
-/ctx/core/nix-setup.sh
-
-/ctx/core/arch-cachy.sh
-
+apt-get update -y
 
 PACKAGES=(
-    linux-firmware
-    linux-cachyos
-    linux-cachyos-headers
-    mkinitcpio
-    plasma
-    konsole
+    ubuntu-desktop
+    gdm3
     firefox
-    dconf
+    gnome-terminal
+    nautilus
+    gnome-control-center
+    gnome-shell
     pipewire
-    pipewire-pulse
     wireplumber
-    podman
-    docker
-    docker-buildx
+    pulseaudio-utils
+    docker.io
     docker-compose
-    ghostty
-    tailscale
+    podman
     flatpak
     steam
-    nvidia-open
-    nvidia-utils
-    lib32-nvidia-utils
-    nvidia-settings
-    nvidia-container-toolkit
-    plasma-login-manager
+    nvidia-driver-550
+    nvidia-utils-550
+    lib32-nvidia-utils-550
+    tailscale
+    curl
+    git
+    build-essential
+    jq
+    python3
+    python3-pip
+    nodejs
+    npm
+    gh
+    code
 )
 
-pacman -S --noconfirm --needed "${PACKAGES[@]}"
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${PACKAGES[@]}"
 
-if pacman -Q linux >/dev/null 2>&1; then
-    pacman -Rdd --noconfirm linux
-fi
-
-mkinitcpio -P
+/ctx/core/nix-setup.sh
 
 flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
@@ -67,17 +56,11 @@ mkdir -p /var/roothome
 
 dconf update
 
-mkdir -p /etc/xdg/systemd/user/sockets.target.wants
-ln -sfn /usr/lib/systemd/user/podman.socket \
-    /etc/xdg/systemd/user/sockets.target.wants/podman.socket
-
-# user services
-systemctl --global enable pipewire.socket pipewire.service pipewire-pulse.service wireplumber.service
-
-systemctl enable plasmalogin
+systemctl enable gdm3
 systemctl enable docker
 systemctl enable podman
 systemctl enable tailscaled
+systemctl enable systemd-resolved
 
 systemctl enable brew-setup.service
 systemctl enable brew-update.timer
@@ -100,7 +83,6 @@ EOF
 
 nvidia-ctk config --set nvidia-container-cli.no-cgroups --in-place
 
-pacman -Scc --noconfirm
-find /etc/ -name "*.pacnew" -type f -delete
-rm -rf /tmp/*
+apt-get clean -y
+rm -rf /var/lib/apt/lists/* /tmp/*
 find /run -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
