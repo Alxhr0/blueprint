@@ -76,7 +76,7 @@ PACKAGES=(
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${PACKAGES[@]}"
 
-/ctx/buildstream/core/nix-setup.sh
+/ctx/build_files/core/nix-setup.sh
 
 flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
