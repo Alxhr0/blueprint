@@ -55,6 +55,7 @@ printf 'network:\n  version: 2\n  ethernets:\n    all-en:\n      match:\n       
 sed -i 's|^HOME=.*|HOME=/var/home|' /etc/default/useradd
 
 apt-get clean -y
+mkdir -p /var/cache/apt/archives/partial
 
 mkdir -p /usr/lib/sysimage
 if [ -d /var/lib/dpkg ]; then cp -a /var/lib/dpkg /usr/lib/sysimage/dpkg; fi
