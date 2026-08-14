@@ -7,6 +7,9 @@ cp -avf "/ctx/system_files/gentoo"/. /
 
 echo 'ACCEPT_LICENSE="*"' >> /etc/portage/make.conf
 echo 'ACCEPT_KEYWORDS="~amd64"' >> /etc/portage/make.conf
+echo 'FEATURES="-manifest getbinpkg binpkg-multi-instance binpkg-request-signature binpkg-ignore-missing parallel-fetch parallel-install"' >> /etc/portage/make.conf
+echo 'MAKEOPTS="-j$(nproc)"' >> /etc/portage/make.conf
+echo 'EMERGE_DEFAULT_OPTS="--getbinpkg"' >> /etc/portage/make.conf
 
 mkdir -p /etc/portage/package.license
 echo "*/* *" > /etc/portage/package.license/00-all
@@ -15,6 +18,9 @@ mkdir -p /etc/portage/package.accept_keywords
 echo "*/* ~amd64" > /etc/portage/package.accept_keywords/00-all
 
 emerge --sync --quiet
+
+mkdir -p /etc/portage/binrepos.conf
+printf '[gentoo]\npriority = 9959\nsync-uri = https://distfiles.gentoo.org/releases/amd64/binpackages/23.0/x86-64/\nverify-signature = false\nlocation = /var/cache/binhost/gentoo\n' > /etc/portage/binrepos.conf/gentoo.conf
 
 PACKAGES=(
     sys-kernel/gentoo-kernel-bin
