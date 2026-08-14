@@ -8,6 +8,12 @@ cp -avf "/ctx/system_files/gentoo"/. /
 echo 'ACCEPT_LICENSE="*"' >> /etc/portage/make.conf
 echo 'ACCEPT_KEYWORDS="~amd64"' >> /etc/portage/make.conf
 
+mkdir -p /etc/portage/package.license
+echo "*/* *" > /etc/portage/package.license/00-all
+
+mkdir -p /etc/portage/package.accept_keywords
+echo "*/* ~amd64" > /etc/portage/package.accept_keywords/00-all
+
 emerge --sync --quiet
 
 PACKAGES=(
