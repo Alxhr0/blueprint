@@ -29,7 +29,10 @@ zypper install -y \
     glib2 \
     libcap-progs
 
-systemctl enable systemd-networkd systemd-resolved chronyd sshd iwd
+if systemctl list-unit-files | grep -q '^systemd-networkd.service'; then
+    systemctl enable systemd-networkd
+fi
+systemctl enable systemd-resolved chronyd sshd iwd
 systemctl mask systemd-firstboot.service
 
 echo "uninitialized" > /etc/machine-id
