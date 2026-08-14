@@ -1,6 +1,7 @@
 # Allow build scripts to be referenced without being copied into the final image
 FROM scratch AS ctx
 COPY build_files /
+COPY buildstream/build_files/fsdk /build_files/fsdk
 COPY system_files/global /system_files/global
 COPY system_files/fsdk /system_files/fsdk
 
