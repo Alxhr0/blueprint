@@ -8,12 +8,8 @@ REPO="opengamingcollective/kernel-packages-arch"
 
 mkdir -p "$OGCI_DIR"
 
-MANIFEST_DIGEST=$(curl -sSLI -H "Accept: application/vnd.oci.image.manifest.v1+json" \
-    "https://${REGISTRY}/v2/${REPO}/manifests/latest" \
-    | grep -i 'docker-content-digest' | awk '{print $2}' | tr -d '\r\n')
-
 curl -sSL -H "Accept: application/vnd.oci.image.manifest.v1+json" \
-    "https://${REGISTRY}/v2/${REPO}/manifests/${MANIFEST_DIGEST}" \
+    "https://${REGISTRY}/v2/${REPO}/manifests/latest" \
     -o "${OGCI_DIR}/manifest.json"
 
 for DIGEST in $(jq -r '.layers[].digest' "${OGCI_DIR}/manifest.json"); do
