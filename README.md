@@ -16,7 +16,7 @@ unless you have read what the images do and they fit you!
 ## Flavors
 
 | Flavor | Containerfile | Notes |
-|---|---|
+|:---|:---|:---|
 | edward | `containerfiles/Containerfile.edward` | Edward's own desktop image |
 | arch | `containerfiles/Containerfile.arch` | Arch-based |
 | debian | `containerfiles/Containerfile.debian` | Debian-based |
@@ -25,9 +25,9 @@ unless you have read what the images do and they fit you!
 | ubuntu | `containerfiles/Containerfile.ubuntu` | Ubuntu 26.04-based |
 | server | `containerfiles/Containerfile.server` | headless/server |
 | ai | `containerfiles/Containerfile.ai` | AI tooling |
-| aira | `containerfiles/Containerfile.aira` | A custom Bazzite image for my Friend! |
-| crmy | `containerfiles/Containerfile.crmy` | A custom dev focused image for my Friend! |
-| holo-amd / holo-nvidia | `containerfiles/Containerfile.holo-*` | GPU-specific SteamOS like variants |
+| aira | `containerfiles/Containerfile.aira` | Custom Bazzite image for a friend |
+| crmy | `containerfiles/Containerfile.crmy` | Dev-focused image for a friend |
+| holo-amd / holo-nvidia | `containerfiles/Containerfile.holo-*` | GPU-specific SteamOS-like variants |
 
 ## Repository layout
 
