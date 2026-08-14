@@ -35,10 +35,27 @@ if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
 fi
 EOF
 
+pacman -U --noconfirm \
+    'https://mirror.cachyos.org/repo/x86_64/cachyos/cachyos-keyring-20240331-1-any.pkg.tar.zst' \
+    'https://mirror.cachyos.org/repo/x86_64/cachyos/cachyos-mirrorlist-27-1-any.pkg.tar.zst' \
+    'https://mirror.cachyos.org/repo/x86_64/cachyos/cachyos-v3-mirrorlist-27-1-any.pkg.tar.zst' \
+    'https://mirror.cachyos.org/repo/x86_64/cachyos/cachyos-v4-mirrorlist-27-1-any.pkg.tar.zst'
+
+sed -i '/^\[core\]/i \
+[cachyos-v3]\nInclude = /etc/pacman.d/cachyos-v3-mirrorlist\n\
+[cachyos-core-v3]\nInclude = /etc/pacman.d/cachyos-v3-mirrorlist\n\
+[cachyos-extra-v3]\nInclude = /etc/pacman.d/cachyos-v3-mirrorlist\n\
+[cachyos]\nInclude = /etc/pacman.d/cachyos-mirrorlist\n' /etc/pacman.conf
+
+pacman -Syu --noconfirm
+
+
 PACKAGES=(
-    gnome
-    gnome-terminal
-    gnome-tweaks
+    linux-cachyos
+    linux-firmware
+    plasma
+    konsole
+    firefox
     dconf
     pipewire
     pipewire-pulse
@@ -56,6 +73,7 @@ PACKAGES=(
     lib32-nvidia-utils
     nvidia-settings
     nvidia-container-toolkit
+    plasma-login-manager
 )
 
 pacman -S --noconfirm --needed "${PACKAGES[@]}"
@@ -73,7 +91,7 @@ ln -sfn /usr/lib/systemd/user/podman.socket \
 # user services
 systemctl --global enable pipewire.socket pipewire.service pipewire-pulse.service wireplumber.service
 
-systemctl enable gdm
+systemctl enable plasmalogin
 systemctl enable docker
 systemctl enable podman
 systemctl enable tailscaled

@@ -3,13 +3,6 @@ tap "frostyard/tap", trusted: true
 tap "Kilo-Org/tap", trusted: true
 tap "ublue-os/experimental-tap", trusted: true
 
-# jetbrains-toolbox-linux, lm-studio-linux, framework-wallpapers,
-# visual-studio-code-linux, and zed-linux exist in multiple tapped taps and
-# cannot be resolved by `brew bundle` (Homebrew resolves bare cask names and
-# aborts). They are installed by the brew-preinstall service directly from
-# their fully-qualified tap name — see BREW_DIRECT_INSTALLS in
-# /usr/libexec/brew-preinstall.
-
 cask "ublue-os/tap/antigravity-cli-linux"
 cask "ublue-os/tap/antigravity-ide-linux"
 cask "ublue-os/tap/goose-linux"
