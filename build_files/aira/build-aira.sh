@@ -13,6 +13,9 @@ else
   mkdir -p /root
 fi
 
+mkdir -p /nix/var/nix/db
+chmod 1777 /nix/var/nix/db
+
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
   | sh -s -- install linux \
     --init none \
