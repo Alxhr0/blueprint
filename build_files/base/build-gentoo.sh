@@ -20,7 +20,7 @@ PACKAGES=(
     sys-kernel/gentoo-kernel-bin
     linux-firmware
     sys-apps/systemd
-    sys-apps/dracut
+    sys-kernel/dracut
     dev-util/ostree
     sys-fs/btrfs-progs
     sys-fs/dosfstools
@@ -38,7 +38,7 @@ PACKAGES=(
     sys-apps/chrony
     app-arch/cpio
     app-arch/xz-utils
-    sys-fs/bubblewrap
+    sys-apps/bubblewrap
     dev-libs/glib
     sys-apps/dbus
     sys-apps/shadow
