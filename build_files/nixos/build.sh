@@ -4,7 +4,7 @@ set -ouex pipefail
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/nixos"/. /
 
-nix-channel --add https://nixos.org/channels/nixos-24.05 nixos
+nix-channel --add https://nixos.org/channels/nixos-26.05 nixos
 nix-channel --update
 
 mkdir -p /etc/nixos
@@ -136,7 +136,7 @@ cat > /etc/nixos/configuration.nix <<'EOF'
     autoUpdate = false;
   };
 
-  system.stateVersion = "24.05";
+  system.stateVersion = "26.05";
 }
 EOF
 

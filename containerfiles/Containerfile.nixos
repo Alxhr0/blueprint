@@ -7,7 +7,7 @@ COPY system_files/nixos /system_files/nixos
 FROM nixos/nix:latest AS builder
 
 RUN nix-channel --update && \
-    nix-channel --add https://nixos.org/channels/nixos-24.05 nixos && \
+    nix-channel --add https://nixos.org/channels/nixos-26.05 nixos && \
     nix-channel --update && \
     nix-env -iA nixos.bootc
 
