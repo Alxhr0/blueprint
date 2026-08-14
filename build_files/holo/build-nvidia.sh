@@ -14,6 +14,7 @@ PACKAGES=(
     linux-firmware
     linux-cachyos
     linux-cachyos-headers
+    mkinitcpio
     jq
 
     plasma-desktop

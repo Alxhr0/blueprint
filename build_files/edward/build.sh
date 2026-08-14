@@ -29,6 +29,7 @@ PACKAGES=(
     linux-firmware
     linux-cachyos
     linux-cachyos-headers
+    mkinitcpio
     plasma
     konsole
     firefox
