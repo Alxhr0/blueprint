@@ -15,6 +15,16 @@ fi
 mkdir -p /var/lib/dpkg /var/lib/apt/lists/partial
 
 apt-get update -y
+apt-get install -y --no-install-recommends software-properties-common
+
+add-apt-repository -y multiverse
+add-apt-repository -y restricted
+add-apt-repository -y ppa:graphics-drivers/ppa
+
+curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/noble.tailscale-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/tailscale-archive-keyring.gpg
+curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/noble.tailscale-repo.sources -o /etc/apt/sources.list.d/tailscale.sources
+
+apt-get update -y
 
 PACKAGES=(
     ubuntu-desktop
@@ -31,10 +41,9 @@ PACKAGES=(
     docker-compose
     podman
     flatpak
-    steam
+    steam-installer
     nvidia-driver-550
     nvidia-utils-550
-    lib32-nvidia-utils-550
     tailscale
     curl
     git
@@ -45,7 +54,6 @@ PACKAGES=(
     nodejs
     npm
     gh
-    code
 )
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${PACKAGES[@]}"
