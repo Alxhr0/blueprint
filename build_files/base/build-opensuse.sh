@@ -44,7 +44,7 @@ printf 'L! /etc/resolv.conf - - - - /run/systemd/resolve/stub-resolv.conf\n' > /
 
 printf '[Match]\nType=ether\n\n[Network]\nDHCP=yes\n' > /etc/systemd/network/20-wired.network
 
-sed -i 's|^HOME=.*|HOME=/var/home|' /etc/default/useradd
+sed -i 's|^HOME=.*|HOME=/var/home|' /etc/default/useradd || true
 
 rm -rf /{boot,home,root,srv,mnt,var,usr/local,opt}
 

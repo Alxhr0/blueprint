@@ -39,7 +39,7 @@ emerge --verbose --deep --newuse "${PACKAGES[@]}"
 
 echo "uninitialized" > /etc/machine-id
 ln -sf /usr/share/zoneinfo/UTC /etc/localtime
-sed -i 's|^HOME=.*|HOME=/var/home|' /etc/default/useradd
+sed -i 's|^HOME=.*|HOME=/var/home|' /etc/default/useradd || true
 
 systemctl enable systemd-networkd systemd-resolved chronyd sshd iwd
 systemctl mask systemd-firstboot.service
