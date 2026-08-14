@@ -1,6 +1,8 @@
 #!/bin/bash
 set -ouex pipefail
 
+export DEBIAN_FRONTEND=noninteractive
+
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/fsdk"/. /
 
@@ -11,100 +13,69 @@ else
   mkdir -p /root
 fi
 
+mkdir -p /var/lib/dpkg /var/lib/apt/lists/partial /var/log/apt /var/log/journal /var/log
+rm -rf /var/log/apt /var/log/journal
+
 apt-get update -y
-mkdir -p /var/lib/apt/lists/partial
+apt-get install -y --no-install-recommends software-properties-common
+
+mkdir -p /var/cache/apt/archives/partial
+
+add-apt-repository -y multiverse
+
+apt-get update -y
 
 PACKAGES=(
-    btrfs-progs
-    bubblewrap
-    dosfstools
-    e2fsprogs
-    fdisk
-    linux-firmware
-    linux-image-generic
-    netplan.io
-    network-manager
-    openssh-server
     skopeo
     buildah
-    systemd
-    systemd-resolved
-    systemd-boot
-    xfsprogs
-    libostree-dev
-    sudo
-    curl
-    wget
-    git
-    ca-certificates
-    dracut
     podman
     docker.io
-    libcap2-bin
-    chrony
-    iwd
     python3
     python3-pip
     python3-venv
     jq
     yq
     gh
-    code
-    gcc
-    g++
-    make
-    pkg-config
-    libssl-dev
-    libffi-dev
+    ostree
+    libostree-dev
+    bubblewrap
+    uidmap
+    slirp4netns
+    fuse-overlayfs
+    curl
+    wget
+    git
+    ca-certificates
+    sudo
 )
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${PACKAGES[@]}"
 
-setcap cap_setuid+ep /usr/bin/newuidmap && chmod -s /usr/bin/newuidmap
-setcap cap_setgid+ep /usr/bin/newgidmap && chmod -s /usr/bin/newgidmap
+flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
-cp /boot/vmlinuz-* "$(find /usr/lib/modules -maxdepth 1 -type d | tail -n 1)/vmlinuz"
+systemctl enable podman
+systemctl enable docker
+systemctl enable systemd-resolved
 
-systemctl enable systemd-networkd systemd-resolved ssh NetworkManager
-systemctl mask systemd-firstboot.service
+systemctl enable brew-setup.service
+systemctl enable brew-update.timer
+systemctl enable brew-upgrade.timer
 
-printf 'L! /etc/resolv.conf - - - - /run/systemd/resolve/stub-resolv.conf\n' \
-    > /usr/lib/tmpfiles.d/resolv-conf.conf
+mkdir -p /etc/systemd/user/graphical-session.target.wants
+ln -sfn /usr/lib/systemd/user/brew-preinstall.service \
+    /etc/systemd/user/graphical-session.target.wants/brew-preinstall.service
 
-mkdir -p /etc/netplan
-printf 'network:\n  version: 2\n  ethernets:\n    all-en:\n      match:\n        name: en*\n      dhcp4: true\n      dhcp4-overrides:\n        use-domains: true\n      dhcp6: true\n      dhcp6-overrides:\n        use-domains: true\n    all-eth:\n      match:\n        name: eth*\n      dhcp4: true\n      dhcp4-overrides:\n        use-domains: true\n      dhcp6: true\n      dhcp6-overrides:\n        use-domains: true\n' > /etc/netplan/90-default.yaml
+mkdir -p /etc/systemd/user/default.target.wants
+ln -sfn /usr/lib/systemd/user/homepage.service \
+    /etc/systemd/user/default.target.wants/homepage.service
+ln -sfn /usr/lib/systemd/user/ai.service \
+    /etc/systemd/user/default.target.wants/ai.service
 
-sed -i 's|^HOME=.*|HOME=/var/home|' /etc/default/useradd
+mkdir -p /usr/lib/bootc/kargs.d
+cat > /usr/lib/bootc/kargs.d/00-rootless.toml <<'EOF'
+kargs = ["shared.enable-journal-worker=no", "cgroup_no_v1=all"]
+EOF
 
 apt-get clean -y
-
-mkdir -p /usr/lib/sysimage
-if [ -d /var/lib/dpkg ]; then cp -a /var/lib/dpkg /usr/lib/sysimage/dpkg; fi
-
-rm -rf /var/lib/dpkg
-mkdir -p /var/lib
-ln -sfnT ../../usr/lib/sysimage/dpkg /var/lib/dpkg
-
-rm -rf /{boot,home,root,srv,mnt,var,usr/local,opt}
-
-mkdir -p /sysroot /boot /usr/lib/ostree /var
-
-ln -sT sysroot/ostree /ostree
-ln -sT var/roothome /root
-ln -sT var/srv /srv
-ln -sT var/mnt /mnt
-ln -sT var/opt /opt
-ln -sT var/home /home
-ln -sT var/usrlocal /usr/local
-
-printf 'd /var/home 0755 root root -\nd /var/srv 0755 root root -\nd /var/mnt 0755 root root -\nd /var/opt 0755 root root -\nd /var/usrlocal 0755 root root -\nd /var/roothome 0700 root root -\nd /run/media 0755 root root -\n' > /usr/lib/tmpfiles.d/bootc-base-dirs.conf
-
-mkdir -p /var/tmp
-
-KVER=$(basename "$(find /usr/lib/modules -maxdepth 1 -mindepth 1 -type d | tail -n 1)")
-dracut --force --no-hostonly --reproducible --zstd --verbose --kver "${KVER}" "/usr/lib/modules/${KVER}/initramfs.img"
-
-printf '[composefs]\nenabled = yes\n[sysroot]\nreadonly = true\n' > /usr/lib/ostree/prepare-root.conf
-
 rm -rf /var/lib/apt/lists/* /tmp/*
 find /run -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
