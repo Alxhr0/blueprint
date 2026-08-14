@@ -34,7 +34,6 @@ PACKAGES=(
     libcap2-bin
     chrony
     iwd
-    wireless-tools
 )
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${PACKAGES[@]}"
