@@ -16,12 +16,121 @@ cat > /etc/nixos/configuration.nix <<'EOF'
 
   bootc.enable = true;
 
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
   environment.systemPackages = with pkgs; [
     bootc
     git
     curl
     wget
     jq
+    vim
+    nano
+    htop
+    btop
+    tmux
+    screen
+    sshfs
+    fuse
+    podman
+    docker
+    skopeo
+    buildah
+    python3
+    python3-pip
+    nodejs
+    npm
+    yarn
+    rustc
+    cargo
+    go
+    jdk
+    gcc
+    gdb
+    strace
+    ltrace
+    perf
+    bpftrace
+    bpftool
+    iperf3
+    netcat
+    nmap
+    tcpdump
+    wireshark
+    whois
+    dnsutils
+    iputils
+    ethtool
+    pciutils
+    usbutils
+    lshw
+    dmidecode
+    smartmontools
+    hdparm
+    sdparm
+    parted
+    gptfdisk
+    dosfstools
+    e2fsprogs
+    xfsprogs
+    btrfs-progs
+    nilfs-utils
+    zfs
+    lvm2
+    cryptsetup
+    mdadm
+    bcache-tools
+    nfs-utils
+    cifs-utils
+    sshfs
+    autofs5
+    systemd
+    systemd-boot
+    systemd-resolved
+    systemd-networkd
+    systemd-timesyncd
+    chrony
+    ntp
+    openssh
+    sudo
+    doas
+    pass
+    pass-otp
+    age
+    sops
+    gnupg
+    pinentry
+    pinentry-curses
+    pinentry-gtk2
+    openssl
+    libsecret
+    keyutils
+    krb5
+    ldapvi
+    adcli
+    realmd
+    sssd
+    nsswitch
+    pam_krb5
+    pam_ldap
+    pam_mount
+    ecryptfs
+    encfs
+    gocryptfs
+    cryfs
+    veracrypt
+    truecrypt
+    luksipc
+    clevis
+    tang
+    cryptsetup-yubikey
+    yubikey-manager
+    yubico-pam
+    pam_u2f
+    oath-toolkit
+    pamtester
+    libpam
+    linux-pam
   ];
 
   services.bootc = {
