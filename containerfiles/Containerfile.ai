@@ -6,4 +6,4 @@ FROM docker.io/nvidia/cuda:12.5.1-runtime-ubuntu24.04
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
-    /ctx/build-ai.sh
+    /ctx/ai/build-ai.sh

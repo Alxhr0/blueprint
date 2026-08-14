@@ -19,7 +19,7 @@ RUN pacman -Syu --noconfirm \
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
-    /ctx/builder-arch.sh
+    /ctx/base/builder-arch.sh
 
 FROM archlinux:latest AS system
 
@@ -27,7 +27,7 @@ COPY --from=builder /output /
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
-    /ctx/build-arch.sh
+    /ctx/base/build-arch.sh
 
 LABEL containers.bootc 1
 
