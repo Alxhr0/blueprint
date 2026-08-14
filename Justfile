@@ -170,7 +170,7 @@ build-fsdk $tag="fsdk":
         --pull=newer \
         --tag "${IMAGE_NAME}:${TAG}" \
         --file "${CONTAINERFILE}" \
-        buildstream
+        .
 
 # Build all images in the repo
 [group('Build')]
