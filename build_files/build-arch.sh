@@ -16,6 +16,7 @@ pacman -Syu --noconfirm
 
 PACKAGES=(
     base
+    glibc-locales
     bubblewrap
     cpio
     dracut
@@ -23,6 +24,8 @@ PACKAGES=(
     iwd
     linux
     linux-firmware
+    amd-ucode
+    intel-ucode
     networkmanager
     ostree
     btrfs-progs
@@ -41,6 +44,9 @@ PACKAGES=(
 )
 
 pacman -S --noconfirm --needed "${PACKAGES[@]}"
+
+setcap cap_setuid+ep /usr/bin/newuidmap && chmod -s /usr/bin/newuidmap
+setcap cap_setgid+ep /usr/bin/newgidmap && chmod -s /usr/bin/newgidmap
 
 pacman -Scc --noconfirm
 
@@ -69,6 +75,8 @@ systemctl enable NetworkManager.service
 # DNS is completely dead even though DHCP succeeds: NM asks D-Bus to activate
 # org.freedesktop.resolve1, which fails because the service is disabled.
 systemctl enable systemd-resolved.service
+
+systemctl enable systemd-timesyncd.service
 
 printf 'L! /etc/resolv.conf - - - - /run/systemd/resolve/stub-resolv.conf\n' > /usr/lib/tmpfiles.d/resolv-conf.conf
 

@@ -60,5 +60,5 @@ systemctl enable install-aira-configs.service
 systemctl enable setup-kwin-effects.service
 
 if command -v chcon > /dev/null; then
-    chcon -R -t unconfined_mgmt_t /nix || true
+    chcon -R -u system_u -r object_r -t unconfined_mgmt_t /nix 2>/dev/null || true
 fi

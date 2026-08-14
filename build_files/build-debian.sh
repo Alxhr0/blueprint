@@ -32,9 +32,13 @@ PACKAGES=(
     ca-certificates
     dracut
     podman
+    libcap2-bin
 )
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${PACKAGES[@]}"
+
+setcap cap_setuid+ep /usr/bin/newuidmap && chmod -s /usr/bin/newuidmap
+setcap cap_setgid+ep /usr/bin/newgidmap && chmod -s /usr/bin/newgidmap
 
 cp /boot/vmlinuz-* "$(find /usr/lib/modules -maxdepth 1 -type d | tail -n 1)/vmlinuz"
 
