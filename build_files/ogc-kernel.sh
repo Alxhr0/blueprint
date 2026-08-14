@@ -30,9 +30,16 @@ pacman -U --noconfirm "${OGCI_DIR}"/*.pkg.tar.zst
 
 if pacman -Q linux >/dev/null 2>&1; then
     pacman -Rdd --noconfirm linux
+    rm -rf /usr/lib/modules/*arch1*
 fi
 
-KERNEL_VERSION="$(basename "$(find /usr/lib/modules -maxdepth 1 -type d | grep -v -E '\.img$' | tail -n 1)")"
+mkdir -p /var/tmp
+
+KERNEL_VERSION="$(find /usr/lib/modules -maxdepth 1 -type d -name '*-ogc*' | head -n 1 | xargs basename)"
+if [ -z "$KERNEL_VERSION" ]; then
+    KERNEL_VERSION="$(basename "$(find /usr/lib/modules -maxdepth 1 -type d | grep -v -E '\.img$' | tail -n 1)")"
+fi
+
 DRACUT_NO_XATTR=1 dracut --force --no-hostonly --reproducible --zstd --verbose \
     --kver "$KERNEL_VERSION" "/usr/lib/modules/$KERNEL_VERSION/initramfs.img"
 
