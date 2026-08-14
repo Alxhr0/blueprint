@@ -1,13 +1,6 @@
 #!/bin/bash
 set -ouex pipefail
 
-if [ -d /nix ]; then
-    chmod -R 1777 /nix
-else
-    mkdir -p /nix
-    chmod 1777 /nix
-fi
-
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
   | sh -s -- install linux \
     --init none \
