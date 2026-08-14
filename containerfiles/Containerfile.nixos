@@ -9,10 +9,7 @@ FROM nixos/nix:latest AS builder
 RUN nix-channel --update && \
     nix-channel --add https://nixos.org/channels/nixos-26.05 nixos && \
     nix-channel --update && \
-    nix-env -iA nixpkgs.bootc && \
-    nix-env -iA nixpkgs.git && \
-    nix-env -iA nixpkgs.curl && \
-    nix-env -iA nixpkgs.ostree
+    nix-env -iA nixpkgs.bootc
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
