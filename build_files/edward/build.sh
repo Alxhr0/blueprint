@@ -2,6 +2,8 @@
 
 set -ouex pipefail
 
+export DEBIAN_FRONTEND=noninteractive
+
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/edward"/. /
 
@@ -18,7 +20,7 @@ apt-get update -y
 
 mkdir -p /var/cache/apt/archives/partial
 
-apt-get install -y --no-install-recommends software-properties-common
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends software-properties-common
 
 add-apt-repository -y multiverse
 add-apt-repository -y restricted
@@ -59,7 +61,7 @@ PACKAGES=(
     gh
 )
 
-DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${PACKAGES[@]}"
+apt-get install -y --no-install-recommends "${PACKAGES[@]}"
 
 /ctx/core/nix-setup.sh
 
