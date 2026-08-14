@@ -1,21 +1,17 @@
-# FSDK Image Build Guide
+# FSDK BuildStream Project
 
-## Philosophy
-
-This image follows the [freedesktop-sdk containers](https://github.com/projectbluefin/fsdk-containers) philosophy:
+This directory is a [BuildStream](https://buildstream.build/) project that follows the [projectbluefin/fsdk-containers](https://github.com/projectbluefin/fsdk-containers) philosophy:
 
 - **Distroless by default** — ship only the runtime, strip the bloat
 - **Slim recipes** — explicit removal of build tools, locale data, sanitizers, and other non-runtime artifacts
 - **Reproducible builds** — pinned FSDK junction refs, deterministic package sets
-- **Clear separation** — base runtime, dev tools, and user data are kept separate
-
-The `buildstream/` directory contains the full BuildStream project for proper FSDK-based distroless images. The `Containerfile.fsdk` provides a simpler podman-based path for the full-featured development image.
+- **Unified image** — base + Python + Skopeo + Buildall in one container
 
 ## Directory Structure
 
 ```
 buildstream/
-├── Containerfile.fsdk          # Podman build entrypoint for the full-featured image
+├── Containerfile.fsdk          # Podman build entrypoint for the fsdk image
 ├── GUIDE.md                    # This file
 ├── Justfile                    # BuildStream-specific just recipes
 ├── project.conf                # BuildStream project configuration
@@ -23,69 +19,38 @@ buildstream/
 │   ├── freedesktop-sdk.bst     # FSDK junction ref
 │   ├── targets.json            # Canonical manifest of image targets
 │   ├── base/                   # Base image composition
-│   ├── oci/                    # OCI image definitions
-│   ├── lab-runner/             # Shell-enabled CI image
-│   └── ...
+│   │   ├── base-init-script.bst
+│   │   ├── base-runtime.bst
+│   │   └── base-stack.bst
+│   ├── fsdk/                   # Unified FSDK image
+│   │   ├── fsdk-stack.bst      # Stack: base + python + skopeo + buildah
+│   │   └── fsdk-runtime.bst    # Runtime: chiseled to runtime-only
+│   ├── oci/
+│   │   └── fsdk.bst            # OCI image definition
+│   ├── plugins/                # BuildStream plugins
+│   └── qemu-img/               # qemu-img utility image
 ├── include/                    # Shared YAML includes (slim recipes, versions)
+│   ├── aliases.yml
+│   └── slim.yml
 ├── build_files/
+│   ├── base/                   # Base build scripts (builder-*.sh, build-*.sh)
+│   ├── core/                   # Core scripts (nix-setup.sh)
 │   └── fsdk/
-│       └── build.sh            # Build script for Containerfile.fsdk
+│       └── build.sh            # Build script for the fsdk image
 ├── system_files/
-│   └── fsdk/                   # System configs (copied into the image)
+│   ├── global/                 # Global system files (brew, presets)
+│   └── fsdk/                   # fsdk-specific system configs
 └── images/
     └── fsdk.env                # Image metadata (name, tags, description)
 ```
 
-## Adding Packages
+## How It Works
 
-### To the Containerfile.fsdk (podman build)
+The fsdk image is composed from raw FSDK components, then chiseled with a BuildStream `compose` element that drops every non-runtime split-rule domain, and finally run through the **SLIM recipe** that removes large runtime-domain bloat.
 
-Edit `buildstream/build_files/fsdk/build.sh` and add packages to the `PACKAGES` array:
-
-```bash
-PACKAGES=(
-    # ... existing packages ...
-    your-new-package
-    another-package
-)
-```
-
-### To BuildStream elements
-
-For proper FSDK distroless images, edit the relevant `.bst` file under `buildstream/elements/`:
-
-1. **Identify the element** — e.g., `elements/oci/base.bst` for the base image
-2. **Add to build-depends** — declare the FSDK component you need:
-
-```yaml
-build-depends:
-  - freedesktop-sdk.bst:components/your-component.bst
-```
-
-3. **Update the slim recipe** — if the component brings in runtime bloat, add removal commands to `buildstream/include/slim.yml` or the element's `config.commands`
-
-4. **Register in targets.json** — add the image name to `oci_images` and define its `image_paths`
-
-## Adding System Files
-
-Place configuration files in `buildstream/system_files/fsdk/`. They will be copied to the root of the image during build:
-
-```
-buildstream/system_files/fsdk/
-├── etc/
-│   └── your-config.conf
-└── usr/
-    └── bin/
-        └── your-script
-```
+Pipeline: `stack` (deps) -> `compose` (chisel) -> `script` (slim + oci-builder).
 
 ## Building
-
-### Build the full-featured image (Containerfile.fsdk)
-
-```bash
-just build-fsdk
-```
 
 ### Build with BuildStream (distroless)
 
@@ -94,33 +59,42 @@ cd buildstream
 just build
 ```
 
-### Build all images
+### Build with Podman (full-featured)
+
+```bash
+just build-fsdk
+```
+
+### Build all images (from repo root)
 
 ```bash
 just build-all
 ```
 
-This builds every variant defined in `images/*.env` plus the fsdk image.
+## Adding Packages
+
+### To the Podman build (Containerfile.fsdk)
+
+Edit `buildstream/build_files/fsdk/build.sh` and add packages to the `PACKAGES` array.
+
+### To BuildStream elements
+
+1. Edit `buildstream/elements/fsdk/fsdk-stack.bst` and add the FSDK component to `depends:`
+2. Update the slim recipe in `buildstream/include/slim.yml` if the component brings runtime bloat
+3. Update `buildstream/elements/targets.json` if adding a new image
 
 ## Image Variants
 
 | Variant | Description |
 |---------|-------------|
+| `fsdk` | Unified FSDK dev image: Python + Skopeo + Buildah + shell-enabled |
 | `edward` | Ubuntu + GNOME desktop, dev tools, NVIDIA, gaming |
 | `aira` | KDE Plasma, AMD-focused |
 | `holo-amd` | Arch + CachyOS kernel, AMD GPU, gaming |
 | `holo-nvidia` | Arch + CachyOS kernel, NVIDIA GPU, gaming |
-| `fsdk` | Full-featured FSDK-inspired dev image (this directory) |
 | `ai` | Ubuntu base for AI/ML containers |
 | `server` | Minimal server image |
 | `gentoo` | Gentoo-based image |
 | `opensuse` | openSUSE-based image |
 | `debian` | Debian-based image |
 | `ubuntu` | Ubuntu base image |
-
-## Adding a New Variant
-
-1. Create `images/<name>.env` with the metadata
-2. Create `containerfiles/Containerfile.<name>` or `buildstream/Containerfile.<name>`
-3. Create `build_files/<name>/build.sh` or `buildstream/build_files/<name>/build.sh`
-4. Add the name to the `list-images` exclusion list in the root `Justfile` if needed

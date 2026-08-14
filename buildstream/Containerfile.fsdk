@@ -13,21 +13,22 @@ RUN apt-get update -y && \
         git \
         make \
         build-essential \
-        go-md2man \
-        libzstd-dev \
-        pkgconf \
-        libostree-dev \
+        python3 \
+        python3-pip \
+        jq \
+        yq \
+        gh \
+        code \
+        skopeo \
+        buildah \
+        podman \
+        docker.io \
         ostree
-
-ENV CARGO_HOME=/tmp/rust
-ENV RUSTUP_HOME=/tmp/rust
-ENV PATH=/tmp/rust/bin:${PATH}
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
     --mount=type=tmpfs,dst=/root \
     --mount=type=tmpfs,dst=/boot \
-    curl --proto '=https' --tlsv1.2 -sSf "https://sh.rustup.rs" | sh -s -- --profile minimal -y && \
     /ctx/build_files/base/builder-ubuntu.sh
 
 FROM ubuntu:26.04 AS system

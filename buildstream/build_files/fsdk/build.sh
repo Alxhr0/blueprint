@@ -4,113 +4,107 @@ set -ouex pipefail
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/fsdk"/. /
 
+if [ -L /root ]; then
+  target=$(readlink -f /root)
+  mkdir -p "$target"
+else
+  mkdir -p /root
+fi
+
 apt-get update -y
 mkdir -p /var/lib/apt/lists/partial
 
 PACKAGES=(
-    ubuntu-desktop
-    gdm3
-    firefox
-    gnome-terminal
-    nautilus
-    gnome-control-center
-    gnome-shell
-    pipewire
-    wireplumber
-    pulseaudio-utils
-    docker.io
-    docker-compose
-    podman
-    flatpak
-    steam
-    nvidia-driver-550
-    nvidia-utils-550
-    lib32-nvidia-utils-550
-    tailscale
+    btrfs-progs
+    bubblewrap
+    dosfstools
+    e2fsprogs
+    fdisk
+    linux-firmware
+    linux-image-generic
+    netplan.io
+    network-manager
+    openssh-server
+    skopeo
+    buildah
+    systemd
+    systemd-resolved
+    systemd-boot
+    xfsprogs
+    libostree-dev
+    sudo
     curl
+    wget
     git
-    build-essential
-    jq
+    ca-certificates
+    dracut
+    podman
+    docker.io
+    libcap2-bin
+    chrony
+    iwd
     python3
     python3-pip
-    nodejs
-    npm
+    python3-venv
+    jq
+    yq
     gh
     code
-    steamos-devices
-    steamos-compositor
-    steam-devices
-    steamctl
-    mangohud
-    lib32-mangohud
-    gamemode
-    lib32-gamemode
-    wine-staging
-    giflib
-    lib32-giflib
-    libpng
-    lib32-libpng
-    libldap
-    lib32-libldap
-    libvulkan
-    lib32-libvulkan
-    libxcomposite
-    lib32-libxcomposite
-    libxinerama
-    lib32-libxinerama
-    libxrandr
-    lib32-libxrandr
-    opencl-driver
-    lib32-opencl-driver
-    lib32-gnutls
-    lib32-libpulse
-    libgudev
-    lib32-libgudev
-    alsa-lib
-    lib32-alsa-lib
-    alsa-utils
-    sof-firmware
-    alsa-firmware
-    linux-firmware-intel
+    gcc
+    g++
+    make
+    pkg-config
+    libssl-dev
+    libffi-dev
 )
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${PACKAGES[@]}"
 
-/ctx/build_files/core/nix-setup.sh
+setcap cap_setuid+ep /usr/bin/newuidmap && chmod -s /usr/bin/newuidmap
+setcap cap_setgid+ep /usr/bin/newgidmap && chmod -s /usr/bin/newgidmap
 
-flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+cp /boot/vmlinuz-* "$(find /usr/lib/modules -maxdepth 1 -type d | tail -n 1)/vmlinuz"
 
-mkdir -p /var/roothome
+systemctl enable systemd-networkd systemd-resolved ssh NetworkManager
+systemctl mask systemd-firstboot.service
 
-dconf update
+printf 'L! /etc/resolv.conf - - - - /run/systemd/resolve/stub-resolv.conf\n' \
+    > /usr/lib/tmpfiles.d/resolv-conf.conf
 
-systemctl enable gdm3
-systemctl enable docker
-systemctl enable podman
-systemctl enable tailscaled
-systemctl enable systemd-resolved
+mkdir -p /etc/netplan
+printf 'network:\n  version: 2\n  ethernets:\n    all-en:\n      match:\n        name: en*\n      dhcp4: true\n      dhcp4-overrides:\n        use-domains: true\n      dhcp6: true\n      dhcp6-overrides:\n        use-domains: true\n    all-eth:\n      match:\n        name: eth*\n      dhcp4: true\n      dhcp4-overrides:\n        use-domains: true\n      dhcp6: true\n      dhcp6-overrides:\n        use-domains: true\n' > /etc/netplan/90-default.yaml
 
-systemctl enable brew-setup.service
-systemctl enable brew-update.timer
-systemctl enable brew-upgrade.timer
-
-mkdir -p /etc/systemd/user/graphical-session.target.wants
-ln -sfn /usr/lib/systemd/user/brew-preinstall.service \
-    /etc/systemd/user/graphical-session.target.wants/brew-preinstall.service
-
-mkdir -p /etc/systemd/user/default.target.wants
-ln -sfn /usr/lib/systemd/user/homepage.service \
-    /etc/systemd/user/default.target.wants/homepage.service
-ln -sfn /usr/lib/systemd/user/ai.service \
-    /etc/systemd/user/default.target.wants/ai.service
-
-mkdir -p /usr/lib/bootc/kargs.d
-cat > /usr/lib/bootc/kargs.d/00-nvidia.toml <<'EOF'
-kargs = ["rd.driver.blacklist=nouveau", "modprobe.blacklist=nouveau", "nvidia-drm.modeset=1", "initcall_blacklist=simpledrm_platform_driver_init"]
-EOF
-
-nvidia-ctk config --set nvidia-container-cli.no-cgroups --in-place
+sed -i 's|^HOME=.*|HOME=/var/home|' /etc/default/useradd
 
 apt-get clean -y
+
+mkdir -p /usr/lib/sysimage
+if [ -d /var/lib/dpkg ]; then cp -a /var/lib/dpkg /usr/lib/sysimage/dpkg; fi
+
+rm -rf /var/lib/dpkg
+mkdir -p /var/lib
+ln -sfnT ../../usr/lib/sysimage/dpkg /var/lib/dpkg
+
+rm -rf /{boot,home,root,srv,mnt,var,usr/local,opt}
+
+mkdir -p /sysroot /boot /usr/lib/ostree /var
+
+ln -sT sysroot/ostree /ostree
+ln -sT var/roothome /root
+ln -sT var/srv /srv
+ln -sT var/mnt /mnt
+ln -sT var/opt /opt
+ln -sT var/home /home
+ln -sT var/usrlocal /usr/local
+
+printf 'd /var/home 0755 root root -\nd /var/srv 0755 root root -\nd /var/mnt 0755 root root -\nd /var/opt 0755 root root -\nd /var/usrlocal 0755 root root -\nd /var/roothome 0700 root root -\nd /run/media 0755 root root -\n' > /usr/lib/tmpfiles.d/bootc-base-dirs.conf
+
+mkdir -p /var/tmp
+
+KVER=$(basename "$(find /usr/lib/modules -maxdepth 1 -mindepth 1 -type d | tail -n 1)")
+dracut --force --no-hostonly --reproducible --zstd --verbose --kver "${KVER}" "/usr/lib/modules/${KVER}/initramfs.img"
+
+printf '[composefs]\nenabled = yes\n[sysroot]\nreadonly = true\n' > /usr/lib/ostree/prepare-root.conf
+
 rm -rf /var/lib/apt/lists/* /tmp/*
 find /run -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
