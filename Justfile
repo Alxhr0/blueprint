@@ -158,19 +158,12 @@ build $target_image="" $tag="":
 
     podman build "${PODMAN_BUILD_ARGS[@]}" .
 
-# Build the fsdk-inspired full-featured image from the buildstream directory
+# Build the fsdk image using BuildStream (pure FSDK composition, no apt)
 [group('Build')]
 build-fsdk $tag="fsdk":
     #!/usr/bin/env bash
     set -euo pipefail
-    IMAGE_NAME="blueprint"
-    TAG="${tag}"
-    CONTAINERFILE="buildstream/Containerfile.fsdk"
-    podman build \
-        --pull=newer \
-        --tag "${IMAGE_NAME}:${TAG}" \
-        --file "${CONTAINERFILE}" \
-        .
+    cd buildstream && just build
 
 # Build all images in the repo
 [group('Build')]

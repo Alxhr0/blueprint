@@ -1,12 +1,13 @@
 kind: stack
 description: |
-  Unified FSDK development image: base runtime + Python + Skopeo + Buildah.
+  Unified FSDK development image: base runtime + Python + Skopeo + Buildah + OSTree.
   Composed from all individual stacks into a single image.
 
 depends:
   - base/base-stack.bst
   - freedesktop-sdk.bst:components/python3.bst
   - freedesktop-sdk.bst:components/skopeo.bst
+  - freedesktop-sdk.bst:components/buildah.bst
   - freedesktop-sdk.bst:components/containers-common.bst
   - freedesktop-sdk.bst:components/gpgme.bst
   - freedesktop-sdk.bst:components/libassuan.bst
