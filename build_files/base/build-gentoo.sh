@@ -5,6 +5,9 @@ cp -avf "/ctx/system_files"/. /
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/gentoo"/. /
 
+echo 'ACCEPT_LICENSE="-* @BINARY-REDISTRIBUTABLE linux-fw-redistributable"' >> /etc/portage/make.conf
+echo 'ACCEPT_KEYWORDS="~amd64"' >> /etc/portage/make.conf
+
 emerge --sync --quiet
 
 PACKAGES=(
