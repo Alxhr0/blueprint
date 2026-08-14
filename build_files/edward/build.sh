@@ -16,6 +16,11 @@ fi
 
 mkdir -p /var/lib/apt/lists/partial
 
+if [ ! -e /var/lib/dpkg ] || [ -L /var/lib/dpkg ] && [ ! -e /var/lib/dpkg ]; then
+  mkdir -p /var/lib
+  ln -sfnT ../../usr/lib/sysimage/dpkg /var/lib/dpkg
+fi
+
 rm -rf /var/log/apt /var/log/journal
 
 apt-get update -y
