@@ -163,7 +163,7 @@ build $target_image="" $tag="":
 build-fsdk $tag="fsdk":
     #!/usr/bin/env bash
     set -euo pipefail
-    cd buildstream && just build
+    cd buildstream && "$(command -v just)" build
 
 # Build all images in the repo
 [group('Build')]
