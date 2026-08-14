@@ -15,6 +15,9 @@ fi
 mkdir -p /var/lib/dpkg /var/lib/apt/lists/partial
 
 apt-get update -y
+
+mkdir -p /var/cache/apt/archives/partial
+
 apt-get install -y --no-install-recommends software-properties-common
 
 add-apt-repository -y multiverse
