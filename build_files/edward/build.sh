@@ -14,7 +14,9 @@ else
   mkdir -p /root
 fi
 
-mkdir -p /var/lib/dpkg /var/lib/apt/lists/partial /var/log/apt /var/log/journal /var/log
+mkdir -p /var/lib/dpkg /var/lib/apt/lists/partial
+
+rm -rf /var/log/apt /var/log/journal
 
 apt-get update -y
 
