@@ -46,9 +46,6 @@ pacman -U --noconfirm \
     'https://mirror.cachyos.org/repo/x86_64/cachyos/cachyos-v4-mirrorlist-27-1-any.pkg.tar.zst'
 
 sed -i '/^\[core\]/i \
-[cachyos-v3]\nInclude = /etc/pacman.d/cachyos-v3-mirrorlist\n\
-[cachyos-core-v3]\nInclude = /etc/pacman.d/cachyos-v3-mirrorlist\n\
-[cachyos-extra-v3]\nInclude = /etc/pacman.d/cachyos-v3-mirrorlist\n\
 [cachyos]\nInclude = /etc/pacman.d/cachyos-mirrorlist\n' /etc/pacman.conf
 
 pacman -Syu --noconfirm
