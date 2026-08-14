@@ -24,6 +24,7 @@ To use any of these in your Containerfile do a `FROM ghcr.io/huntedraven/bluepri
 | debian | `containerfiles/Containerfile.debian` | Debian-based |
 | gentoo | `containerfiles/Containerfile.gentoo` | Gentoo-based |
 | fsdk | `buildstream/` | Distroless FSDK-based (BuildStream) |
+| nixos | `containerfiles/Containerfile.nixos` | NixOS-based bootc image |
 | opensuse | `containerfiles/Containerfile.opensuse` | OpenSUSE Tumbleweed-based |
 | ubuntu | `containerfiles/Containerfile.ubuntu` | Ubuntu 26.04-based |
 | server | `containerfiles/Containerfile.server` | headless/server |

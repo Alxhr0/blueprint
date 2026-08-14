@@ -178,6 +178,7 @@ build-all:
     just build gentoo
     just build opensuse
     just build ubuntu
+    just build nixos
     just build holo-amd
     just build holo-nvidia
     just build-fsdk
@@ -316,7 +317,7 @@ list-images:
         stem="${stem%.env}"
         if [[ -f "containerfiles/Containerfile.${stem}" ]] || [[ -f "buildstream/Containerfile.${stem}" ]]; then
             case "${stem}" in
-                arch|holo-amd|holo-nvidia|ai|debian|gentoo|opensuse|ubuntu|fsdk) continue ;;
+                arch|holo-amd|holo-nvidia|ai|debian|gentoo|opensuse|ubuntu|nixos|fsdk) continue ;;
             esac
             IMAGES+=("${stem}")
         fi

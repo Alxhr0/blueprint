@@ -1,0 +1,19 @@
+# Allow build scripts to be referenced without being copied into the final image
+FROM scratch AS ctx
+COPY build_files /
+COPY system_files/global /system_files/global
+COPY system_files/nixos /system_files/nixos
+
+FROM nixos/nixos:latest AS builder
+
+RUN nix-channel --update && \
+    nix-env -iA nixos.bootc
+
+COPY --from=ctx /build_files/nixos/build.sh /tmp/build.sh
+RUN /tmp/build.sh
+
+FROM nixos/nixos:latest AS system
+
+COPY --from=builder /output /
+
+LABEL containers.bootc 1
