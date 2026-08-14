@@ -8,6 +8,7 @@ sed -i 's/^#Include = \/etc\/pacman.conf.d\/\*.conf/Include = \/etc\/pacman.conf
 
 pacman -Syu --noconfirm
 
+pacman-key --init
 pacman-key --recv-key F3B607488DB35A47 --keyserver keyserver.ubuntu.com
 pacman-key --lsign-key F3B607488DB35A47
 

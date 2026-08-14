@@ -25,6 +25,7 @@ unless you have read what the images do and they fit you!
 | aira | `containerfiles/Containerfile.aira` | A custom Bazzite image for my Friend! |
 | crmy | `containerfiles/Containerfile.crmy` | A custom dev focused image for my Friend! |
 | holo-amd / holo-nvidia | `containerfiles/Containerfile.holo-*` | GPU-specific SteamOS like variants |
+| dakota | `containerfiles/Containerfile.dakota` | Based on `ghcr.io/projectbluefin/dakota:testing`, built on its own Tue/Sat schedule |
 
 ## Repository layout
 
