@@ -15,7 +15,7 @@ unless you have read what the images do and they fit you!
 
 ## Flavors
 
-To use any of these in your Containerfile do a `FROM ghcr.io/huntedraven/blueprint:` then right after the : put on the of flavors below!
+To use any of these in your Containerfile do a `FROM ghcr.io/huntedraven/blueprint:` then right after the : put one the of flavors below!
 
 | Flavor | Containerfile | Notes |
 |:---|:---|:---|
