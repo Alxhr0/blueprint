@@ -74,3 +74,9 @@ cp /etc/nixos/lock.json /output/etc/nixos/lock.json 2>/dev/null || true
 
 mkdir -p /output/var/lib/bootc
 cp -r /var/lib/bootc/* /output/var/lib/bootc/ 2>/dev/null || true
+
+mkdir -p /output/sysroot/ostree
+cp -r /sysroot/ostree/repo /output/sysroot/ostree/repo
+
+mkdir -p /output/ostree
+ln -sfnT /sysroot/ostree /output/ostree
