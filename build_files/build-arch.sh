@@ -66,17 +66,9 @@ sed -i '/DisableSandboxNetwork/d' /etc/pacman.conf
 find /etc/ -name "*.pacnew" -type f -delete
 
 systemctl enable systemd-boot-update.service
-
 systemctl mask systemd-firstboot.service
-
 systemctl enable NetworkManager.service
-
-# NetworkManager auto-selects the systemd-resolved plugin when the unit file is
-# present (matches the working Fedora base). Without systemd-resolved enabled,
-# DNS is completely dead even though DHCP succeeds: NM asks D-Bus to activate
-# org.freedesktop.resolve1, which fails because the service is disabled.
 systemctl enable systemd-resolved.service
-
 systemctl enable systemd-timesyncd.service
 
 printf 'L! /etc/resolv.conf - - - - /run/systemd/resolve/stub-resolv.conf\n' > /usr/lib/tmpfiles.d/resolv-conf.conf
