@@ -5,6 +5,8 @@ cp -avf "/ctx/system_files"/. /
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/ubuntu"/. /
 
+mkdir -p /var/lib/apt/lists/partial
+
 apt-get update -y
 
 PACKAGES=(
@@ -55,9 +57,6 @@ mkdir -p /etc/netplan
 printf 'network:\n  version: 2\n  ethernets:\n    all-en:\n      match:\n        name: en*\n      dhcp4: true\n      dhcp4-overrides:\n        use-domains: true\n      dhcp6: true\n      dhcp6-overrides:\n        use-domains: true\n    all-eth:\n      match:\n        name: eth*\n      dhcp4: true\n      dhcp4-overrides:\n        use-domains: true\n      dhcp6: true\n      dhcp6-overrides:\n        use-domains: true\n' > /etc/netplan/90-default.yaml
 
 sed -i 's|^HOME=.*|HOME=/var/home|' /etc/default/useradd
-
-apt-get clean -y
-mkdir -p /var/cache/apt/archives/partial
 
 mkdir -p /usr/lib/sysimage
 if [ -d /var/lib/dpkg ]; then cp -a /var/lib/dpkg /usr/lib/sysimage/dpkg; fi

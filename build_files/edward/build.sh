@@ -21,8 +21,6 @@ if [ ! -e /var/lib/dpkg ] || [ -L /var/lib/dpkg ] && [ ! -e /var/lib/dpkg ]; the
   ln -sfnT ../../usr/lib/sysimage/dpkg /var/lib/dpkg
 fi
 
-rm -rf /var/log/apt /var/log/journal
-
 apt-get update -y
 
 mkdir -p /var/cache/apt/archives/partial
