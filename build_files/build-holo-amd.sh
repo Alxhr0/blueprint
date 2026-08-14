@@ -8,10 +8,6 @@ sed -i 's/^#Include = \/etc\/pacman.conf.d\/\*.conf/Include = \/etc\/pacman.conf
 
 pacman -Syu --noconfirm
 
-pacman-key --init
-pacman-key --recv-key F3B607488DB35A47 --keyserver keyserver.ubuntu.com
-pacman-key --lsign-key F3B607488DB35A47
-
 pacman -U --noconfirm \
     'https://mirror.cachyos.org/repo/x86_64/cachyos/cachyos-keyring-20240331-1-any.pkg.tar.zst' \
     'https://mirror.cachyos.org/repo/x86_64/cachyos/cachyos-mirrorlist-27-1-any.pkg.tar.zst' \
@@ -27,8 +23,8 @@ sed -i '/^\[core\]/i \
 pacman -Syu --noconfirm
 
 PACKAGES=(
-    linux-cachyos
     linux-firmware
+    jq
 
     plasma-desktop
     plasma-workspace
@@ -88,6 +84,8 @@ PACKAGES=(
 )
 
 pacman -S --noconfirm --needed "${PACKAGES[@]}"
+
+/ctx/ogc-kernel.sh
 
 pacman -Scc --noconfirm
 

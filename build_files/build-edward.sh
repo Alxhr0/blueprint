@@ -35,10 +35,6 @@ if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
 fi
 EOF
 
-sudo pacman-key --recv-keys F3B607488DB35A47 --keyserver keyserver.ubuntu.com
-
-sudo pacman-key --lsign-key F3B607488DB35A47
-
 pacman -U --noconfirm \
     'https://mirror.cachyos.org/repo/x86_64/cachyos/cachyos-keyring-20240331-1-any.pkg.tar.zst' \
     'https://mirror.cachyos.org/repo/x86_64/cachyos/cachyos-mirrorlist-27-1-any.pkg.tar.zst' \
@@ -55,7 +51,6 @@ pacman -Syu --noconfirm
 
 
 PACKAGES=(
-    linux-cachyos
     linux-firmware
     plasma
     konsole
@@ -121,9 +116,7 @@ EOF
 
 nvidia-ctk config --set nvidia-container-cli.no-cgroups --in-place
 
-KERNEL_VERSION="$(basename "$(find /usr/lib/modules -maxdepth 1 -type d | grep -v -E '\.img$' | tail -n 1)")"
-DRACUT_NO_XATTR=1 dracut --force --no-hostonly --reproducible --zstd --verbose \
-    --kver "$KERNEL_VERSION" "/usr/lib/modules/$KERNEL_VERSION/initramfs.img"
+/ctx/ogc-kernel.sh
 
 pacman -Scc --noconfirm
 find /etc/ -name "*.pacnew" -type f -delete
