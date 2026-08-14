@@ -31,14 +31,14 @@ dnf5 versionlock add \
 
 dnf5 -y install /tmp/rpms/ublue-os/ublue-os-akmods-addons-*.rpm
 
-/ctx/install-kmods \
+/ctx/core/install-kmods \
     /tmp/rpms/{common,kmods}/*framework-laptop*.rpm \
     /tmp/rpms/{common,kmods}/*v4l2loopback*.rpm \
     /tmp/rpms/{common,kmods}/*xone*.rpm \
     /tmp/rpms/{common,kmods}/*xpadneo*.rpm \
     /tmp/rpms/{common,kmods}/*wl*.rpm
 
-/ctx/install-kmods \
+/ctx/core/install-kmods \
     /tmp/rpms/{extra,kmods-extra}/*zenergy*.rpm \
     /tmp/rpms/{extra,kmods-extra}/*gcadapter*.rpm \
     /tmp/rpms/{extra,kmods-extra}/*kvmfr*.rpm \
