@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [arch, debian, gentoo, opensuse]
+        image: [arch, debian, gentoo, opensuse, ubuntu]
 
     permissions:
       contents: read
