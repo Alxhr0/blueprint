@@ -5,8 +5,6 @@ set -ouex pipefail
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/edward"/. /
 
-# /root is a symlink to var/roothome in the arch base; make sure the target
-# exists before anything writes to $HOME (the nix installer needs /root).
 if [ -L /root ]; then
   target=$(readlink -f /root)
   mkdir -p "$target"
@@ -80,8 +78,6 @@ systemctl enable docker
 systemctl enable podman
 systemctl enable tailscaled
 
-# brew comes prebuilt from ghcr.io/ublue-os/brew (homebrew.tar.zst); the
-# setup service unpacks it into /home/linuxbrew on first boot.
 systemctl enable brew-setup.service
 systemctl enable brew-update.timer
 systemctl enable brew-upgrade.timer
