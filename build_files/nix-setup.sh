@@ -1,11 +1,11 @@
 #!/bin/bash
 set -ouex pipefail
 
-if [ -d /nix/var/nix/db ]; then
-    chmod -R 1777 /nix/var/nix/db
+if [ -d /nix ]; then
+    chmod -R 1777 /nix
 else
-    mkdir -p /nix/var/nix/db
-    chmod 1777 /nix/var/nix/db
+    mkdir -p /nix
+    chmod 1777 /nix
 fi
 
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
