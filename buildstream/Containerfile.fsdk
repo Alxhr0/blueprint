@@ -29,7 +29,9 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
     --mount=type=tmpfs,dst=/root \
     --mount=type=tmpfs,dst=/boot \
-    /ctx/build_files/base/builder-ubuntu.sh
+    git clone "https://github.com/bootc-dev/bootc.git" /tmp/bootc && \
+    make -C /tmp/bootc bin install-all DESTDIR=/output && \
+    rm -rf /tmp/bootc
 
 FROM ubuntu:26.04 AS system
 
