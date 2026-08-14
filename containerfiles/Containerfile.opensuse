@@ -1,0 +1,23 @@
+# Allow build scripts to be referenced without being copied into the final image
+FROM scratch AS ctx
+COPY build_files /
+COPY system_files/global /system_files/global
+COPY system_files/opensuse /system_files/opensuse
+
+FROM registry.opensuse.org/opensuse/tumbleweed:latest AS builder
+
+RUN zypper install -y binutils cargo git go-md2man libostree-devel make rust
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    --mount=type=tmpfs,dst=/tmp \
+    /ctx/base/builder-opensuse.sh
+
+FROM registry.opensuse.org/opensuse/tumbleweed:latest AS system
+
+COPY --from=builder /output /
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    --mount=type=tmpfs,dst=/tmp \
+    /ctx/base/build-opensuse.sh
+
+LABEL containers.bootc 1

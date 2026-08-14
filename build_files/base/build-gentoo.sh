@@ -1,0 +1,66 @@
+#!/bin/bash
+set -ouex pipefail
+
+cp -avf "/ctx/system_files"/. /
+cp -avf "/ctx/system_files/global"/. /
+cp -avf "/ctx/system_files/gentoo"/. /
+
+emerge --sync --quiet
+
+PACKAGES=(
+    sys-kernel/gentoo-kernel-bin
+    linux-firmware
+    sys-apps/systemd
+    sys-apps/dracut
+    sys-boot/ostree
+    sys-fs/btrfs-progs
+    sys-fs/dosfstools
+    sys-fs/e2fsprogs
+    sys-fs/xfsprogs
+    sys-fs/cryptsetup
+    sys-fs/lvm2
+    net-misc/openssh
+    net-misc/curl
+    net-misc/wget
+    net-wireless/iwd
+    app-containers/skopeo
+    app-containers/podman
+    sys-apps/sudo
+    sys-apps/chrony
+    app-arch/cpio
+    app-arch/xz-utils
+    sys-fs/bubblewrap
+    dev-libs/glib
+    sys-apps/dbus
+    sys-apps/shadow
+)
+
+emerge --verbose --deep --newuse "${PACKAGES[@]}"
+
+echo "uninitialized" > /etc/machine-id
+ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+sed -i 's|^HOME=.*|HOME=/var/home|' /etc/default/useradd
+
+systemctl enable systemd-networkd systemd-resolved chronyd sshd iwd
+systemctl mask systemd-firstboot.service
+
+printf 'L! /etc/resolv.conf - - - - /run/systemd/resolve/stub-resolv.conf\n' > /usr/lib/tmpfiles.d/resolv-conf.conf
+
+KVER=$(basename "$(ls /usr/lib/modules | head -n 1)")
+dracut --force --no-hostonly --reproducible --zstd --verbose --kver "$KVER" "/usr/lib/modules/$KVER/initramfs.img"
+
+printf '[composefs]\nenabled = yes\n[sysroot]\nreadonly = true\n' > /usr/lib/ostree/prepare-root.conf
+
+printf 'd /var/home 0755 root root -\nd /var/srv 0755 root root -\nd /var/mnt 0755 root root -\nd /var/opt 0755 root root -\nd /var/usrlocal 0755 root root -\nd /var/roothome 0700 root root -\nd /run/media 0755 root root -\n' > /usr/lib/tmpfiles.d/bootc-base-dirs.conf
+
+rm -rf /{boot,home,root,srv,mnt,var,usr/local,opt}
+
+mkdir -p /sysroot /boot /usr/lib/ostree /var
+
+ln -sT sysroot/ostree /ostree
+ln -sT var/roothome /root
+ln -sT var/srv /srv
+ln -sT var/mnt /mnt
+ln -sT var/opt /opt
+ln -sT var/home /home
+ln -sT var/usrlocal /usr/local
