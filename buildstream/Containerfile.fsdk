@@ -19,7 +19,6 @@ RUN apt-get update -y && \
         jq \
         yq \
         gh \
-        code \
         skopeo \
         buildah \
         podman \
