@@ -48,7 +48,7 @@ sed -i 's|^HOME=.*|HOME=/var/home|' /etc/default/useradd || true
 
 rm -rf /{boot,home,root,srv,mnt,var,usr/local,opt}
 
-mkdir -p /sysroot /boot /usr/lib/ostree /var
+mkdir -p /sysroot /boot /usr/lib/ostree /var /var/tmp
 
 ln -sT sysroot/ostree /ostree
 ln -sT var/roothome /root

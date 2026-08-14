@@ -27,6 +27,8 @@ pacman -S --noconfirm --needed curl git gcc make jq
 
 PACKAGES=(
     linux-firmware
+    linux-cachyos
+    linux-cachyos-headers
     plasma
     konsole
     firefox
@@ -51,6 +53,12 @@ PACKAGES=(
 )
 
 pacman -S --noconfirm --needed "${PACKAGES[@]}"
+
+if pacman -Q linux >/dev/null 2>&1; then
+    pacman -Rdd --noconfirm linux
+fi
+
+mkinitcpio -P
 
 flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
@@ -90,8 +98,6 @@ kargs = ["rd.driver.blacklist=nouveau", "modprobe.blacklist=nouveau", "nvidia-dr
 EOF
 
 nvidia-ctk config --set nvidia-container-cli.no-cgroups --in-place
-
-/ctx/core/ogc-kernel.sh
 
 pacman -Scc --noconfirm
 find /etc/ -name "*.pacnew" -type f -delete

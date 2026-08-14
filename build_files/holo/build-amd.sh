@@ -12,6 +12,7 @@ pacman -Syu --noconfirm
 
 PACKAGES=(
     linux-firmware
+    linux-cachyos
     jq
 
     plasma-desktop
@@ -73,7 +74,11 @@ PACKAGES=(
 
 pacman -S --noconfirm --needed "${PACKAGES[@]}"
 
-/ctx/core/ogc-kernel.sh
+if pacman -Q linux >/dev/null 2>&1; then
+    pacman -Rdd --noconfirm linux
+fi
+
+mkinitcpio -P
 
 pacman -Scc --noconfirm
 
