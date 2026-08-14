@@ -11,7 +11,7 @@ COPY brew/packages-edward.Brewfile /usr/share/ublue-os/homebrew/preinstall.d/pac
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
-    /ctx/build-edward.sh
+    /ctx/edward/build.sh
 
 LABEL containers.bootc 1
 
