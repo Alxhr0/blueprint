@@ -12,7 +12,7 @@ PACKAGES=(
     linux-firmware
     sys-apps/systemd
     sys-apps/dracut
-    sys-boot/ostree
+    dev-util/ostree
     sys-fs/btrfs-progs
     sys-fs/dosfstools
     sys-fs/e2fsprogs

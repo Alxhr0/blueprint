@@ -158,6 +158,37 @@ build $target_image="" $tag="":
 
     podman build "${PODMAN_BUILD_ARGS[@]}" .
 
+# Build the fsdk-inspired full-featured image from the buildstream directory
+[group('Build')]
+build-fsdk $tag="fsdk":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    IMAGE_NAME="blueprint"
+    TAG="${tag}"
+    CONTAINERFILE="buildstream/Containerfile.fsdk"
+    podman build \
+        --pull=newer \
+        --tag "${IMAGE_NAME}:${TAG}" \
+        --file "${CONTAINERFILE}" \
+        buildstream
+
+# Build all images in the repo
+[group('Build')]
+build-all:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    just build edward
+    just build aira
+    just build server
+    just build ai
+    just build debian
+    just build gentoo
+    just build opensuse
+    just build ubuntu
+    just build holo-amd
+    just build holo-nvidia
+    just build-fsdk
+
 # Split the image for smaller updates (New)!
 rechunk $target_image=image_name $tag=default_tag:
     #!/usr/bin/env bash
@@ -290,9 +321,9 @@ list-images:
         [[ -f "${env}" ]] || continue
         stem="${env#images/}"
         stem="${stem%.env}"
-        if [[ -f "containerfiles/Containerfile.${stem}" ]]; then
+        if [[ -f "containerfiles/Containerfile.${stem}" ]] || [[ -f "buildstream/Containerfile.${stem}" ]]; then
             case "${stem}" in
-                arch|holo-amd|holo-nvidia|ai|debian|gentoo|opensuse|ubuntu) continue ;;
+                arch|holo-amd|holo-nvidia|ai|debian|gentoo|opensuse|ubuntu|fsdk) continue ;;
             esac
             IMAGES+=("${stem}")
         fi

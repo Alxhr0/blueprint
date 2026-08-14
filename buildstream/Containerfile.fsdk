@@ -1,0 +1,75 @@
+# Allow build scripts to be referenced without being copied into the final image
+FROM scratch AS ctx
+COPY build_files /
+COPY system_files/global /system_files/global
+COPY system_files/fsdk /system_files/fsdk
+
+FROM ubuntu:26.04 AS builder
+
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        git \
+        build-essential \
+        python3 \
+        python3-pip \
+        nodejs \
+        npm \
+        jq \
+        yq \
+        gh \
+        code \
+        docker.io \
+        docker-compose \
+        podman \
+        flatpak \
+        steamos-devices \
+        steamos-compositor \
+        steam-devices \
+        steamctl \
+        mangohud \
+        lib32-mangohud \
+        gamemode \
+        lib32-gamemode \
+        wine-staging \
+        giflib \
+        lib32-giflib \
+        libpng \
+        lib32-libpng \
+        libldap \
+        lib32-libldap \
+        libvulkan \
+        lib32-libvulkan \
+        libxcomposite \
+        lib32-libxcomposite \
+        libxinerama \
+        lib32-libxinerama \
+        libxrandr \
+        lib32-libxrandr \
+        opencl-driver \
+        lib32-opencl-driver \
+        lib32-gnutls \
+        lib32-libpulse \
+        libgudev \
+        lib32-libgudev \
+        alsa-lib \
+        lib32-alsa-lib \
+        alsa-utils \
+        pipewire \
+        pipewire-alsa \
+        pipewire-audio \
+        pipewire-ffado \
+        pipewire-jack \
+        pipewire-pulse \
+        pipewire-zeroconf \
+        wireplumber \
+        sof-firmware \
+        alsa-firmware \
+        linux-firmware-intel
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    --mount=type=tmpfs,dst=/tmp \
+    /ctx/buildstream/build_files/fsdk/build.sh
+
+LABEL containers.bootc 1
