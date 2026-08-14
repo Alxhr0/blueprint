@@ -13,7 +13,7 @@ RUN mkdir -p /etc/portage/binrepos.conf && \
     echo "EMERGE_DEFAULT_OPTS=\"--getbinpkg\"" >> /etc/portage/make.conf && \
     getuto && \
     emerge --sync --quiet && \
-    emerge --getbinpkg --verbose dev-util/ostree net-misc/openssh sys-devel/gcc dev-util/pkgconf dev-vcs/git app-arch/cpio app-arch/xz-utils app-arch/bzip2
+    emerge --getbinpkg --verbose dev-util/ostree net-misc/openssh sys-devel/gcc dev-util/pkgconf dev-vcs/git app-arch/cpio app-arch/xz-utils app-arch/bzip2 app-text/go-md2man
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
