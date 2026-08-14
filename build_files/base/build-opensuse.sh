@@ -32,7 +32,10 @@ zypper install -y \
 if systemctl list-unit-files | grep -q '^systemd-networkd.service'; then
     systemctl enable systemd-networkd
 fi
-systemctl enable systemd-resolved chronyd sshd iwd
+if systemctl list-unit-files | grep -q '^systemd-resolved.service'; then
+    systemctl enable systemd-resolved
+fi
+systemctl enable chronyd sshd iwd
 systemctl mask systemd-firstboot.service
 
 echo "uninitialized" > /etc/machine-id
