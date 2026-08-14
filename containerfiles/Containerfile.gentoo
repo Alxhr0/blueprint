@@ -6,9 +6,10 @@ COPY system_files/gentoo /system_files/gentoo
 
 FROM gentoo/stage3:systemd AS builder
 
-RUN echo 'FEATURES="-manifest"' >> /etc/portage/make.conf && \
+RUN echo 'FEATURES="-manifest binpkg-multi-instance binpkg-signing"' >> /etc/portage/make.conf && \
+    echo 'EMERGE_DEFAULT_OPTS="--getbinpkg"' >> /etc/portage/make.conf && \
     emerge --sync --quiet && \
-    emerge --verbose dev-util/ostree net-misc/openssh sys-devel/gcc dev-util/pkgconf dev-vcs/git app-arch/cpio app-arch/xz-utils app-arch/bzip2
+    emerge --getbinpkg --verbose dev-util/ostree net-misc/openssh sys-devel/gcc dev-util/pkgconf dev-vcs/git app-arch/cpio app-arch/xz-utils app-arch/bzip2
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
