@@ -11,9 +11,8 @@ RUN nix-channel --update && \
     nix-channel --update && \
     nix-env -iA nixpkgs.bootc
 
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
-    --mount=type=tmpfs,dst=/tmp \
-    /ctx/build_files/nixos/build.sh
+COPY --from=ctx /build_files/nixos/build.sh /tmp/build.sh
+RUN /tmp/build.sh
 
 FROM nixos/nix:latest AS system
 
