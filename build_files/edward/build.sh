@@ -12,9 +12,9 @@ else
   mkdir -p /root
 fi
 
-apt-get update -y
-
 mkdir -p /var/lib/apt/lists/partial
+
+apt-get update -y
 
 PACKAGES=(
     ubuntu-desktop
