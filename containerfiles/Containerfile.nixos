@@ -9,7 +9,7 @@ FROM nixos/nix:latest AS builder
 RUN nix-channel --update && \
     nix-channel --add https://nixos.org/channels/nixos-26.05 nixos && \
     nix-channel --update && \
-    nix-env -iA nixos.bootc
+    nix-env -iA nixpkgs.bootc
 
 COPY --from=ctx /build_files/nixos/build.sh /tmp/build.sh
 RUN /tmp/build.sh
