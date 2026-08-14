@@ -1,160 +1,100 @@
-# fsdk-containers
+# FSDK BuildStream Project
 
-**Bringing distroless patterns to [freedesktop-sdk](https://gitlab.com/freedesktop-sdk/freedesktop-sdk) (FSDK) containers.**
+This directory is a [BuildStream](https://buildstream.build/) project that follows the [projectbluefin/fsdk-containers](https://github.com/projectbluefin/fsdk-containers) philosophy:
 
-FSDK already maintains beautifully patched, reproducible builds of glibc and
-every major runtime. This repo applies the distroless playbook to them — carve
-out only the runtime, strip the bloat, ship slim by default — so you get a free,
-OSS distroless suite that **inherits FSDK's CVE patching** instead of maintaining
-a separate package set.
+- **Distroless by default** — ship only the runtime, strip the bloat
+- **Slim recipes** — explicit removal of build tools, locale data, sanitizers, and other non-runtime artifacts
+- **Reproducible builds** — pinned FSDK junction refs, deterministic package sets
+- **Unified image** — base + Python + Skopeo + Buildall in one container
 
-These containers are maintained for projectbluefin/fsdk usage for cluster ops, etc. Digital sovereignty isn't just for nations, this controls our supply chain. 
+## Directory Structure
 
-## Images
+```
+buildstream/
+├── Containerfile.fsdk          # Podman build entrypoint for the fsdk image
+├── GUIDE.md                    # This file
+├── Justfile                    # BuildStream-specific just recipes
+├── project.conf                # BuildStream project configuration
+├── elements/                   # BuildStream elements (BST files)
+│   ├── freedesktop-sdk.bst     # FSDK junction ref
+│   ├── targets.json            # Canonical manifest of image targets
+│   ├── base/                   # Base image composition
+│   │   ├── base-init-script.bst
+│   │   ├── base-runtime.bst
+│   │   └── base-stack.bst
+│   ├── fsdk/                   # Unified FSDK image
+│   │   ├── fsdk-stack.bst      # Stack: base + python + skopeo + buildah
+│   │   └── fsdk-runtime.bst    # Runtime: chiseled to runtime-only
+│   ├── oci/
+│   │   └── fsdk.bst            # OCI image definition
+│   ├── plugins/                # BuildStream plugins
+│   └── qemu-img/               # qemu-img utility image
+├── include/                    # Shared YAML includes (slim recipes, versions)
+│   ├── aliases.yml
+│   └── slim.yml
+├── build_files/
+│   ├── base/                   # Base build scripts (builder-*.sh, build-*.sh)
+│   ├── core/                   # Core scripts (nix-setup.sh)
+│   └── fsdk/
+│       └── build.sh            # Build script for the fsdk image
+├── system_files/
+│   ├── global/                 # Global system files (brew, presets)
+│   └── fsdk/                   # fsdk-specific system configs
+└── images/
+    └── fsdk.env                # Image metadata (name, tags, description)
+```
 
-| Image | Size | Description |
-| ----- | ---- | ----------- |
-| `ghcr.io/projectbluefin/base` | ~40 MB | Distroless base: glibc, coreutils, CA certificates, timezone data. No shell, no package manager. Multi-arch: linux/amd64, linux/arm64. [¹](#base-contract) |
-| `ghcr.io/projectbluefin/static` | ~40 MB | **Deprecated — currently identical to `base`.** Intended as a libc-free tier for `CGO_ENABLED=0` binaries, but it ships full glibc and differs from `base` by two files. Use `base` instead. See [#116](https://github.com/projectbluefin/fsdk-containers/issues/116). |
-| `ghcr.io/projectbluefin/python` | ~45 MB | Distroless Python 3: Python runtime + pip, with dev/testing bloat pruned. No shell, no package manager. Multi-arch: linux/amd64, linux/arm64. |
-| `ghcr.io/projectbluefin/skopeo` | — | Distroless Skopeo OCI image utility. No shell, no package manager. Multi-arch: linux/amd64, linux/arm64. |
-| `ghcr.io/projectbluefin/buildah` | ~70 MB | Distroless Buildah: static Go binary compiled from source, linked against FSDK gpgme/libseccomp. No shell, no package manager. Multi-arch: linux/amd64, linux/arm64. |
-| `ghcr.io/projectbluefin/qemu-img` | — | Distroless qemu-img disk image utility, compiled with OpenSSF-hardened flags. No shell, no package manager. Multi-arch: linux/amd64, linux/arm64. |
-| `ghcr.io/projectbluefin/lab-runner` | — | **Deliberately shell-enabled** CI/CD utility container (bash, curl, git, jq, yq, python3 + PyYAML, kubectl) for Project Bluefin lab workflows. The one scoped exception to the no-shell rule among the OCI images. Multi-arch: linux/amd64, linux/arm64. |
+## How It Works
 
-<a name="base-contract"></a> **¹ Base image contract:** The base image is intentionally
-shell-less but keeps coreutils. In FSDK 25.08, `runtime-minimal` still bundles bash
-and coreutils together; the SLIM recipe removes only bash. In FSDK 26.08+, the
-split becomes explicit: `runtime-minimal` drops both bash and coreutils, which move
-to `public-stacks/runtime-gnu`. The distroless `base` image continues to compose
-from `runtime-minimal` and therefore does not include bash; shell-enabled stacks
-(lab-runner, brew) must add `runtime-gnu` when upgrading to FSDK 26.08+.
-
-### Machine images (not distroless)
-
-| Image | Size | Description |
-| ----- | ---- | ----------- |
-| `ghcr.io/projectbluefin/brew` | ~410 MB | Homebrew developer environment as a **systemd-nspawn machine image** (a `.tar.zst` rootfs for `machinectl import-tar`, **not** an OCI image). Full dev env: bash, ruby, git, curl, gcc, patchelf, systemd init + the linuxbrew prefix. The distroless/slim rules do **not** apply here — see [docs/skills/nspawn-machine-image.md](docs/skills/nspawn-machine-image.md). Built with `just export-brew`. |
-
-## How it works
-
-Each image is composed from raw FSDK `components/*` (never `platform.bst`),
-then chiseled with a BuildStream `compose` element that drops every non-runtime
-split-rule domain, and finally run through the **SLIM recipe** in the OCI script
-step. The slim recipe removes the large runtime-domain bloat that has no FSDK
-domain to exclude it: shell binaries, `terminfo`, gcc sanitizer/fortran runtimes,
-the `gconv` charset long-tail, the glibc `locale-archive`, and leaked build tools.
-
-It deliberately **keeps** the cheap crash-preventers — `tzdata`, a common charset
-set, CA certificates — so `datetime`/TLS work out of the box without the wheel
-gymnastics other distroless suites push onto you.
+The fsdk image is composed from raw FSDK components, then chiseled with a BuildStream `compose` element that drops every non-runtime split-rule domain, and finally run through the **SLIM recipe** that removes large runtime-domain bloat.
 
 Pipeline: `stack` (deps) -> `compose` (chisel) -> `script` (slim + oci-builder).
-See [docs/skills/slim-an-image.md](docs/skills/slim-an-image.md) for the recipe.
 
-## Verify signatures
+## Building
 
-All published multi-arch images are keyless-signed with [cosign](https://docs.sigstore.dev/)
-and ship an attached SPDX SBOM. Signing happens in the `oci-images.yml` reusable
-workflow (called from `build.yml` — see docs/skills/ci-tooling/SKILL.md), so the
-certificate identity below names that file, not `build.yml`. Verify a
-main-branch build with:
+### Build with BuildStream (distroless)
 
-    cosign verify ghcr.io/projectbluefin/base:25.08 \
-      --certificate-identity "https://github.com/projectbluefin/fsdk-containers/.github/workflows/oci-images.yml@refs/heads/main" \
-      --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
+```bash
+cd buildstream
+just build
+```
 
-(Builds triggered from other refs, e.g. dispatch test builds, are signed with the
-corresponding branch ref in the certificate identity.)
+### Build with Podman (full-featured)
 
-GitHub also publishes a registry-backed build provenance attestation for each
-image. Verify it with the GitHub CLI:
+```bash
+just build-fsdk
+```
 
-    gh attestation verify oci://ghcr.io/projectbluefin/base:25.08 \
-      -R projectbluefin/fsdk-containers
+### Build all images (from repo root)
 
-For reproducible audits, replace the tag with the exact manifest digest.
+```bash
+just build-all
+```
 
-## Versioning
+## Adding Packages
 
-There is no application version for a base image, so the version axis is the
-FSDK release. We track upstream FSDK releases and active development/beta branches
-so users can test upcoming FSDK features early. Tags are derived automatically from
-the pinned junction ref in `elements/freedesktop-sdk.bst`:
+### To the Podman build (Containerfile.fsdk)
 
-- `:25.08` or `:26.08` -- FSDK minor line (the most rolling tag published)
-- `:25.08.14` -- FSDK point release (immutable: once published, CI never overwrites a point-release tag)
-- `:26.08beta.1` / `:26.08rc.1` -- pre-release/beta tags (published for every upstream dev/beta branch)
+Edit `buildstream/build_files/fsdk/build.sh` and add packages to the `PACKAGES` array.
 
-There is deliberately **no `:latest`**. A rolling alias lets a consumer deploy
-an unpinned image and have it change underneath them without any signal; the
-minor line is the most permissive tag we publish, so every consumer has to
-state how much drift it accepts. Pin the point release, or a digest, when even
-that is too much.
+### To BuildStream elements
 
-Every image self-declares its base via `io.projectbluefin.fsdk.version` and
-`io.projectbluefin.fsdk.ref` labels.
+1. Edit `buildstream/elements/fsdk/fsdk-stack.bst` and add the FSDK component to `depends:`
+2. Update the slim recipe in `buildstream/include/slim.yml` if the component brings runtime bloat
+3. Update `buildstream/elements/targets.json` if adding a new image
 
-## Build locally
+## Image Variants
 
-Requires `podman` and [`just`](https://github.com/casey/just). BuildStream runs
-inside the FSDK `bst2` container -- nothing to install.
-
-    just validate        # resolve the element graph
-    just build           # build + load ghcr.io/projectbluefin/base:build
-    just verify          # assert distroless + certs + tzdata
-    just tags            # show derived tags
-
-All image recipes are independently selectable from the canonical
-`elements/targets.json` manifest; for example:
-
-    BUILD_IMAGE_NAME=python just build
-    BUILD_IMAGE_NAME=python just verify
-
-The manual **Build images** workflow likewise accepts an optional `image`
-input, so one target can fan out to native x86_64 and aarch64 runners without
-building a separate repository or waiting for unrelated image targets.
-
-By default `just bst` submits build actions to the ghost cluster's BuildBarn
-remote-execution grid instead of building on your machine (and fails loudly if
-the cluster is unreachable). Use `BST_LOCAL=1 just build` for explicit local
-execution — see [docs/skills/remote-execution.md](docs/skills/remote-execution.md).
-
-## Homebrew systemd-nspawn container
-
-For a full developer environment container booted by `systemd-nspawn` instead of a distroless OCI image, we provide the `brew` machine image.
-
-### 1. Build and install
-
-The build process produces a `.tar.zst` rootfs, imports it into `machinectl`, creates a dedicated `/home/linuxbrew` folder on your host, and configures the `systemd-nspawn` sandbox settings (requires `sudo`):
-
-    just install-brew
-
-This runs `build-brew`, `export-brew`, and `verify-brew` before importing it as a systemd machine named `homebrew`.
-
-### 2. Run commands
-
-Execute brew commands inside the sandboxed container from your host shell:
-
-    just run-brew info
-    just run-brew install hello
-
-### 3. Uninstall
-
-Stop the container, remove the machine image, and clean up sandbox settings:
-
-    just uninstall-brew
-
-Please report any issues or feedback you encounter while using the Homebrew nspawn container!
-
-## Custom Builds and Caching
-
-You can fork/clone this repository to run your own custom builds and maintain them in GitHub Actions.
-
-The repository includes pre-configured public, read-only cache servers (from GNOME and Project Bluefin) in `project.conf` so you can build on top of pre-compiled freedesktop-sdk components without rebuilding everything from scratch.
-
-For instructions on configuring your own push caches (local or remote CAS) or setting up GitHub Actions caching, see the **[Custom Builds and Caching Guide](docs/skills/custom-builds-and-caching.md)**.
-
-## License
-
-Apache-2.0.
+| Variant | Description |
+|---------|-------------|
+| `fsdk` | Unified FSDK dev image: Python + Skopeo + Buildah + shell-enabled |
+| `edward` | Ubuntu + GNOME desktop, dev tools, NVIDIA, gaming |
+| `aira` | KDE Plasma, AMD-focused |
+| `holo-amd` | Arch + CachyOS kernel, AMD GPU, gaming |
+| `holo-nvidia` | Arch + CachyOS kernel, NVIDIA GPU, gaming |
+| `ai` | Ubuntu base for AI/ML containers |
+| `server` | Minimal server image |
+| `gentoo` | Gentoo-based image |
+| `opensuse` | openSUSE-based image |
+| `debian` | Debian-based image |
+| `ubuntu` | Ubuntu base image |
