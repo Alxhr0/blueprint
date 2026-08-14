@@ -42,8 +42,8 @@ PACKAGES=(
     podman
     flatpak
     steam-installer
-    nvidia-driver-550
-    nvidia-utils-550
+    nvidia-driver-595
+    nvidia-utils-595
     tailscale
     curl
     git
