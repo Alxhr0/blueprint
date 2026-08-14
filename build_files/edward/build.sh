@@ -14,6 +14,8 @@ fi
 
 apt-get update -y
 
+mkdir -p /var/lib/apt/lists/partial
+
 PACKAGES=(
     ubuntu-desktop
     gdm3
