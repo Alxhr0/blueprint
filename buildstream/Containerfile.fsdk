@@ -5,15 +5,10 @@ COPY buildstream/build_files/fsdk /build_files/fsdk
 COPY system_files/global /system_files/global
 COPY system_files/fsdk /system_files/fsdk
 
-FROM ubuntu:26.04 AS builder
+FROM ghcr.io/huntedraven7/blueprint:ubuntu AS builder
 
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
-        ca-certificates \
-        curl \
-        git \
-        make \
-        build-essential \
         python3 \
         python3-pip \
         jq \
@@ -33,7 +28,7 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     make -C /tmp/bootc bin install-all DESTDIR=/output && \
     rm -rf /tmp/bootc
 
-FROM ubuntu:26.04 AS system
+FROM ghcr.io/huntedraven7/blueprint:ubuntu AS system
 
 COPY --from=builder /output /
 

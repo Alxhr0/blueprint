@@ -34,6 +34,8 @@ PACKAGES=(
     libcap2-bin
     chrony
     iwd
+    golang-go
+    go-md2man
 )
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${PACKAGES[@]}"
