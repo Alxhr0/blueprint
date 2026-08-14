@@ -12,7 +12,7 @@ else
   mkdir -p /root
 fi
 
-mkdir -p /var/lib/dpkg /var/lib/apt/lists/partial
+mkdir -p /var/lib/dpkg /var/lib/apt/lists/partial /var/log/apt /var/log/journal /var/log
 
 apt-get update -y
 
