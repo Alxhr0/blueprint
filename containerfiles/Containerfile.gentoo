@@ -7,7 +7,6 @@ COPY system_files/gentoo /system_files/gentoo
 FROM gentoo/stage3:systemd AS builder
 
 RUN echo 'FEATURES="-manifest"' >> /etc/portage/make.conf && \
-    emerge --sync --quiet && \
     emerge --verbose dev-util/ostree net-misc/openssh sys-devel/gcc dev-util/pkgconf dev-vcs/git app-arch/cpio app-arch/xz-utils app-arch/bzip2
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
