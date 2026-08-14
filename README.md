@@ -23,7 +23,7 @@ To use any of these in your Containerfile do a `FROM ghcr.io/huntedraven/bluepri
 | arch | `containerfiles/Containerfile.arch` | Arch-based |
 | debian | `containerfiles/Containerfile.debian` | Debian-based |
 | gentoo | `containerfiles/Containerfile.gentoo` | Gentoo-based |
-| gentoo | `buildstream/Containerfile.fsdk` | Distroless FSDK-based |
+| fsdk | `buildstream/` | Distroless FSDK-based (BuildStream) |
 | opensuse | `containerfiles/Containerfile.opensuse` | OpenSUSE Tumbleweed-based |
 | ubuntu | `containerfiles/Containerfile.ubuntu` | Ubuntu 26.04-based |
 | server | `containerfiles/Containerfile.server` | headless/server |
