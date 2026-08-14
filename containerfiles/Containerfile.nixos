@@ -4,7 +4,7 @@ COPY build_files /
 COPY system_files/global /system_files/global
 COPY system_files/nixos /system_files/nixos
 
-FROM nixos/nixos:latest AS builder
+FROM nixos/nix:latest AS builder
 
 RUN nix-channel --update && \
     nix-env -iA nixos.bootc
@@ -12,7 +12,7 @@ RUN nix-channel --update && \
 COPY --from=ctx /build_files/nixos/build.sh /tmp/build.sh
 RUN /tmp/build.sh
 
-FROM nixos/nixos:latest AS system
+FROM nixos/nix:latest AS system
 
 COPY --from=builder /output /
 
