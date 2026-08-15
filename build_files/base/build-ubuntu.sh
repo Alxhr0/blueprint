@@ -40,6 +40,12 @@ PACKAGES=(
     go-md2man
 )
 
+# Prevent the kernel postinst (called by linux-image) from invoking
+# dracet via kernel-install or /etc/kernel/postinst.d — neither is
+# suppressed by --no-triggers because they are direct postinst calls,
+# not dpkg triggers. The explicit dracet --force below handles initramfs
+# generation with the correct ostree/bootc configuration.
+export KERNEL_INSTALL_INITRD_GENERATOR=""
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
     "${PACKAGES[@]}"
