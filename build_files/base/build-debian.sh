@@ -39,7 +39,6 @@ PACKAGES=(
     podman
     libcap2-bin
     chrony
-    intel-microcode
     passwd
 )
 
