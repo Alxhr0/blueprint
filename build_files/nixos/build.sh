@@ -169,7 +169,7 @@ nixos-rebuild build -I nixos=/root/.nix-defexpr/channels/nixos --flake /etc/nixo
 SYSTEM_PATH=$(readlink -f result)
 
 mkdir -p /sysroot/ostree/repo
-ostree init --mode=bare-user --no-fsync --path=/sysroot/ostree/repo
+ostree init --mode=bare-user --repo=/sysroot/ostree/repo
 
 ostree commit --repo=/sysroot/ostree/repo \
   --branch=blueprint/nixos \
@@ -178,7 +178,7 @@ ostree commit --repo=/sysroot/ostree/repo \
   --no-xattrs \
   "${SYSTEM_PATH}"
 
-ostree summary --repo=/sysroot/ostree/repo --update --ref=blueprint/nixos
+ostree summary --repo=/sysroot/ostree/repo --update
 
 mkdir -p /sysroot/ostree/deploy/blueprint/nixos/0
 
