@@ -5,6 +5,7 @@ cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/nixos"/. /
 
 nix-channel --add https://nixos.org/channels/nixos-26.05 nixos
+nix-channel --add https://nixos.org/channels/nixos-26.05 nixpkgs
 nix-channel --update
 
 mkdir -p /etc/nixos
@@ -161,9 +162,9 @@ cat > /etc/nixos/configuration.nix <<'EOF'
 }
 EOF
 
-export NIX_PATH="nixos-config=/etc/nixos/configuration.nix:${NIX_PATH:-}"
+export NIX_PATH="nixos-config=/etc/nixos/configuration.nix:nixpkgs=/root/.nix-defexpr/channels/nixpkgs:/root/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/root/channels"
 
-nixos-rebuild build --flake /etc/nixos#default 2>/dev/null || nixos-rebuild build
+nixos-rebuild build -I nixos=/root/.nix-defexpr/channels/nixos --flake /etc/nixos#default 2>/dev/null || nixos-rebuild build -I nixos=/root/.nix-defexpr/channels/nixos
 
 SYSTEM_PATH=$(readlink -f result)
 
