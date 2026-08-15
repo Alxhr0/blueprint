@@ -85,7 +85,7 @@ cat > /etc/nixos/configuration.nix <<'EOF'
     ltrace
     perf
     bpftrace
-    linuxPackages_latest.bpftool
+    bpftools
     iperf3
     netcat
     nmap
