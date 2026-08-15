@@ -14,7 +14,6 @@
     "project.conf",
     "Justfile",
     "include/",
-    "patches/",
     "elements/targets.json",
     "elements/freedesktop-sdk.bst",
     "elements/gnome-build-meta.bst",
