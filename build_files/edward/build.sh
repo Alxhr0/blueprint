@@ -54,7 +54,6 @@ PACKAGES=(
     docker-compose-v2
     podman
     flatpak
-    steam-installer
     nvidia-driver-595
     nvidia-utils-595
     nvidia-container-toolkit
