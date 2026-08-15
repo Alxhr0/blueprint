@@ -20,6 +20,9 @@ if ! grep -q '^\[cachyos\]' /etc/pacman.conf; then
 [cachyos]\nInclude = /etc/pacman.d/cachyos-mirrorlist\n' /etc/pacman.conf
 fi
 
+# Thank you for finding this Alx!
+sed -i 's/^Architecture = auto/Architecture = x86_64 x86_64_v3 x86_64-v4/' /etc/pacman.conf
+
 if ! grep -q '^DisableSandboxNetwork' /etc/pacman.conf; then
     sed -i '/^\[options\]/a DisableSandboxNetwork' /etc/pacman.conf
 fi
