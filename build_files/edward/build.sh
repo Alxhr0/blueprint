@@ -30,8 +30,12 @@ add-apt-repository -y multiverse
 add-apt-repository -y restricted
 add-apt-repository -y ppa:graphics-drivers/ppa
 
-curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/noble.tailscale-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/tailscale-archive-keyring.gpg
-curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/noble.tailscale-repo.sources -o /etc/apt/sources.list.d/tailscale.sources
+curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/resolute.noarmor.gpg -o /usr/share/keyrings/tailscale-archive-keyring.gpg
+curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/resolute.tailscale-keyring.list -o /etc/apt/sources.list.d/tailscale.list
+
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+curl -fsSL https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list -o /etc/apt/sources.list.d/nvidia-container-toolkit.list
+sed -i 's#^deb #deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] #' /etc/apt/sources.list.d/nvidia-container-toolkit.list
 
 apt-get update -y
 
@@ -47,12 +51,13 @@ PACKAGES=(
     wireplumber
     pulseaudio-utils
     docker.io
-    docker-compose
+    docker-compose-v2
     podman
     flatpak
     steam-installer
     nvidia-driver-595
     nvidia-utils-595
+    nvidia-container-toolkit
     tailscale
     curl
     git
