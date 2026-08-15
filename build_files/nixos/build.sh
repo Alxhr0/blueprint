@@ -9,17 +9,38 @@ nix-channel --update
 
 mkdir -p /etc/nixos
 cat > /etc/nixos/configuration.nix <<'EOF'
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   imports = [ ];
 
-  bootc.enable = true;
+  options = {
+    bootc.enable = lib.mkEnableOption "bootc (bootable container) support";
+    services.bootc = {
+      enable = lib.mkEnableOption "the bootc systemd services";
+      autoUpdate = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Whether to automatically fetch and apply bootc updates on a timer.";
+      };
+    };
+  };
+
+  config = lib.mkIf config.bootc.enable {
+    boot.bootspec.enable = true;
+    system.etc.overlay.enable = lib.mkDefault true;
+    environment.systemPackages = [ pkgs.bootc ];
+    systemd = lib.mkIf config.services.bootc.enable {
+      packages = [ pkgs.bootc ];
+      timers."bootc-fetch-apply-updates" = lib.mkIf config.services.bootc.autoUpdate {
+        wantedBy = [ "timers.target" ];
+      };
+    };
+  };
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   environment.systemPackages = with pkgs; [
-    bootc
     git
     curl
     wget
@@ -133,6 +154,8 @@ cat > /etc/nixos/configuration.nix <<'EOF'
     linux-pam
   ];
 
+  bootc.enable = true;
+
   services.bootc = {
     enable = true;
     autoUpdate = false;
@@ -144,7 +167,7 @@ EOF
 
 nixos-rebuild build --flake /etc/nixos#default 2>/dev/null || nixos-rebuild build
 
-SYSTEM_PATH=$(readlink -f /run/current-system)
+SYSTEM_PATH=$(readlink -f result)
 
 mkdir -p /sysroot/ostree/repo
 ostree init --mode=bare-user --no-fsync --path=/sysroot/ostree/repo

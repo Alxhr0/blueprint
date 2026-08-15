@@ -7,6 +7,11 @@ cp -avf "/ctx/system_files/arch"/. /
 
 sed -i 's/^#Include = \/etc\/pacman.conf.d\/\*.conf/Include = \/etc\/pacman.conf.d\/\*.conf/' /etc/pacman.conf
 
+# Enable the multilib repository (32-bit libraries) in the stock pacman.conf.
+sed -i -e 's|^#[[:space:]]*\[multilib\]|[multilib]|' \
+       -e 's|^#[[:space:]]*Include[[:space:]]*=[[:space:]]*/etc/pacman.d/mirrorlist|Include = /etc/pacman.d/mirrorlist|' \
+       /etc/pacman.conf
+
 # Build against the stock pacman layout first: archlinux:latest ships its
 # installed packages tracked in /var/lib/pacman, so /var paths must stay in
 # place until after every pacman operation.
