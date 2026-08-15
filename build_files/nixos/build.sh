@@ -73,7 +73,6 @@ cat > /etc/nixos/configuration.nix <<'EOF'
     buildah
     python3
     python314Packages.pip
-    pipx
     nodejs
     yarn
     rustc

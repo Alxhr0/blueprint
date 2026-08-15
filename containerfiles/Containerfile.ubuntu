@@ -39,3 +39,5 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     /ctx/base/build-ubuntu.sh
 
 LABEL containers.bootc 1
+
+RUN bootc container lint
