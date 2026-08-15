@@ -10,12 +10,20 @@ apt-get update -y
 PACKAGES=(
     btrfs-progs
     bubblewrap
+    cpio
+    dbus
     dosfstools
     e2fsprogs
+    efibootmgr
     fdisk
     firmware-linux-free
+    shadow
+    udev
+    amd-ucode
+    intel-ucode
     linux-image-generic
     netplan.io
+    network-manager
     libnss-resolve
     libnss-myhostname
     openssh-server
@@ -27,12 +35,14 @@ PACKAGES=(
     ostree
     sudo
     curl
+    wget
     unzip
     git
     ca-certificates
     dracut
     podman
     libcap2-bin
+    chrony
 )
 
 # Prevent the kernel postinst (called by linux-image) from invoking

@@ -12,9 +12,16 @@ apt-get update -y
 PACKAGES=(
     btrfs-progs
     bubblewrap
+    cpio
+    dbus
     dosfstools
     e2fsprogs
+    efibootmgr
     fdisk
+    shadow
+    udev
+    amd-ucode
+    intel-ucode
     linux-firmware
     linux-image-generic
     netplan.io

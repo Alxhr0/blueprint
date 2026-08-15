@@ -171,12 +171,18 @@ SYSTEM_PATH=$(readlink -f result)
 mkdir -p /sysroot/ostree/repo
 ostree init --mode=bare-user --repo=/sysroot/ostree/repo
 
-ostree commit --repo=/sysroot/ostree/repo \
-  --branch=blueprint/nixos \
-  --subject="Blueprint NixOS bootc image" \
-  --add-metadata-string="version=$(date +%Y%m%d)" \
-  --no-xattrs \
-  "${SYSTEM_PATH}"
+for i in 1 2 3 4 5; do
+  if ostree commit --repo=/sysroot/ostree/repo \
+    --branch=blueprint/nixos \
+    --subject="Blueprint NixOS bootc image" \
+    --add-metadata-string="version=$(date +%Y%m%d)" \
+    --no-xattrs \
+    "${SYSTEM_PATH}"; then
+    break
+  fi
+  echo "ostree commit failed (attempt $i), retrying..."
+  sleep 2
+done
 
 ostree summary --repo=/sysroot/ostree/repo --update
 
