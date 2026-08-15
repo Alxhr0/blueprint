@@ -69,6 +69,12 @@ rm -rf /{boot,home,root,srv,mnt,var,usr/local,opt}
 
 mkdir -p /sysroot /boot /usr/lib/ostree /var /var/lib
 
+mkdir -p /var/cache/apt/archives/partial
+mkdir -p /var/lib/apt/lists/partial
+mkdir -p /var/log/apt
+mkdir -p /var/lib/sgml-base
+mkdir -p /var/lib/xml-core
+
 ln -sT sysroot/ostree /ostree
 ln -sT var/roothome /root
 ln -sT var/srv /srv

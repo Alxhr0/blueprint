@@ -14,7 +14,8 @@ else
   mkdir -p /root
 fi
 
-mkdir -p /var/lib/apt/lists/partial
+mkdir -p /var/lib/apt/lists/partial /var/cache/apt/archives/partial
+mkdir -p /var/log/apt /var/lib/sgml-base /var/lib/xml-core
 
 if [ ! -e /var/lib/dpkg ] || [ -L /var/lib/dpkg ] && [ ! -e /var/lib/dpkg ]; then
   mkdir -p /var/lib
@@ -22,8 +23,6 @@ if [ ! -e /var/lib/dpkg ] || [ -L /var/lib/dpkg ] && [ ! -e /var/lib/dpkg ]; the
 fi
 
 apt-get update -y
-
-mkdir -p /var/cache/apt/archives/partial
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends software-properties-common
 
