@@ -17,10 +17,6 @@ PACKAGES=(
     efibootmgr
     fdisk
     firmware-linux-free
-    shadow
-    udev
-    amd-ucode
-    intel-ucode
     linux-image-generic
     netplan.io
     network-manager
@@ -43,6 +39,9 @@ PACKAGES=(
     podman
     libcap2-bin
     chrony
+    amd-microcode
+    intel-microcode
+    passwd
 )
 
 # Prevent the kernel postinst (called by linux-image) from invoking

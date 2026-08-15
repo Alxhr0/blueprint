@@ -18,10 +18,6 @@ PACKAGES=(
     e2fsprogs
     efibootmgr
     fdisk
-    shadow
-    udev
-    amd-ucode
-    intel-ucode
     linux-firmware
     linux-image-generic
     netplan.io
@@ -45,6 +41,9 @@ PACKAGES=(
     iwd
     golang-go
     go-md2man
+    amd-microcode
+    intel-microcode
+    passwd
 )
 
 # Prevent the kernel postinst (called by linux-image) from invoking
