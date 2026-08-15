@@ -22,7 +22,7 @@ printf '[gentoo]\npriority = 9959\nsync-uri = https://distfiles.gentoo.org/relea
 
 PACKAGES=(
     sys-kernel/gentoo-kernel-bin
-    linux-firmware
+    sys-kernel/linux-firmware
     sys-apps/systemd
     sys-kernel/dracut
     dev-util/ostree
@@ -38,8 +38,8 @@ PACKAGES=(
     net-wireless/iwd
     app-containers/skopeo
     app-containers/podman
-    sys-apps/sudo
-    sys-apps/chrony
+    app-admin/sudo
+    net-misc/chrony
     app-arch/cpio
     app-arch/xz-utils
     sys-apps/bubblewrap
