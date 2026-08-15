@@ -17,6 +17,10 @@ echo "*/* *" > /etc/portage/package.license/00-all
 mkdir -p /etc/portage/package.accept_keywords
 echo "*/* ~amd64" > /etc/portage/package.accept_keywords/00-all
 
+mkdir -p /etc/portage/package.use
+echo "net-firewall/nftables json" > /etc/portage/package.use/nftables
+echo "sys-kernel/installkernel dracut" > /etc/portage/package.use/installkernel
+
 mkdir -p /etc/portage/binrepos.conf
 printf '[gentoo]\npriority = 9959\nsync-uri = https://distfiles.gentoo.org/releases/amd64/binpackages/23.0/x86-64/\nverify-signature = false\nlocation = /var/cache/binhost/gentoo\n' > /etc/portage/binrepos.conf/gentoo.conf
 
