@@ -70,13 +70,35 @@ sed -i '/DisableSandboxNetwork/d' /etc/pacman.conf
 
 find /etc/ -name "*.pacnew" -type f -delete
 
-systemctl enable systemd-boot-update.service
-systemctl mask systemd-firstboot.service
-systemctl enable NetworkManager.service
-systemctl enable systemd-resolved.service
-systemctl enable systemd-timesyncd.service
+mkdir -p /usr/lib/systemd/system/sysinit.target.wants \
+         /usr/lib/systemd/system/multi-user.target.wants \
+         /usr/lib/systemd/system/timers.target.wants
 
-printf 'L! /etc/resolv.conf - - - - /run/systemd/resolve/stub-resolv.conf\n' > /usr/lib/tmpfiles.d/resolv-conf.conf
+# Enable services with /usr symlinks, not `systemctl enable`: in a bootc
+# image /etc is machine-local state that gets a three-way merge on upgrade,
+# so enablement dropped there is only a first-boot default that a later
+# image update cannot reliably re-assert. A /usr symlink tracks the image on
+# every upgrade like any other vendored file. `systemctl mask` below is the
+# deliberate exception: it must stay in /etc because pacman overwrites /usr
+# unit files on upgrade, silently restoring anything masked there.
+ln -sfn /usr/lib/systemd/system/systemd-boot-update.service \
+    /usr/lib/systemd/system/sysinit.target.wants/systemd-boot-update.service
+ln -sfn /usr/lib/systemd/system/NetworkManager.service \
+    /usr/lib/systemd/system/multi-user.target.wants/NetworkManager.service
+ln -sfn /usr/lib/systemd/system/systemd-resolved.service \
+    /usr/lib/systemd/system/sysinit.target.wants/systemd-resolved.service
+ln -sfn /usr/lib/systemd/system/systemd-timesyncd.service \
+    /usr/lib/systemd/system/sysinit.target.wants/systemd-timesyncd.service
+ln -sfn /usr/lib/systemd/system/arch-bootc-prune-esp.timer \
+    /usr/lib/systemd/system/timers.target.wants/arch-bootc-prune-esp.timer
+
+systemctl mask systemd-firstboot.service
+systemctl mask systemd-networkd-wait-online.service
+
+printf 'L! /etc/resolv.conf - - - - /run/systemd/resolve/stub-resolv.conf\n' \
+    > /usr/lib/tmpfiles.d/resolv-conf.conf
+printf 'z /etc/resolv.conf 0644 root root -\n' \
+    > /usr/lib/tmpfiles.d/resolv-conf-perms.conf
 
 KERNEL_VERSION="$(basename "$(find /usr/lib/modules -maxdepth 1 -type d | grep -v -E '\.img$' | tail -n 1)")"
 

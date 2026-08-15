@@ -29,4 +29,16 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
     /ctx/base/build-arch.sh
 
+# Fail the build (rather than shipping a broken image) if any systemd
+# enablement symlink created above is dangling, and verify the unit files
+# this repo ships parse correctly. Scans both /etc/systemd/system and
+# /usr/lib/systemd/system since the image enables services from both trees.
+RUN --mount=type=bind,source=system_files/arch/usr/lib/systemd/system,target=/tmp/shipped-units,ro \
+    dangling="$(find /etc/systemd/system /usr/lib/systemd/system -xtype l)" && \
+    if [ -n "$dangling" ]; then echo "error: dangling systemd enablement symlink(s):" >&2; printf '%s\n' "$dangling" >&2; exit 1; fi && \
+    units="$(find /tmp/shipped-units -maxdepth 1 -type f \( -name '*.service' -o -name '*.timer' \) -printf '%f ')" && \
+    if [ -n "$units" ]; then systemd-analyze verify $(printf '/usr/lib/systemd/system/%s ' $units); fi
+
 LABEL containers.bootc 1
+
+RUN bootc container lint
