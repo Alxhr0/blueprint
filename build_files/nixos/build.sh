@@ -8,12 +8,10 @@ nix-channel --add https://nixos.org/channels/nixos-26.05 nixos
 nix-channel --update
 
 mkdir -p /etc/nixos
-cat > /etc/nixos/configuration.nix <<'EOF'
+cat > /etc/nixos/bootc.nix <<'EOF'
 { config, lib, pkgs, ... }:
 
 {
-  imports = [ ];
-
   options = {
     bootc.enable = lib.mkEnableOption "bootc (bootable container) support";
     services.bootc = {
@@ -37,6 +35,16 @@ cat > /etc/nixos/configuration.nix <<'EOF'
       };
     };
   };
+}
+EOF
+
+cat > /etc/nixos/configuration.nix <<'EOF'
+{ config, lib, pkgs, ... }:
+
+{
+  imports = [
+    ./bootc.nix
+  ];
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
@@ -203,6 +211,7 @@ cp /etc/bootc.toml /output/etc/bootc/bootc.toml 2>/dev/null || true
 
 mkdir -p /output/etc/nixos
 cp /etc/nixos/configuration.nix /output/etc/nixos/configuration.nix
+cp /etc/nixos/bootc.nix /output/etc/nixos/bootc.nix
 cp /etc/nixos/flake.nix /output/etc/nixos/flake.nix 2>/dev/null || true
 cp /etc/nixos/lock.json /output/etc/nixos/lock.json 2>/dev/null || true
 
