@@ -82,7 +82,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          IMAGE_ID=$(sudo -E podman images --filter reference="blueprint:${{ matrix.image }}" --format '{{.ID}}')
+          IMAGE_ID=$(sudo -E podman images --filter reference="blueprint:${{ matrix.image }}" --format '{{.ID}}' | head -n1)
           sudo -E podman tag "${IMAGE_ID}" "blueprint:${{ matrix.image }}"
 
           for tag in ${ALIAS_TAGS}; do

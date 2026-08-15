@@ -82,7 +82,7 @@ jobs:
         run: |
           set -euo pipefail
           if [[ "${{ matrix.image }}" == "homepage" ]]; then
-            IMAGE_ID=$(sudo -E podman images --filter reference="homepage:latest" --format '{{.ID}}')
+            IMAGE_ID=$(sudo -E podman images --filter reference="homepage:latest" --format '{{.ID}}' | head -n1)
             sudo -E podman tag "${IMAGE_ID}" "homepage:latest"
             for tag in ${ALIAS_TAGS}; do
               if [[ "${tag}" != "latest" ]]; then
@@ -90,7 +90,7 @@ jobs:
               fi
             done
           else
-            IMAGE_ID=$(sudo -E podman images --filter reference="blueprint:${{ matrix.image }}" --format '{{.ID}}')
+            IMAGE_ID=$(sudo -E podman images --filter reference="blueprint:${{ matrix.image }}" --format '{{.ID}}' | head -n1)
             sudo -E podman tag "${IMAGE_ID}" "blueprint:${{ matrix.image }}"
             for tag in ${ALIAS_TAGS}; do
               if [[ "${tag}" != "${{ matrix.image }}" ]]; then

@@ -70,7 +70,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          IMAGE_ID=$(sudo -E podman images --filter reference="homepage:latest" --format '{{.ID}}')
+          IMAGE_ID=$(sudo -E podman images --filter reference="homepage:latest" --format '{{.ID}}' | head -n1)
           sudo -E podman tag "${IMAGE_ID}" "homepage:${source_sha}"
 
           for tag in ${ALIAS_TAGS}; do

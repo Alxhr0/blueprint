@@ -70,7 +70,7 @@ jobs:
           set -euo pipefail
           REGISTRY="${IMAGE_REGISTRY,,}"
           sudo -E podman pull "${REGISTRY}/blueprint:arch" || true
-          IMAGE_ID=$(sudo -E podman images --filter reference="${REGISTRY}/blueprint:arch" --format '{{.ID}}')
+          IMAGE_ID=$(sudo -E podman images --filter reference="${REGISTRY}/blueprint:arch" --format '{{.ID}}' | head -n1)
           if [[ -z "${IMAGE_ID}" ]]; then
             echo "Arch base image not found in registry, building locally..."
             sudo -E "$(command -v just)" build arch
