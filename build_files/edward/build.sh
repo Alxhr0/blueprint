@@ -24,7 +24,9 @@ fi
 
 apt-get update -y
 
-DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends software-properties-common
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    -o Dpkg::Options::="--no-triggers" \
+    software-properties-common
 
 add-apt-repository -y multiverse
 add-apt-repository -y restricted
@@ -69,7 +71,15 @@ PACKAGES=(
     gh
 )
 
-apt-get install -y --no-install-recommends "${PACKAGES[@]}"
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    -o Dpkg::Options::="--no-triggers" \
+    "${PACKAGES[@]}"
+
+# Triggers suppressed above so kernel/NVIDIA postinst scripts don't run dracut
+# with the ostree/bootc dracut modules before the ostree environment is ready.
+dpkg --configure -a
+update-ca-certificates 2>/dev/null || true
+ldconfig
 
 /ctx/core/nix-setup.sh
 

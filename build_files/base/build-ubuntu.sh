@@ -40,7 +40,17 @@ PACKAGES=(
     go-md2man
 )
 
-DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${PACKAGES[@]}"
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    -o Dpkg::Options::="--no-triggers" \
+    "${PACKAGES[@]}"
+
+# Triggers (dracut, ca-certificates, ldconfig) are suppressed so the kernel
+# postinst doesn't run dracut with the ostree/bootc modules before the ostree
+# environment is fully prepared. The explicit dracut call below handles the
+# initramfs build with the correct configuration.
+dpkg --configure -a
+update-ca-certificates 2>/dev/null || true
+ldconfig
 
 setcap cap_setuid+ep /usr/bin/newuidmap && chmod -s /usr/bin/newuidmap
 setcap cap_setgid+ep /usr/bin/newgidmap && chmod -s /usr/bin/newgidmap

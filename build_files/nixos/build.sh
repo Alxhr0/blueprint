@@ -74,7 +74,6 @@ cat > /etc/nixos/configuration.nix <<'EOF'
     python314Packages.pip
     pipx
     nodejs
-    npm
     yarn
     rustc
     cargo
@@ -86,7 +85,7 @@ cat > /etc/nixos/configuration.nix <<'EOF'
     ltrace
     perf
     bpftrace
-    bpftool
+    linuxPackages_latest.bpftool
     iperf3
     netcat
     nmap
@@ -116,25 +115,18 @@ cat > /etc/nixos/configuration.nix <<'EOF'
     bcache-tools
     nfs-utils
     cifs-utils
-    sshfs
     autofs5
     systemd
-    systemd-boot
-    systemd-resolved
-    systemd-networkd
-    systemd-timesyncd
     chrony
     ntp
     openssh
     sudo
-    pass
-    pass-otp
+    (pass.withExtensions (exts: [ exts.pass-otp ]))
     age
     sops
     gnupg
     pinentry
     pinentry-curses
-    pinentry-gtk2
     openssl
     libsecret
     keyutils
@@ -143,26 +135,19 @@ cat > /etc/nixos/configuration.nix <<'EOF'
     adcli
     realmd
     sssd
-    nsswitch
     pam_krb5
     pam_ldap
     pam_mount
-    ecryptfs
     encfs
     gocryptfs
-    cryfs
     veracrypt
-    truecrypt
-    luksipc
     clevis
     tang
-    cryptsetup-yubikey
     yubikey-manager
     yubico-pam
     pam_u2f
     oath-toolkit
     pamtester
-    libpam
     linux-pam
   ];
 
