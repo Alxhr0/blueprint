@@ -165,6 +165,8 @@ cat > /etc/nixos/configuration.nix <<'EOF'
 }
 EOF
 
+export NIX_PATH="nixos-config=/etc/nixos/configuration.nix:${NIX_PATH:-}"
+
 nixos-rebuild build --flake /etc/nixos#default 2>/dev/null || nixos-rebuild build
 
 SYSTEM_PATH=$(readlink -f result)
