@@ -25,7 +25,6 @@ cat > /etc/nixos/bootc.nix <<'EOF'
   };
 
   config = lib.mkIf config.bootc.enable {
-    boot.bootspec.enable = true;
     system.etc.overlay.enable = lib.mkDefault true;
     environment.systemPackages = [ pkgs.bootc ];
     systemd = lib.mkIf config.services.bootc.enable {
@@ -47,6 +46,11 @@ cat > /etc/nixos/configuration.nix <<'EOF'
   ];
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
+
+  boot.loader.grub.enable = false;
+  fileSystems."/" = {
+    device = "/dev/null";
+  };
 
   environment.systemPackages = with pkgs; [
     git
