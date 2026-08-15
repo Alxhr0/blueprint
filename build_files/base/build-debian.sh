@@ -24,7 +24,7 @@ PACKAGES=(
     systemd-boot
     systemd-resolved
     xfsprogs
-    libostree-dev
+    ostree
     sudo
     curl
     unzip

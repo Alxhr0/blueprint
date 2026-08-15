@@ -132,7 +132,7 @@ export:
     rm -rf .build-out
     just bst artifact checkout "oci/{{image_name}}.bst" --directory /src/.build-out
 
-    IMAGE_ID=$({{sudo_cmd}} podman pull -q oci:.build-out)
+    IMAGE_ID=$({{sudo_cmd}} podman pull -q oci:.build-out | head -n1)
     rm -rf .build-out
 
     DESC="Unified FSDK development image with Python, Skopeo, and Buildah"

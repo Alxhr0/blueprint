@@ -71,7 +71,8 @@ cat > /etc/nixos/configuration.nix <<'EOF'
     skopeo
     buildah
     python3
-    python3-pip
+    python314Packages.pip
+    pipx
     nodejs
     npm
     yarn
@@ -90,7 +91,6 @@ cat > /etc/nixos/configuration.nix <<'EOF'
     netcat
     nmap
     tcpdump
-    wireshark
     whois
     dnsutils
     iputils
@@ -127,7 +127,6 @@ cat > /etc/nixos/configuration.nix <<'EOF'
     ntp
     openssh
     sudo
-    doas
     pass
     pass-otp
     age
