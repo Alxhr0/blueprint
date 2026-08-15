@@ -125,7 +125,6 @@ cat > /etc/nixos/configuration.nix <<'EOF'
     age
     sops
     gnupg
-    pinentry
     pinentry-curses
     openssl
     libsecret
