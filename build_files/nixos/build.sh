@@ -158,6 +158,7 @@ cat > /etc/nixos/configuration.nix <<'EOF'
     autoUpdate = false;
   };
 
+  nixpkgs.config.allowUnfree = true;
   system.stateVersion = "26.05";
 }
 EOF
