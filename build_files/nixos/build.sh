@@ -188,6 +188,8 @@ ostree summary --repo=/sysroot/ostree/repo --update
 
 mkdir -p /sysroot/ostree/deploy/blueprint/nixos/0
 
+rm -rf /root /srv /mnt /opt /home /usr/local
+
 ln -sT sysroot/ostree /ostree
 ln -sT var/roothome /root
 ln -sT var/srv /srv
