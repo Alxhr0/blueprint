@@ -198,6 +198,8 @@ ln -sT var/opt /opt
 ln -sT var/home /home
 ln -sT var/usrlocal /usr/local
 
+mkdir -p /usr/lib/tmpfiles.d
+
 printf 'd /var/home 0755 root root -\nd /var/srv 0755 root root -\nd /var/mnt 0755 root root -\nd /var/opt 0755 root root -\nd /var/usrlocal 0755 root root -\nd /var/roothome 0700 root root -\nd /run/media 0755 root root -\n' > /usr/lib/tmpfiles.d/bootc-base-dirs.conf
 
 printf '[composefs]\nenabled = yes\n[sysroot]\nreadonly = true\n' > /usr/lib/ostree/prepare-root.conf
