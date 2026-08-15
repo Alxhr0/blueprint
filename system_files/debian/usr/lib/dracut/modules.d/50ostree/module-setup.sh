@@ -24,11 +24,11 @@ installkernel() {
 }
 
 check() {
-    if [[ -x $systemdutildir/systemd ]] && [[ -x /usr/lib/ostree/ostree-prepare-root ]]; then
-       return 255
-    fi
-
-    return 1
+    # Always return 0 so the module is unconditionally included when
+    # explicitly requested via add_dracutmodules. The upstream ostree
+    # check() returns 255, which is only accepted by newer dracut versions
+    # (056+) for explicitly-added modules. Debian trixie ships dracut 106.
+    return 0
 }
 
 depends() {
