@@ -43,7 +43,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 # postinst doesn't run dracut with the ostree/bootc modules before the ostree
 # environment is fully prepared. The explicit dracut call below handles the
 # initramfs build with the correct configuration.
-dpkg --configure -a
+dpkg --configure -a --no-triggers
 update-ca-certificates 2>/dev/null || true
 ldconfig
 
