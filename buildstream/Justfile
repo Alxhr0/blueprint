@@ -149,7 +149,7 @@ export:
     LABEL_ARGS+=(--label "io.projectbluefin.fsdk.ref={{fsdk_ref}}")
 
     printf 'FROM %s\n' "$IMAGE_ID" \
-      | {{sudo_cmd}} podman build --pull=never --squash-all "${LABEL_ARGS[@]}" -t "${FINAL_REF}" -f - .
+      | {{sudo_cmd}} podman build --pull=never --squash-all "${LABEL_ARGS[@]}" -t "${FINAL_REF}" -t "blueprint:{{image_name}}" -f - .
     echo "==> Built ${FINAL_REF}"
 
 [group('build')]

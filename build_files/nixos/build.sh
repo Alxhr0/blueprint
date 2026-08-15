@@ -50,6 +50,7 @@ cat > /etc/nixos/configuration.nix <<'EOF'
   boot.loader.grub.enable = false;
   fileSystems."/" = {
     device = "/dev/null";
+    fsType = "tmpfs";
   };
 
   environment.systemPackages = with pkgs; [
