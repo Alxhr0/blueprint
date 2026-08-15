@@ -10,7 +10,8 @@ RUN nix-channel --update && \
     nix-channel --add https://nixos.org/channels/nixos-26.05 nixos && \
     nix-channel --add https://nixos.org/channels/nixos-26.05 nixpkgs && \
     nix-channel --update && \
-    NIX_PATH="nixpkgs=/root/.nix-defexpr/channels/nixpkgs:/nix/var/nix/profiles/per-user/root/channels nix-env -iA nixpkgs.bootc nixpkgs.ostree nixpkgs.nixos-rebuild
+    export NIX_PATH=nixpkgs=/root/.nix-defexpr/channels/nixpkgs:/nix/var/nix/profiles/per-user/root/channels && \
+    nix-env -iA nixpkgs.bootc nixpkgs.ostree nixpkgs.nixos-rebuild
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
