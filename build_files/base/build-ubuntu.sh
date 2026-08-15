@@ -41,7 +41,6 @@ PACKAGES=(
     iwd
     golang-go
     go-md2man
-    amd-microcode
     intel-microcode
     passwd
 )
