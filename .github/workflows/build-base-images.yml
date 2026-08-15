@@ -51,7 +51,9 @@ jobs:
         run: |
           set -euo pipefail
           if [[ "${{ matrix.image }}" == "fsdk" ]]; then
-            sudo -E "$(command -v just)" build-fsdk
+            # sudo's secure_path strips PATH (even with -E), hiding just from
+            # the recipe's nested `just build`; restore it explicitly.
+            sudo env "PATH=${PATH}" "$(command -v just)" build-fsdk
           else
             sudo -E "$(command -v just)" build "${{ matrix.image }}"
           fi
