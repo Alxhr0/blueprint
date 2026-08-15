@@ -1,5 +1,5 @@
-#!/bin/bash
-set -ouex pipefail
+#!/bin/sh
+set -eux
 
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/nixos"/. /
