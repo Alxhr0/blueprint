@@ -6,6 +6,9 @@ PKGS_TOML="/run/context/build_scripts/packages/base.toml"
 
 MAJOR_VERSION_NUMBER="$(sh -c '. /usr/lib/os-release ; echo ${VERSION_ID%.*}')"
 
+# Install dnf plugins core first (provides config-manager)
+dnf -y install dnf-plugins-core
+
 # Enable CRB (PowerTools/EPEL equivalent for AlmaLinux)
 dnf config-manager --set-enabled crb
 

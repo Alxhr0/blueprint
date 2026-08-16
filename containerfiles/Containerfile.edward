@@ -10,7 +10,7 @@ COPY brew /brew
 COPY build_files/edward /build_scripts
 COPY image-versions.yaml /image-versions.yaml
 
-FROM quay.io/almalinuxorg/almalinux-bootc@sha256:cdbd976f38d0e58b8e42252f925c997116c51c06fb8fe1bd2057f9c3474fb4bf
+FROM quay.io/almalinuxorg/almalinux-bootc@sha256:afd5a14361c46b892358f3b12d54d501cd68011b30c4db9f8362cf5e938d1371
 
 ARG ENABLE_DX="${ENABLE_DX:-0}"
 ARG ENABLE_NVIDIA="${ENABLE_NVIDIA:-1}"
