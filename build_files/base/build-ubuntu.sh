@@ -122,12 +122,20 @@ chmod +x /etc/kernel/postinst.d/kdump-tools /etc/kernel/postinst.d/dracut
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
-    "${PACKAGES[@]}"
+    "${PACKAGES[@]}" || true
 
-# Triggers (dracut, ca-certificates, ldconfig) are suppressed so the kernel
-# postinst doesn't run dracut with the ostree/bootc modules before the ostree
-# environment is fully prepared. The explicit dracut call below handles the
-# initramfs build with the correct configuration.
+# dracut and cryptsetup-initramfs postinst scripts run dracut directly,
+# bypassing the stubs above. Replace them with stubs so dpkg --configure
+# doesn't trigger premature initramfs generation before the ostree/bootc
+# environment is fully prepared. The explicit dracut --force below handles
+# the initramfs build with the correct configuration.
+for pkg in dracut cryptsetup-initramfs; do
+    if [ -f "/var/lib/dpkg/info/${pkg}.postinst" ]; then
+        printf '#!/bin/sh\nexit 0\n' > "/var/lib/dpkg/info/${pkg}.postinst"
+        chmod +x "/var/lib/dpkg/info/${pkg}.postinst"
+    fi
+done
+
 dpkg --configure -a --no-triggers
 update-ca-certificates 2>/dev/null || true
 ldconfig
