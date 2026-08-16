@@ -24,6 +24,17 @@ packages = [
     "xdg-desktop-portal-gnome",
     "xdg-user-dirs-gtk",
     "yelp",
+    "NetworkManager-glib",
+    "NetworkManager-wifi",
+    "polkit",
+    "pipewire",
+    "wireplumber",
+    "pulseaudio-utils",
+    "xdg-desktop-portal",
+    "xdg-desktop-portal-gtk",
+    "gnome-keyring",
+    "seahorse",
+    "nautilus-extensions",
 ]
 
 [gnome_excluded]
