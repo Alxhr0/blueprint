@@ -42,13 +42,7 @@ sed -i 's#^deb #deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyr
 apt-get update -y
 
 PACKAGES=(
-    ubuntu-desktop
-    gdm3
     firefox
-    gnome-terminal
-    nautilus
-    gnome-control-center
-    gnome-shell
     pipewire
     wireplumber
     pulseaudio-utils
@@ -70,9 +64,14 @@ PACKAGES=(
     nodejs
     npm
     gh
+    login 
+    cups 
+    hplip 
+    gir1.2-gda-5.0 
+    ubuntu-desktop-minimal 
 )
 
-DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-missing --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
     "${PACKAGES[@]}"
 
