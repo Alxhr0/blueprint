@@ -38,10 +38,9 @@ PACKAGES=(
     git
     jq
     python3
-    python3-pip
+    python-pip
     nodejs
     npm
-    gh
     hplip
     cups
     sudo
@@ -49,8 +48,8 @@ PACKAGES=(
     iwd
     bubblewrap
     cpio
-    libcap-progs
-    kernel-firmware
+    libcap
+    linux-firmware
     btrfs-progs
     dosfstools
     e2fsprogs
@@ -83,7 +82,6 @@ PACKAGES=(
     gcc
     make
     rust
-    cargo
 )
 
 pacman -S --noconfirm --needed "${PACKAGES[@]}"
