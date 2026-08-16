@@ -24,6 +24,7 @@ echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf
 pacman -Syu --noconfirm
 
 PACKAGES=(
+    gnome
     firefox
     pipewire
     wireplumber
@@ -39,8 +40,6 @@ PACKAGES=(
     jq
     python3
     python-pip
-    nodejs
-    npm
     hplip
     cups
     sudo
@@ -50,6 +49,7 @@ PACKAGES=(
     cpio
     libcap
     linux-firmware
+    linux-headers
     btrfs-progs
     dosfstools
     e2fsprogs
@@ -62,14 +62,6 @@ PACKAGES=(
     mkinitcpio
     nvidia-open
     nvidia-utils
-    plasma
-    kdeplasma-addons
-    breeze
-    sddm
-    konsole
-    dolphin
-    kdeconnect
-    plasma-login-manager
     ffmpeg
     fwupd
     fzf
@@ -87,10 +79,14 @@ pacman -S --noconfirm --needed "${PACKAGES[@]}"
 # sed -i 's/^#\[kde-unstable\]/[kde-unstable]/' /etc/pacman.conf.d/kde-unstable.conf
 # sed -i 's/^#Include = \/etc\/pacman.d\/mirrorlist/Include = \/etc\/pacman.d\/mirrorlist/' /etc/pacman.conf.d/kde-unstable.conf
 
+# Uncomment to enable GNOME Unstable repository for latest GNOME packages
+# sed -i 's/^#\[gnome-unstable\]/[gnome-unstable]/' /etc/pacman.conf.d/gnome-unstable.conf
+# sed -i 's/^#Include = \/etc\/pacman.d\/mirrorlist/Include = \/etc\/pacman.d\/mirrorlist/' /etc/pacman.conf.d/gnome-unstable.conf
+
 flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
 systemctl set-default graphical.target
-systemctl enable sddm
+systemctl enable gdm
 systemctl enable chronyd sshd iwd
 systemctl enable tailscaled
 systemctl enable docker
