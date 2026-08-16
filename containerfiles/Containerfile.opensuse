@@ -21,3 +21,5 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     /ctx/base/build-opensuse.sh
 
 LABEL containers.bootc 1
+
+RUN bootc container lint

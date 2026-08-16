@@ -58,10 +58,11 @@ ln -sT var/opt /opt
 ln -sT var/home /home
 ln -sT var/usrlocal /usr/local
 
-KVER=$(basename "$(ls /usr/lib/modules | head -n 1)")
-dracut --force --no-hostonly --reproducible --zstd --verbose --kver "$KVER" "/usr/lib/modules/$KVER/initramfs.img"
+cp /boot/vmlinuz-* "$(find /usr/lib/modules -maxdepth 1 -mindepth 1 -type d | tail -n 1)/vmlinuz"
 
+KVER=$(basename "$(find /usr/lib/modules -maxdepth 1 -mindepth 1 -type d | tail -n 1)")
 printf '[composefs]\nenabled = yes\n[sysroot]\nreadonly = true\n' > /usr/lib/ostree/prepare-root.conf
+dracut --force --no-hostonly --reproducible --zstd --verbose --kver "$KVER" "/usr/lib/modules/$KVER/initramfs.img"
 
 printf 'd /var/home 0755 root root -\nd /var/srv 0755 root root -\nd /var/mnt 0755 root root -\nd /var/opt 0755 root root -\nd /var/usrlocal 0755 root root -\nd /var/roothome 0700 root root -\nd /run/media 0755 root root -\n' > /usr/lib/tmpfiles.d/bootc-base-dirs.conf
 
