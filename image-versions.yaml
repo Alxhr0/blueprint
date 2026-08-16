@@ -1,0 +1,12 @@
+images:
+  - name: almalinux-bootc
+    image: quay.io/almalinuxorg/almalinux-bootc
+    tag: 10
+    digest: sha256:cdbd976f38d0e58b8e42252f925c997116c51c06fb8fe1bd2057f9c3474fb4bf
+  - name: brew
+    image: ghcr.io/ublue-os/brew
+    tag: latest
+    digest: sha256:de0391c67209703bdf1249079c8d478d44eff864d62e7ec6f12aaa382bdf21df
+
+downloads:
+  uupd: "v1.4.0"

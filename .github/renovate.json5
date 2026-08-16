@@ -1,23 +1,38 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:best-practices",
-  ],
-
+  "extends": ["config:best-practices"],
   "rebaseWhen": "never",
+
+  "schedule": ["on the 1st of each month"],
 
   "customManagers": [
     {
       "customType": "regex",
+      "fileMatch": ["^image-versions\\.yaml$"],
+      "matchStrings": [
+        "- name: almalinux-bootc\n    image: quay\\.io/almalinuxorg/almalinux-bootc\n    tag: (?<currentValue>\\S+)\n    digest: (?<currentDigest>\\S+)"
+      ],
+      "datasourceTemplate": "docker",
+      "lookupNameTemplate": "quay.io/almalinuxorg/almalinux-bootc"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^image-versions\\.yaml$"],
+      "matchStrings": [
+        "- name: brew\n    image: ghcr\\.io/ublue-os/brew\n    tag: (?<currentValue>\\S+)\n    digest: (?<currentDigest>\\S+)"
+      ],
+      "datasourceTemplate": "docker",
+      "lookupNameTemplate": "ghcr.io/ublue-os/brew"
+    },
+    {
+      "customType": "regex",
       "fileMatch": ["^containerfiles/Containerfile\\.edward$"],
       "matchStrings": [
-        "ARG AKMODS_TAG=\"(?<currentValue>[^\"]+)\"",
+        "FROM quay\\.io/almalinuxorg/almalinux-bootc@(?<currentDigest>\\S+)"
       ],
-      "depNameTemplate": "ublue-os akmods (OGC kernel)",
       "datasourceTemplate": "docker",
-      "lookupNameTemplate": "ghcr.io/ublue-os/akmods",
-      "versioningTemplate": "regex:^ogc-(?<compatibility>\\d+)-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+).*\\.x86_64$",
-    },
+      "lookupNameTemplate": "quay.io/almalinuxorg/almalinux-bootc"
+    }
   ],
 
   "packageRules": [
@@ -29,7 +44,7 @@
       "enabled": false,
       "matchUpdateTypes": ["digest", "pinDigest", "pin"],
       "matchDepTypes": ["container"],
-      "matchFileNames": [".github/workflows/**.yaml", ".github/workflows/**.yml"],
-    },
+      "matchFileNames": [".github/workflows/**.yaml", ".github/workflows/**.yml"]
+    }
   ]
 }

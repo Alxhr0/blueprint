@@ -95,22 +95,26 @@ sudoif command *args:
 # This will build an image 'myimage:mytag'
 #
 
+[private]
+_ensure-yq:
+    #!/usr/bin/env bash
+    if ! command -v yq &> /dev/null; then
+        echo "Missing requirement: 'yq' is not installed."
+        echo "Please install yq (e.g. 'brew install yq')"
+        exit 1
+    fi
+
 # Build the image using the specified parameters
-# target_image is a variant key: the name of a containerfiles/Containerfile.<name> + images/<name>.env
-# (e.g. edward, aira, server). Every variant is tagged ${IMAGE_NAME}:${DEFAULT_TAG},
-# e.g. blueprint:edward, blueprint:aira, blueprint:server.
-build $target_image="" $tag="":
+build $target_image="" $tag="" $dx="0" $nvidia="1" $kernel_pin="" $gnome_version="50" $almalinux_version="10": _ensure-yq
     #!/usr/bin/env bash
 
-    set -euox pipefail
+    set -euo pipefail
 
-    # The primary variant is the env file's stem (e.g. edward)
     PRIMARY_STEM="$(basename "{{ primary_env }}" .env)"
     if [[ -z "${target_image}" ]]; then
         target_image="${PRIMARY_STEM}"
     fi
 
-    # Load shared defaults from the primary image env, then this variant's env if it exists
     set -a
     source "{{ primary_env }}"
     if [[ -f "images/${target_image}.env" && "images/${target_image}.env" != "{{ primary_env }}" ]]; then
@@ -118,19 +122,37 @@ build $target_image="" $tag="":
     fi
     set +a
 
-    # Pick the containerfile for this variant (containerfiles/Containerfile.<name> or the primary variant's)
     CONTAINERFILE="containerfiles/Containerfile.${PRIMARY_STEM}"
     if [[ -f "containerfiles/Containerfile.${target_image}" ]]; then
         CONTAINERFILE="containerfiles/Containerfile.${target_image}"
     fi
 
-    # Explicit tag arg wins, otherwise use the variant's DEFAULT_TAG
     TAG="${DEFAULT_TAG}"
     if [[ -n "${tag}" ]]; then
         TAG="${tag}"
     fi
 
+    ver="${tag}.$(date +%Y%m%d)"
+
+    brew_image_sha=$(yq -r '.images[] | select(.name == "brew") | .digest' image-versions.yaml)
+    brew_image_ref="ghcr.io/ublue-os/brew:latest@${brew_image_sha}"
+
     BUILD_ARGS=()
+    BUILD_ARGS+=("--build-arg" "BREW_IMAGE_REF=${brew_image_ref}")
+    BUILD_ARGS+=("--build-arg" "MAJOR_VERSION={{ almalinux_version }}")
+    BUILD_ARGS+=("--build-arg" "IMAGE_NAME=${IMAGE_NAME}")
+    BUILD_ARGS+=("--build-arg" "IMAGE_VENDOR=${REPO_ORGANIZATION}")
+    BUILD_ARGS+=("--build-arg" "ENABLE_DX={{ dx }}")
+    BUILD_ARGS+=("--build-arg" "ENABLE_NVIDIA={{ nvidia }}")
+    BUILD_ARGS+=("--build-arg" "GNOME_VERSION={{ gnome_version }}")
+    BUILD_ARGS+=("--build-arg" "AKMODS_VERSION=almalinux-stable-10")
+    if [[ -n "${kernel_pin}" ]]; then
+        BUILD_ARGS+=("--build-arg" "AKMODS_VERSION=almalinux-stable-10-${kernel_pin}")
+    fi
+    if [[ -z "$(git status -s)" ]]; then
+        BUILD_ARGS+=("--build-arg" "SHA_HEAD_SHORT=$(git rev-parse --short HEAD)")
+    fi
+
     LABELS=()
     if [[ -z "$(git status -s)" ]]; then
         GIT_SHA=$(git rev-parse --short HEAD)
@@ -140,9 +162,6 @@ build $target_image="" $tag="":
         LABELS+=("--label" "org.opencontainers.image.url=https://github.com/${REPO_ORGANIZATION}/${IMAGE_NAME}/tree/${GIT_SHA}")
         LABELS+=("--label" "org.opencontainers.image.version=${DEFAULT_TAG}.$(date +%Y%m%d)-${GIT_SHA}")
     fi
-
-    # Image metadata for https://artifacthub.io/ - This is optional but is highly recommended so we all can get a index of all the custom images
-    # The metadata by itself is not going to do anything, you choose if you want your image to be on ArtifactHub or not.
     LABELS+=("--label" "io.artifacthub.package.deprecated=false")
     LABELS+=("--label" "io.artifacthub.package.keywords=${IMAGE_KEYWORDS}")
     LABELS+=("--label" "io.artifacthub.package.license=Apache-2.0")
@@ -153,8 +172,7 @@ build $target_image="" $tag="":
     LABELS+=("--label" "org.opencontainers.image.title=${IMAGE_NAME}")
     LABELS+=("--label" "org.opencontainers.image.vendor=${REPO_ORGANIZATION}")
 
-    # This actually builds the image!
-    PODMAN_BUILD_ARGS=("${BUILD_ARGS[@]}" "${LABELS[@]}" --pull=newer --tag "${IMAGE_NAME}:${TAG}" --file "${CONTAINERFILE}")
+    PODMAN_BUILD_ARGS=("${BUILD_ARGS[@]}" "${LABELS[@]}" "--pull=newer" "--tag" "${IMAGE_NAME}:${TAG}" "--file" "${CONTAINERFILE}")
 
     podman build "${PODMAN_BUILD_ARGS[@]}" .
 

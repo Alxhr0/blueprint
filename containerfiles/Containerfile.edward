@@ -1,25 +1,33 @@
+ARG BREW_IMAGE_REF
+
+FROM ${BREW_IMAGE_REF} AS brew
+
 FROM scratch AS ctx
-COPY build_files /
-COPY system_files/global /system_files/global
-COPY system_files/edward /system_files/edward
-COPY system_files/arch /system_files/arch
 
-FROM ghcr.io/huntedraven7/blueprint:arch
+COPY --from=brew /system_files /files
+COPY system_files /files
+COPY brew /brew
+COPY build_files/edward /build_scripts
+COPY image-versions.yaml /image-versions.yaml
 
-COPY --from=ghcr.io/ublue-os/brew:latest /system_files /
-RUN --mount=type=cache,dst=/var/cache \
-    --mount=type=cache,dst=/var/log \
-    --mount=type=tmpfs,dst=/tmp \
-    /usr/bin/systemctl preset brew-setup.service && \
-    /usr/bin/systemctl preset brew-update.timer && \
-    /usr/bin/systemctl preset brew-upgrade.timer
+FROM quay.io/almalinuxorg/almalinux-bootc@sha256:cdbd976f38d0e58b8e42252f925c997116c51c06fb8fe1bd2057f9c3474fb4bf
 
-COPY brew/packages-edward.Brewfile /usr/share/ublue-os/homebrew/preinstall.d/packages-edward.Brewfile
+ARG ENABLE_DX="${ENABLE_DX:-0}"
+ARG ENABLE_NVIDIA="${ENABLE_NVIDIA:-1}"
+ARG GNOME_VERSION="${GNOME_VERSION:-50}"
+ARG IMAGE_NAME="${IMAGE_NAME:-edward}"
+ARG IMAGE_VENDOR="${IMAGE_VENDOR:-huntedraven7}"
+ARG MAJOR_VERSION="${MAJOR_VERSION:-10}"
+ARG SHA_HEAD_SHORT="${SHA_HEAD_SHORT:-deadbeef}"
 
-RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
-    --mount=type=tmpfs,dst=/tmp \
-    /ctx/edward/build.sh
+RUN --mount=type=tmpfs,dst=/opt \
+  --mount=type=tmpfs,dst=/tmp \
+  --mount=type=tmpfs,dst=/var \
+  --mount=type=tmpfs,dst=/boot \
+  --mount=type=bind,from=ctx,source=/,target=/run/context \
+  /run/context/build_scripts/build.sh
+
+RUN rm -rf /opt && ln -s /var/opt /opt
 
 LABEL containers.bootc 1
-
 RUN bootc container lint

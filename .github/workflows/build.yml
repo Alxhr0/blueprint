@@ -59,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [aira, server, edward]
+        image: [aira, server]
 
     permissions:
       contents: read

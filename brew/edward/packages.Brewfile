@@ -1,5 +1,4 @@
 tap "ublue-os/tap", trusted: true
-tap "frostyard/tap", trusted: true
 tap "Kilo-Org/tap", trusted: true
 tap "ublue-os/experimental-tap", trusted: true
 
@@ -9,8 +8,6 @@ cask "ublue-os/tap/goose-linux"
 
 cask "ublue-os/experimental-tap/emacs-app-linux"
 cask "ublue-os/experimental-tap/opencode-desktop-linux"
-
-cask "frostyard/tap/chairlift"
 
 brew "kilo-org/tap/kilo"
 

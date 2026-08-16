@@ -1,0 +1,5 @@
+tap "ublue-os/tap", trusted: true
+tap "Kilo-Org/tap", trusted: true
+tap "ublue-os/experimental-tap", trusted: true
+
+import "edward/packages.Brewfile"
