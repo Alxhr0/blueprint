@@ -85,6 +85,10 @@ PACKAGES=(
     systemd-oomd
     systemd-resolved
     tpm2-tools
+    systemd-cryptenroll
+    snapd
+    apparmor
+    apparmor-utils
     unzip
     wayland-utils
     wget
@@ -120,14 +124,6 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
     "${PACKAGES[@]}"
 
-# systemd-cryptenroll (needed to enroll LUKS TPM2 keyslots) ships in a
-# separate package on resolute/26.04; install it when present.
-if apt-cache show systemd-cryptsetup 2>/dev/null | grep -q '^Package:'; then
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        -o Dpkg::Options::="--no-triggers" \
-        systemd-cryptsetup
-fi
-
 # Triggers (dracut, ca-certificates, ldconfig) are suppressed so the kernel
 # postinst doesn't run dracut with the ostree/bootc modules before the ostree
 # environment is fully prepared. The explicit dracut call below handles the
@@ -141,7 +137,7 @@ setcap cap_setgid+ep /usr/bin/newgidmap && chmod -s /usr/bin/newgidmap
 
 cp /boot/vmlinuz-* "$(find /usr/lib/modules -maxdepth 1 -type d | tail -n 1)/vmlinuz"
 
-systemctl enable NetworkManager systemd-resolved ssh
+systemctl enable NetworkManager systemd-resolved ssh apparmor snapd
 systemctl mask systemd-firstboot.service
 
 # L+! rather than L!: Ubuntu's base ships a 0-byte /etc/resolv.conf, which a

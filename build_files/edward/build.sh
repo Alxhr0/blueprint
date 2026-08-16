@@ -91,6 +91,7 @@ mkdir -p /var/roothome
 dconf update
 
 systemctl enable gdm3
+systemctl set-default graphical.target
 systemctl enable docker
 systemctl enable podman
 systemctl enable tailscaled

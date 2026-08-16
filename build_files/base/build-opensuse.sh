@@ -12,7 +12,7 @@ zypper install -y \
     systemd \
     dracut \
     ostree \
-    btrfs-progs \
+    btrfsprogs \
     dosfstools \
     e2fsprogs \
     xfsprogs \
@@ -26,9 +26,7 @@ zypper install -y \
     iwd \
     bubblewrap \
     cpio \
-    glib2 \
-    libcap-progs \
-    libopenssl1_1
+    libcap-progs
 
 if systemctl list-unit-files | grep -q '^systemd-networkd.service'; then
     systemctl enable systemd-networkd
