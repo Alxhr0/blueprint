@@ -80,12 +80,11 @@ PACKAGES=(
     skopeo
     sudo
     systemd
-    systemd-boot
+    systemd-boot*
     systemd-boot-efi
     systemd-oomd
     systemd-resolved
     tpm2-tools
-    systemd-cryptenroll
     snapd
     apparmor
     apparmor-utils
@@ -131,6 +130,14 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 dpkg --configure -a --no-triggers
 update-ca-certificates 2>/dev/null || true
 ldconfig
+
+# systemd-cryptenroll (needed to enroll LUKS TPM2 keyslots) ships in a
+# separate package on some releases; install it when present.
+if apt-cache show systemd-cryptenroll 2>/dev/null | grep -q '^Package:'; then
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        -o Dpkg::Options::="--no-triggers" \
+        systemd-cryptenroll
+fi
 
 setcap cap_setuid+ep /usr/bin/newuidmap && chmod -s /usr/bin/newuidmap
 setcap cap_setgid+ep /usr/bin/newgidmap && chmod -s /usr/bin/newgidmap
