@@ -168,6 +168,21 @@ nixos-rebuild build -I nixos=/root/.nix-defexpr/channels/nixos --flake /etc/nixo
 
 SYSTEM_PATH=$(readlink -f result)
 
+mkdir -p /boot
+
+KERNEL="$(find /nix/store -maxdepth 2 -name 'bzImage' -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -n1 | cut -d' ' -f2)"
+if [ -n "$KERNEL" ]; then
+    MODDIR="$(dirname "$KERNEL")/lib/modules"
+    KVER="$(find "$MODDIR" -maxdepth 1 -type d ! -name '.' | head -n1 | xargs basename)"
+    if [ -n "$KVER" ]; then
+        mkdir -p "/usr/lib/modules/${KVER}"
+        cp "$KERNEL" "/usr/lib/modules/${KVER}/vmlinuz"
+        if [ -d "$MODDIR/$KVER" ]; then
+            cp -r "$MODDIR/$KVER"/. "/usr/lib/modules/${KVER}/"
+        fi
+    fi
+fi
+
 mkdir -p /sysroot/ostree/repo
 ostree init --mode=bare-user --repo=/sysroot/ostree/repo
 
