@@ -3,7 +3,6 @@ set -ouex pipefail
 
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/edward"/. /
-cp -avf "/ctx/system_files/arch"/. /
 
 if [ -L /root ]; then
   target=$(readlink -f /root)
@@ -24,7 +23,6 @@ echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf
 pacman -Syu --noconfirm
 
 PACKAGES=(
-    gnome
     firefox
     pipewire
     wireplumber
@@ -71,6 +69,15 @@ PACKAGES=(
     gcc
     make
     rust
+    waybar
+    awww
+    swaybg
+    sway
+    hyprland
+    niri
+    quickshell
+    plasma
+    plasma-login-manager
 )
 
 pacman -S --noconfirm --needed "${PACKAGES[@]}"
@@ -86,7 +93,7 @@ pacman -S --noconfirm --needed "${PACKAGES[@]}"
 flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
 systemctl set-default graphical.target
-systemctl enable gdm
+systemctl enable plasmalogin
 systemctl enable chronyd sshd iwd
 systemctl enable tailscaled
 systemctl enable docker
