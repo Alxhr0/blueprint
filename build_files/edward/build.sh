@@ -61,11 +61,7 @@ PACKAGES=(
     ostree
     nvidia-open
     nvidia-utils
-    lib32-nvidia-utils
-    plasma-desktop
-    plasma-workspace
-    plasma-nm
-    plasma-pa
+    plasma
     kdeplasma-addons
     breeze
     sddm
