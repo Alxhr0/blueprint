@@ -24,7 +24,6 @@ packages = [
     "xdg-desktop-portal-gnome",
     "xdg-user-dirs-gtk",
     "yelp",
-    "NetworkManager-glib",
     "NetworkManager-wifi",
     "polkit",
     "pipewire",
