@@ -7,6 +7,8 @@ cp -avf "/ctx/system_files/edward"/. /
 zypper refresh
 
 zypper install -y openSUSE-repos-Tumbleweed-NVIDIA
+zypper removerepo NVIDIA || true
+zypper addrepo --refresh --no-gpg-check http://download.nvidia.com/opensuse/tumbleweed NVIDIA
 zypper refresh
 
 PACKAGES=(
