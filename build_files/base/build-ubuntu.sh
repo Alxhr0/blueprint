@@ -117,6 +117,8 @@ chmod +x /etc/kernel/postinst.d/kdump-tools \
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confold" \
     "${PACKAGES[@]}"
 
 dpkg --configure -a --no-triggers --force-confdef --force-confold
@@ -129,10 +131,14 @@ ldconfig
 # cryptsetup-initramfs tries to resolve its linux-initramfs-tool dependency.
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confold" \
     dracut
 dpkg --configure -a --no-triggers --force-confdef --force-confold
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confold" \
     cryptsetup-initramfs
 
 # systemd-cryptenroll (needed to enroll LUKS TPM2 keyslots) ships in a
@@ -140,6 +146,8 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 if apt-cache show systemd-cryptenroll 2>/dev/null | grep -q '^Package:'; then
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         -o Dpkg::Options::="--no-triggers" \
+        -o Dpkg::Options::="--force-confdef" \
+        -o Dpkg::Options::="--force-confold" \
         systemd-cryptenroll
 fi
 
