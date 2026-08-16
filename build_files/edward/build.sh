@@ -120,7 +120,7 @@ printf 'blacklist nouveau\noptions nouveau modeset=0\n' > /usr/lib/modprobe.d/00
 
 KERNEL_VERSION="$(basename "$(find /usr/lib/modules -maxdepth 1 -type d | grep -v -E '\.img$' | tail -n 1)")"
 if [ -n "$KERNEL_VERSION" ]; then
-    mkinitcpio -P
+    DRACUT_NO_XATTR=1 dracut --force --no-hostonly --reproducible --zstd --verbose --kver "$KERNEL_VERSION" "/usr/lib/modules/$KERNEL_VERSION/initramfs.img"
 fi
 
 for _nv_unit in nvidia-persistenced nvidia-suspend nvidia-resume nvidia-hibernate; do
