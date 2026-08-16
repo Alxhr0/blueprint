@@ -84,8 +84,8 @@ PACKAGES=(
 pacman -S --noconfirm --needed "${PACKAGES[@]}"
 
 # Uncomment to enable KDE Unstable repository for latest Plasma packages
-# [kde-unstable]
-# Include = /etc/pacman.d/mirrorlist
+# sed -i 's/^#\[kde-unstable\]/[kde-unstable]/' /etc/pacman.conf.d/kde-unstable.conf
+# sed -i 's/^#Include = \/etc\/pacman.d\/mirrorlist/Include = \/etc\/pacman.d\/mirrorlist/' /etc/pacman.conf.d/kde-unstable.conf
 
 flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 

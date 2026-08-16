@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: '0 4 */2 * *' # 4:00am UTC every 2 days
+    - cron: '0 4 1,15 * *' # 4:00am UTC on the 1st and 15th of each month (~every 2 weeks)
   push:
     branches:
       - main
@@ -59,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: ${{ fromJson(needs.list_images.outputs.images) }}
+        image: [aira, server, edward]
 
     permissions:
       contents: read
