@@ -12,6 +12,9 @@ export MAJOR_VERSION_NUMBER
 run_buildscripts_for() {
 	WHAT=$1
 	shift
+	if [ ! -d "${BUILD_SCRIPTS_PATH}/overrides/${WHAT}" ]; then
+		return 0
+	fi
 	find "${BUILD_SCRIPTS_PATH}/overrides/$WHAT" -maxdepth 1 -iname "*-*.sh" -type f -print0 | sort --zero-terminated --sort=human-numeric | while IFS= read -r -d $'\0' script ; do
 		if [ "${CUSTOM_NAME}" != "" ] ; then
 			WHAT=$CUSTOM_NAME
