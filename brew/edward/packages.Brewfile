@@ -27,6 +27,7 @@ brew "stow"
 brew "fd"
 brew "dysk"
 brew "opencode"
+brew "ghostty"
 
 flatpak "io.github.tanaybhomia.Whisp"
 flatpak "com.discordapp.Discord"
