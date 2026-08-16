@@ -35,7 +35,7 @@ copy_systemfiles_for() {
 			cp -avf "${CONTEXT_PATH}/system_files/edward/." /
 			;;
 		*)
-			cp -avf "${CONTEXT_PATH}/system_files/edward/overrides/${WHAT}/." /
+			cp -avf "${CONTEXT_PATH}/system_files/edward/overrides/${WHAT}/." / 2>/dev/null || true
 			;;
 	esac
 	printf "::endgroup::\n"
