@@ -36,19 +36,6 @@ echo "exclude=libjxl*" >> "${GNOME50_REPO}"
 #   at gnome-shell startup.
 dnf -y upgrade glib2 fontconfig
 
-# Install GNOME base groups
-dnf -y install -x rsyslog* \
-	-x cockpit \
-	-x cronie* \
-	-x crontabs \
-	"Common NetworkManager submodules" \
-	"Core" \
-	"Fonts" \
-	"Hardware Support" \
-	"Printing Client" \
-	"Standard" \
-	"Workstation product core"
-
 # Install GNOME packages from manifest
 readarray -t GNOME_PKGS    < <($READ_PKGS "$PKGS_TOML" gnome)
 readarray -t GNOME_EXCL    < <($READ_PKGS "$PKGS_TOML" gnome_excluded)
