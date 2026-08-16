@@ -5,6 +5,13 @@ cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/edward"/. /
 cp -avf "/ctx/system_files/arch"/. /
 
+if [ -L /root ]; then
+  target=$(readlink -f /root)
+  mkdir -p "$target"
+else
+  mkdir -p /root
+fi
+
 curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sh -s -- --daemon
 
 echo '. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' \
