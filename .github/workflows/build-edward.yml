@@ -53,6 +53,13 @@ jobs:
         run: |
           sudo -E "$(command -v just)" build edward
 
+      - name: Rechunk with Chunkah
+        id: rechunk
+        run: |
+          sudo -E "$(command -v just)" rechunk \
+            "${IMAGE_NAME}" \
+            "${DEFAULT_TAG}"
+
       - name: Generate Build Tags
         id: gen-build-tags
         env:
