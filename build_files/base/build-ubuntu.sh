@@ -25,9 +25,8 @@ PACKAGES=(
     buildah
     ca-certificates
     amd64-microcode
-    systemd-cryptsetup 
-    cryptsetup 
-    cryptsetup-initramfs 
+    systemd-cryptsetup
+    cryptsetup
     chrony
     cpio
     cryptsetup
@@ -36,7 +35,6 @@ PACKAGES=(
     distrobox
     dmsetup
     dosfstools
-    dracut
     e2fsprogs
     efibootmgr
     fdisk
@@ -80,7 +78,7 @@ PACKAGES=(
     skopeo
     sudo
     systemd
-    systemd-boot*
+    systemd-boot
     systemd-boot-efi
     systemd-oomd
     systemd-resolved
@@ -121,19 +119,18 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
     "${PACKAGES[@]}"
 
-# dracut and cryptsetup-initramfs postinst scripts run dracut directly,
-# bypassing the stubs above. Replace them with stubs now that the packages
-# are installed, then reconfigure any that failed.
-for pkg in dracut cryptsetup-initramfs; do
-    if [ -f "/var/lib/dpkg/info/${pkg}.postinst" ]; then
-        printf '#!/bin/sh\nexit 0\n' > "/var/lib/dpkg/info/${pkg}.postinst"
-        chmod +x "/var/lib/dpkg/info/${pkg}.postinst"
-    fi
-done
-
 dpkg --configure -a --no-triggers
 update-ca-certificates 2>/dev/null || true
 ldconfig
+
+# Install dracut and cryptsetup-initramfs after the main package set so their
+# postinst scripts (which run dracut directly) hit the stubs above instead of
+# running premature initramfs generation before the ostree/bootc environment
+# is fully prepared. The explicit dracut --force below builds the initramfs
+# with the correct configuration.
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    -o Dpkg::Options::="--no-triggers" \
+    dracut cryptsetup-initramfs
 
 # systemd-cryptenroll (needed to enroll LUKS TPM2 keyslots) ships in a
 # separate package on some releases; install it when present.

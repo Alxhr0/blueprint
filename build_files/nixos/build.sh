@@ -174,7 +174,7 @@ KERNEL="$(find /nix/store -maxdepth 2 -name 'bzImage' -printf '%T@ %p\n' 2>/dev/
 if [ -n "$KERNEL" ]; then
     MODDIR="$(dirname "$KERNEL")/lib/modules"
     if [ -d "$MODDIR" ]; then
-        KVER="$(find "$MODDIR" -maxdepth 1 -type d ! -name '.' | head -n1 | xargs basename)"
+        KVER="$(find "$MODDIR" -maxdepth 1 -type d ! -name '.' | head -n1 | xargs -r basename)"
         if [ -n "$KVER" ]; then
             mkdir -p "/usr/lib/modules/${KVER}"
             cp "$KERNEL" "/usr/lib/modules/${KVER}/vmlinuz"
@@ -183,7 +183,7 @@ if [ -n "$KERNEL" ]; then
             fi
         fi
     else
-        KVER="$(find /nix/store -maxdepth 3 -type d -path "*/lib/modules/*" ! -name '.' 2>/dev/null | head -n1 | xargs basename)"
+        KVER="$(find /nix/store -maxdepth 3 -type d -path "*/lib/modules/*" ! -name '.' 2>/dev/null | head -n1 | xargs -r basename)"
         if [ -n "$KVER" ]; then
             MODDIR="$(find /nix/store -maxdepth 3 -type d -path "*/lib/modules/${KVER}" 2>/dev/null | head -n1)"
             if [ -n "$MODDIR" ] && [ -d "$MODDIR" ]; then
