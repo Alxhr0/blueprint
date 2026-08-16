@@ -119,7 +119,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
     "${PACKAGES[@]}"
 
-dpkg --configure -a --no-triggers
+dpkg --configure -a --no-triggers --force-confdef --force-confold
 update-ca-certificates 2>/dev/null || true
 ldconfig
 
@@ -130,7 +130,7 @@ ldconfig
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
     dracut
-dpkg --configure -a --no-triggers
+dpkg --configure -a --no-triggers --force-confdef --force-confold
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
     cryptsetup-initramfs
