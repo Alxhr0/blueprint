@@ -5,17 +5,6 @@ cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/edward"/. /
 cp -avf "/ctx/system_files/arch"/. /
 
-sed -i 's/^#Include = \/etc\/pacman.conf.d\/\*.conf/Include = \/etc\/pacman.conf.d\/\*.conf/' /etc/pacman.conf
-
-if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
-    sed -i '/^#\[multilib\]/s/^#//' /etc/pacman.conf
-    if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
-        echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
-    fi
-fi
-
-rm -f /etc/pacman.d/mirrorlist
-
 pacman -Syu --noconfirm
 
 PACKAGES=(
