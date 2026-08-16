@@ -18,7 +18,7 @@ systemctl mask bootc-fetch-apply-updates.timer bootc-fetch-apply-updates.service
 systemctl mask rpm-ostree-countme.service rpm-ostree-countme.timer
 
 # Disable sshd by default
-systemctl disable sshd.service
+systemctl disable sshd.service 2>/dev/null || true
 
 # Enable polkit rules for fingerprint sensors via fprintd
 authselect enable-feature with-fingerprint

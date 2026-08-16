@@ -10,7 +10,7 @@ find /boot -mindepth 1 -delete
 mkdir -p /var /boot
 
 # Make /usr/local writeable
-ln -s /var/usrlocal /usr/local
+ln -sf /var/usrlocal /usr/local
 
 chmod 644 /usr/share/ublue-os/image-info.json
 

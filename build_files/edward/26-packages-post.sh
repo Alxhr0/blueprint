@@ -3,7 +3,7 @@ set -xeuo pipefail
 
 # Enable Flatpak by default
 mkdir -p /etc/flatpak/remotes.d
-curl --retry 3 -o /etc/flatpak/remotes.d/flathub.flatpakrepo "https://dl.flathub.org/repo/flathub.flatpakrepo"
+curl --retry 3 -o /etc/flatpak/remotes.d/flathub.flatpakrepo "https://dl.flathub.org/repo/flathub.flatpakrepo" || true
 
 # Generate initramfs after all packages installed
 depmod -a "$(ls -1 /lib/modules/ | tail -1)"
