@@ -29,6 +29,7 @@ PACKAGES=(
     systemd-boot
     xfsprogs
     ostree
+    ostree-boot
     sudo
     curl
     wget
