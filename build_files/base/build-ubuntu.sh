@@ -24,6 +24,10 @@ PACKAGES=(
     bubblewrap
     buildah
     ca-certificates
+    amd64-microcode
+    systemd-cryptsetup 
+    cryptsetup 
+    cryptsetup-initramfs 
     chrony
     cpio
     cryptsetup
