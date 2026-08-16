@@ -123,14 +123,17 @@ dpkg --configure -a --no-triggers
 update-ca-certificates 2>/dev/null || true
 ldconfig
 
-# Install dracut and cryptsetup-initramfs after the main package set so their
-# postinst scripts (which run dracut directly) hit the stubs above instead of
-# running premature initramfs generation before the ostree/bootc environment
-# is fully prepared. The explicit dracut --force below builds the initramfs
-# with the correct configuration.
+# Install dracut and cryptsetup-initramfs separately after the main package set.
+# Their postinst scripts call dracut directly, bypassing the stubs above.
+# Installing them separately ensures dpkg configures dracut (via stub) before
+# cryptsetup-initramfs tries to resolve its linux-initramfs-tool dependency.
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
-    dracut cryptsetup-initramfs
+    dracut
+dpkg --configure -a --no-triggers
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    -o Dpkg::Options::="--no-triggers" \
+    cryptsetup-initramfs
 
 # systemd-cryptenroll (needed to enroll LUKS TPM2 keyslots) ships in a
 # separate package on some releases; install it when present.
