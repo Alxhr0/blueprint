@@ -59,6 +59,7 @@ PACKAGES=(
     systemd
     dracut
     ostree
+    mkinitcpio
     nvidia-open
     nvidia-utils
     plasma
