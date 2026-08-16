@@ -109,7 +109,7 @@ printf '#!/bin/sh\nexit 0\n' | tee \
     /usr/sbin/update-grub /usr/sbin/grub-mkconfig > /dev/null
 chmod +x /usr/sbin/update-initramfs /usr/sbin/mkinitramfs \
     /usr/sbin/update-grub /usr/sbin/grub-mkconfig
-mkdir -p /etc/kernel/postinst.d
+mkdir -p /etc/kernel/postinst.d /usr/share/kernel/postinst.d
 printf '#!/bin/sh\nexit 0\n' > /etc/kernel/postinst.d/kdump-tools
 printf '#!/bin/sh\nexit 0\n' > /etc/kernel/postinst.d/dracut
 printf '#!/bin/sh\nexit 0\n' > /usr/share/kernel/postinst.d/zz-systemd-boot
