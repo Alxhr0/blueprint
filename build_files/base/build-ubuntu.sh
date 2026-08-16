@@ -98,18 +98,12 @@ PACKAGES=(
     zstd
 )
 
-# Prevent the kernel postinst (called by linux-image) from invoking
-# dracet via kernel-install or /etc/kernel/postinst.d — neither is
-# suppressed by --no-triggers because they are direct postinst calls,
-# not dpkg triggers. The explicit dracet --force below handles initramfs
-# generation with the correct ostree/bootc configuration.
-export KERNEL_INSTALL_INITRD_GENERATOR=""
-
-# Stub out the initramfs/grub generators too: several package postinsts
-# (plymouth, kdump-tools, ...) call update-initramfs directly, and with
-# dracut installed Ubuntu's update-initramfs delegates to it — which would
-# run dracut with the stock config before the ostree/bootc environment is
-# ready. The explicit dracut call below builds the initramfs.
+# Stub out the initramfs/grub generators before package install: several
+# package postinsts (dracut, cryptsetup-initramfs, plymouth, kdump-tools,
+# linux-image, ...) call dracut/update-initramfs directly, which would run
+# dracut with the stock config before the ostree/bootc environment is ready.
+# The explicit dracut --force below builds the initramfs with the correct
+# configuration.
 printf '#!/bin/sh\nexit 0\n' | tee \
     /usr/sbin/update-initramfs /usr/sbin/mkinitramfs \
     /usr/sbin/update-grub /usr/sbin/grub-mkconfig > /dev/null
@@ -118,17 +112,18 @@ chmod +x /usr/sbin/update-initramfs /usr/sbin/mkinitramfs \
 mkdir -p /etc/kernel/postinst.d
 printf '#!/bin/sh\nexit 0\n' > /etc/kernel/postinst.d/kdump-tools
 printf '#!/bin/sh\nexit 0\n' > /etc/kernel/postinst.d/dracut
-chmod +x /etc/kernel/postinst.d/kdump-tools /etc/kernel/postinst.d/dracut
+printf '#!/bin/sh\nexit 0\n' > /usr/share/kernel/postinst.d/zz-systemd-boot
+chmod +x /etc/kernel/postinst.d/kdump-tools \
+    /etc/kernel/postinst.d/dracut \
+    /usr/share/kernel/postinst.d/zz-systemd-boot
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
-    "${PACKAGES[@]}" || true
+    "${PACKAGES[@]}"
 
 # dracut and cryptsetup-initramfs postinst scripts run dracut directly,
-# bypassing the stubs above. Replace them with stubs so dpkg --configure
-# doesn't trigger premature initramfs generation before the ostree/bootc
-# environment is fully prepared. The explicit dracut --force below handles
-# the initramfs build with the correct configuration.
+# bypassing the stubs above. Replace them with stubs now that the packages
+# are installed, then reconfigure any that failed.
 for pkg in dracut cryptsetup-initramfs; do
     if [ -f "/var/lib/dpkg/info/${pkg}.postinst" ]; then
         printf '#!/bin/sh\nexit 0\n' > "/var/lib/dpkg/info/${pkg}.postinst"
