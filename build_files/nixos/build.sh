@@ -213,6 +213,28 @@ done
 
 ostree summary --repo=/sysroot/ostree/repo --update
 
+STAGING="$(mktemp -d)"
+ostree checkout --repo=/sysroot/ostree/repo blueprint/nixos "${STAGING}" 2>/dev/null || \
+    ostree checkout --repo=/sysroot/ostree/repo blueprint/nixos "${STAGING}"
+
+if [ -n "${KVER}" ] && [ -n "${KERNEL}" ]; then
+    mkdir -p "${STAGING}/usr/lib/modules/${KVER}"
+    cp "${KERNEL}" "${STAGING}/usr/lib/modules/${KVER}/vmlinuz"
+    if [ -d "${MODDIR}/${KVER}" ]; then
+        cp -r "${MODDIR}/${KVER}/." "${STAGING}/usr/lib/modules/${KVER}/"
+    fi
+    ostree commit --repo=/sysroot/ostree/repo \
+        --branch=blueprint/nixos \
+        --subject="Add kernel" \
+        --add-metadata-string="version=$(date +%Y%m%d)" \
+        --no-xattrs \
+        --parent="$(ostree rev-parse --repo=/sysroot/ostree/repo blueprint/nixos)" \
+        "${STAGING}"
+fi
+rm -rf "${STAGING}"
+
+ostree summary --repo=/sysroot/ostree/repo --update
+
 mkdir -p /sysroot/ostree/deploy/blueprint/nixos/0
 
 rm -rf /root /srv /mnt /opt /home /usr/local
