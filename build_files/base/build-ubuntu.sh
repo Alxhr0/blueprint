@@ -7,43 +7,87 @@ cp -avf "/ctx/system_files/ubuntu"/. /
 
 mkdir -p /var/lib/apt/lists/partial
 
+# Enable universe/multiverse: several packages below (flatpak, just, fzf,
+# buildah, grim, ...) live in universe. No-op if the base already lists them.
+if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+    sed -i 's/^Components: .*/Components: main restricted universe multiverse/' \
+        /etc/apt/sources.list.d/ubuntu.sources
+fi
+if [ -f /etc/apt/sources.list ]; then
+    sed -i 's/ main$/ main restricted universe multiverse/' /etc/apt/sources.list
+fi
+
 apt-get update -y
 
 PACKAGES=(
     btrfs-progs
     bubblewrap
+    buildah
+    ca-certificates
+    chrony
     cpio
+    cryptsetup
+    curl
     dbus
+    distrobox
+    dmsetup
     dosfstools
+    dracut
     e2fsprogs
     efibootmgr
     fdisk
+    ffmpeg
+    flatpak
+    fuse-overlayfs
+    fwupd
+    fzf
+    git
+    go-md2man
+    golang-go
+    grim
+    gstreamer1.0-libav
+    gstreamer1.0-plugins-bad
+    gstreamer1.0-plugins-base
+    gstreamer1.0-plugins-good
+    gstreamer1.0-plugins-ugly
+    intel-microcode
+    iwd
+    jq
+    just
+    libavcodec-extra
+    libcap2-bin
+    libtss2-esys-3.0.2-0t64
+    libtss2-rc0t64
+    libtss2-tcti-device0t64
+    libtss2-tctildr0t64
     linux-firmware
     linux-image-generic
     netplan.io
     network-manager
     openssh-server
-    skopeo
-    systemd
-    systemd-resolved
-    systemd-boot
-    xfsprogs
     ostree
     ostree-boot
-    sudo
-    curl
-    wget
-    git
-    ca-certificates
-    dracut
-    podman
-    libcap2-bin
-    chrony
-    iwd
-    golang-go
-    go-md2man
-    intel-microcode
     passwd
+    plymouth
+    plymouth-themes
+    podman
+    power-profiles-daemon
+    powertop
+    skopeo
+    sudo
+    systemd
+    systemd-boot
+    systemd-boot-efi
+    systemd-oomd
+    systemd-resolved
+    tpm2-tools
+    unzip
+    wayland-utils
+    wget
+    wl-clipboard
+    x11-xserver-utils
+    xdg-desktop-portal
+    xfsprogs
 )
 
 # Prevent the kernel postinst (called by linux-image) from invoking
@@ -52,9 +96,32 @@ PACKAGES=(
 # not dpkg triggers. The explicit dracet --force below handles initramfs
 # generation with the correct ostree/bootc configuration.
 export KERNEL_INSTALL_INITRD_GENERATOR=""
+
+# Stub out the initramfs/grub generators too: several package postinsts
+# (plymouth, kdump-tools, ...) call update-initramfs directly, and with
+# dracut installed Ubuntu's update-initramfs delegates to it — which would
+# run dracut with the stock config before the ostree/bootc environment is
+# ready. The explicit dracut call below builds the initramfs.
+printf '#!/bin/sh\nexit 0\n' | tee \
+    /usr/sbin/update-initramfs /usr/sbin/mkinitramfs \
+    /usr/sbin/update-grub /usr/sbin/grub-mkconfig > /dev/null
+chmod +x /usr/sbin/update-initramfs /usr/sbin/mkinitramfs \
+    /usr/sbin/update-grub /usr/sbin/grub-mkconfig
+mkdir -p /etc/kernel/postinst.d
+printf '#!/bin/sh\nexit 0\n' > /etc/kernel/postinst.d/kdump-tools
+chmod +x /etc/kernel/postinst.d/kdump-tools
+
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
     "${PACKAGES[@]}"
+
+# systemd-cryptenroll (needed to enroll LUKS TPM2 keyslots) ships in a
+# separate package on resolute/26.04; install it when present.
+if apt-cache show systemd-cryptsetup 2>/dev/null | grep -q '^Package:'; then
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        -o Dpkg::Options::="--no-triggers" \
+        systemd-cryptsetup
+fi
 
 # Triggers (dracut, ca-certificates, ldconfig) are suppressed so the kernel
 # postinst doesn't run dracut with the ostree/bootc modules before the ostree
@@ -69,14 +136,23 @@ setcap cap_setgid+ep /usr/bin/newgidmap && chmod -s /usr/bin/newgidmap
 
 cp /boot/vmlinuz-* "$(find /usr/lib/modules -maxdepth 1 -type d | tail -n 1)/vmlinuz"
 
-systemctl enable systemd-networkd systemd-resolved ssh NetworkManager
+systemctl enable NetworkManager systemd-resolved ssh
 systemctl mask systemd-firstboot.service
 
-printf 'L! /etc/resolv.conf - - - - /run/systemd/resolve/stub-resolv.conf\n' \
+# L+! rather than L!: Ubuntu's base ships a 0-byte /etc/resolv.conf, which a
+# plain L! tmpfiles rule leaves untouched (it only links empty paths), so
+# resolved's stub is never wired up and DNS breaks at first boot.
+printf 'L+! /etc/resolv.conf - - - - /run/systemd/resolve/stub-resolv.conf\n' \
     > /usr/lib/tmpfiles.d/resolv-conf.conf
 
 mkdir -p /etc/netplan
-printf 'network:\n  version: 2\n  ethernets:\n    all-en:\n      match:\n        name: en*\n      dhcp4: true\n      dhcp4-overrides:\n        use-domains: true\n      dhcp6: true\n      dhcp6-overrides:\n        use-domains: true\n    all-eth:\n      match:\n        name: eth*\n      dhcp4: true\n      dhcp4-overrides:\n        use-domains: true\n      dhcp6: true\n      dhcp6-overrides:\n        use-domains: true\n' > /etc/netplan/90-default.yaml
+printf 'network:\n  version: 2\n  renderer: NetworkManager\n  ethernets:\n    all-en:\n      match:\n        name: en*\n      dhcp4: true\n      dhcp4-overrides:\n        use-domains: true\n      dhcp6: true\n      dhcp6-overrides:\n        use-domains: true\n    all-eth:\n      match:\n        name: eth*\n      dhcp4: true\n      dhcp4-overrides:\n        use-domains: true\n      dhcp6: true\n      dhcp6-overrides:\n        use-domains: true\n' > /etc/netplan/90-default.yaml
+
+# Declare Flathub via /etc/flatpak/remotes.d (not `flatpak remote-add --system`,
+# which writes into /var/lib/flatpak and is wiped by the /var reset below).
+mkdir -p /etc/flatpak/remotes.d
+curl -fsSL https://dl.flathub.org/repo/flathub.flatpakrepo \
+    -o /etc/flatpak/remotes.d/flathub.flatpakrepo
 
 sed -i 's|^HOME=.*|HOME=/var/home|' /etc/default/useradd
 
@@ -111,9 +187,32 @@ printf 'd /var/home 0755 root root -\nd /var/srv 0755 root root -\nd /var/mnt 07
 mkdir -p /var/tmp
 
 KVER=$(basename "$(find /usr/lib/modules -maxdepth 1 -mindepth 1 -type d | tail -n 1)")
+
+# The composefs root is an EROFS image with an overlayfs on top; the initramfs
+# has to carry both drivers (plus the filesystems bootc install can format).
+# Probe the kernel's module set rather than assuming they exist as modules.
+DRIVERS=""
+for drv in erofs overlay xfs ext4 btrfs; do
+    if find "/usr/lib/modules/${KVER}" -maxdepth 4 -name "${drv}.ko*" -print -quit 2>/dev/null | grep -q .; then
+        DRIVERS="${DRIVERS} ${drv}"
+    fi
+done
+if [ -n "$DRIVERS" ]; then
+    printf 'add_drivers+="%s "\n' "$DRIVERS" \
+        >> /usr/lib/dracut/dracut.conf.d/30-bootcrew-bootc-container-build.conf
+fi
+
 dracut --force --no-hostonly --reproducible --zstd --verbose --kver "${KVER}" "/usr/lib/modules/${KVER}/initramfs.img"
 
 printf '[composefs]\nenabled = yes\n[sysroot]\nreadonly = true\n' > /usr/lib/ostree/prepare-root.conf
+
+# bootc install (via skopeo) fails with "no policy.json file found" when the
+# base image ships no containers policy. Write a permissive default if absent.
+if [ ! -f /etc/containers/policy.json ]; then
+    mkdir -p /etc/containers
+    printf '{ "default": [ { "type": "insecureAcceptAnything" } ] }\n' \
+        > /etc/containers/policy.json
+fi
 
 rm -rf /var/lib/apt/lists/* /tmp/*
 find /run -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true

@@ -56,6 +56,7 @@ PACKAGES=(
     docker-compose-v2
     podman
     flatpak
+    linux-headers-generic
     nvidia-driver-595
     nvidia-utils-595
     nvidia-container-toolkit
@@ -115,6 +116,39 @@ kargs = ["rd.driver.blacklist=nouveau", "modprobe.blacklist=nouveau", "nvidia-dr
 EOF
 
 nvidia-ctk config --set nvidia-container-cli.no-cgroups --in-place
+
+# The base stage builds the initramfs before the NVIDIA driver exists, so it
+# cannot contain the nvidia modules or the nouveau blacklist. Rebuild it here.
+# (Mirrors tunaOS's nvidia-debian overlay.)
+KVER=$(basename "$(find /usr/lib/modules -maxdepth 1 -mindepth 1 -type d ! -name '*.img' | sort -V | tail -n 1)")
+
+# If apt upgraded the kernel during this build, stage its vmlinuz where bootc
+# expects it before rebuilding the initramfs for it.
+if [ -e "/boot/vmlinuz-${KVER}" ]; then
+    cp "/boot/vmlinuz-${KVER}" "/usr/lib/modules/${KVER}/vmlinuz"
+fi
+
+mkdir -p /usr/lib/modprobe.d
+printf 'blacklist nouveau\noptions nouveau modeset=0\n' > /usr/lib/modprobe.d/00-nouveau-blacklist.conf
+
+mkdir -p /usr/lib/dracut/dracut.conf.d
+printf 'force_drivers+=" i915 amdgpu nvidia nvidia_modeset nvidia_uvm nvidia_drm "\n' > /usr/lib/dracut/dracut.conf.d/99-nvidia.conf
+
+if command -v dkms > /dev/null 2>&1; then
+    dkms autoinstall -k "${KVER}"
+fi
+
+if [ -n "${KVER}" ] && [ -e "/usr/lib/modules/${KVER}/vmlinuz" ] && command -v dracut > /dev/null 2>&1; then
+    mkdir -p /boot
+    dracut --force --no-hostonly --reproducible --tmpdir /boot "/usr/lib/modules/${KVER}/initramfs.img" "${KVER}"
+fi
+
+for _nv_unit in nvidia-persistenced nvidia-suspend nvidia-resume nvidia-hibernate; do
+    if [ -e "/usr/lib/systemd/system/${_nv_unit}.service" ]; then
+        systemctl enable "${_nv_unit}.service"
+    fi
+done
+unset _nv_unit
 
 apt-get clean -y
 rm -rf /var/lib/apt/lists/* /tmp/*
