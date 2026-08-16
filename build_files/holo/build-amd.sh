@@ -6,6 +6,15 @@ cp -avf "/ctx/system_files/holo"/. /
 
 sed -i 's/^#Include = \/etc\/pacman.conf.d\/\*.conf/Include = \/etc\/pacman.conf.d\/\*.conf/' /etc/pacman.conf
 
+if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
+    sed -i '/^#\[multilib\]/s/^#//' /etc/pacman.conf
+    if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
+        echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
+    fi
+fi
+
+rm -f /etc/pacman.d/mirrorlist
+
 pacman -Syu --noconfirm
 
 /ctx/core/arch-cachy.sh
@@ -43,8 +52,6 @@ PACKAGES=(
     lib32-libpng
     libldap
     lib32-libldap
-    libvulkan
-    lib32-libvulkan
     libxcomposite
     lib32-libxcomposite
     libxinerama
@@ -74,7 +81,7 @@ PACKAGES=(
     linux-firmware-intel
 )
 
-pacman -S --noconfirm --needed "${PACKAGES[@]}"
+pacman -S --noconfirm --needed --ask=4 "${PACKAGES[@]}"
 
 if pacman -Q linux >/dev/null 2>&1; then
     pacman -Rdd --noconfirm linux
