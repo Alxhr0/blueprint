@@ -2,8 +2,9 @@ FROM scratch AS ctx
 COPY build_files /
 COPY system_files/global /system_files/global
 COPY system_files/edward /system_files/edward
+COPY system_files/arch /system_files/arch
 
-FROM ghcr.io/huntedraven7/blueprint:opensuse
+FROM ghcr.io/huntedraven7/blueprint:arch
 
 COPY --from=ghcr.io/ublue-os/brew:latest /system_files /
 RUN --mount=type=cache,dst=/var/cache \

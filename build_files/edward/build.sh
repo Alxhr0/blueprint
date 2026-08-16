@@ -3,13 +3,20 @@ set -ouex pipefail
 
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/edward"/. /
+cp -avf "/ctx/system_files/arch"/. /
 
-zypper refresh
+sed -i 's/^#Include = \/etc\/pacman.conf.d\/\*.conf/Include = \/etc\/pacman.conf.d\/\*.conf/' /etc/pacman.conf
 
-zypper install -y openSUSE-repos-Tumbleweed-NVIDIA
-zypper removerepo NVIDIA || true
-zypper addrepo --refresh --no-gpg-check http://download.nvidia.com/opensuse/tumbleweed NVIDIA
-zypper refresh
+if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
+    sed -i '/^#\[multilib\]/s/^#//' /etc/pacman.conf
+    if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
+        echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
+    fi
+fi
+
+rm -f /etc/pacman.d/mirrorlist
+
+pacman -Syu --noconfirm
 
 PACKAGES=(
     firefox
@@ -39,7 +46,7 @@ PACKAGES=(
     cpio
     libcap-progs
     kernel-firmware
-    btrfsprogs
+    btrfs-progs
     dosfstools
     e2fsprogs
     xfsprogs
@@ -48,9 +55,9 @@ PACKAGES=(
     systemd
     dracut
     ostree
-    nvidia-open-driver-G07-signed-kmp-meta
-    nvidia-compute
-    nvidia-uvm
+    nvidia-open
+    nvidia-utils
+    lib32-nvidia-utils
     plasma-desktop
     plasma-workspace
     plasma-nm
@@ -74,7 +81,11 @@ PACKAGES=(
     cargo
 )
 
-zypper install -y "${PACKAGES[@]}"
+pacman -S --noconfirm --needed "${PACKAGES[@]}"
+
+# Uncomment to enable KDE Unstable repository for latest Plasma packages
+# [kde-unstable]
+# Include = /etc/pacman.d/mirrorlist
 
 flatpak remote-add --if-not-exists --system flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
@@ -104,20 +115,12 @@ cat > /usr/lib/bootc/kargs.d/00-nvidia.toml <<'EOF'
 kargs = ["rd.driver.blacklist=nouveau", "modprobe.blacklist=nouveau", "nvidia-drm.modeset=1", "initcall_blacklist=simpledrm_platform_driver_init"]
 EOF
 
-if command -v nvidia-ctk >/dev/null 2>&1; then
-    nvidia-ctk config --set nvidia-container-cli.no-cgroups --in-place
-fi
-
-KVER=$(basename "$(find /usr/lib/modules -maxdepth 1 -mindepth 1 -type d ! -name '*.img' | sort -V | tail -n 1)")
-
 mkdir -p /usr/lib/modprobe.d
 printf 'blacklist nouveau\noptions nouveau modeset=0\n' > /usr/lib/modprobe.d/00-nouveau-blacklist.conf
 
-mkdir -p /usr/lib/dracut/dracut.conf.d
-printf 'force_drivers+=" i915 amdgpu nvidia nvidia_modeset nvidia_uvm nvidia_drm "\n' > /usr/lib/dracut/dracut.conf.d/99-nvidia.conf
-
-if command -v dracut >/dev/null 2>&1; then
-    dracut --force --no-hostonly --reproducible --zstd --verbose --kver "$KVER" "/usr/lib/modules/$KVER/initramfs.img"
+KERNEL_VERSION="$(basename "$(find /usr/lib/modules -maxdepth 1 -type d | grep -v -E '\.img$' | tail -n 1)")"
+if [ -n "$KERNEL_VERSION" ]; then
+    mkinitcpio -P
 fi
 
 for _nv_unit in nvidia-persistenced nvidia-suspend nvidia-resume nvidia-hibernate; do
@@ -127,7 +130,10 @@ for _nv_unit in nvidia-persistenced nvidia-suspend nvidia-resume nvidia-hibernat
 done
 unset _nv_unit
 
-zypper clean -a
+setcap cap_setuid+ep /usr/bin/newuidmap && chmod -s /usr/bin/newuidmap
+setcap cap_setgid+ep /usr/bin/newgidmap && chmod -s /usr/bin/newgidmap
+
+pacman -Scc --noconfirm
 
 rm -rf /tmp/*
 find /run -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
