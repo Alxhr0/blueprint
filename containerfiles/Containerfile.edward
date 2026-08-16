@@ -3,7 +3,7 @@ COPY build_files /
 COPY system_files/global /system_files/global
 COPY system_files/edward /system_files/edward
 
-FROM ghcr.io/huntedraven7/blueprint:ubuntu
+FROM ghcr.io/huntedraven7/blueprint:opensuse
 
 COPY --from=ghcr.io/ublue-os/brew:latest /system_files /
 RUN --mount=type=cache,dst=/var/cache \
