@@ -55,21 +55,25 @@ PACKAGES=(
 export KERNEL_INSTALL_INITRD_GENERATOR=""
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confold" \
     "${PACKAGES[@]}"
 
 # systemd-cryptenroll (needed to enroll LUKS TPM2 keyslots) ships in a
 # separate package on some Debian releases; install it when present.
 if apt-cache show systemd-cryptsetup 2>/dev/null | grep -q '^Package:'; then
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        -o Dpkg::Options::="--no-triggers" \
-        systemd-cryptsetup
+    -o Dpkg::Options::="--no-triggers" \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confold" \
+    systemd-cryptsetup
 fi
 
 # Triggers (dracut, ca-certificates, ldconfig) are suppressed so the kernel
 # postinst doesn't run dracut with the ostree/bootc modules before the ostree
 # environment is fully prepared. The explicit dracut call below handles the
 # initramfs build with the correct configuration.
-dpkg --configure -a --no-triggers
+dpkg --configure -a --no-triggers --force-confdef --force-confold
 update-ca-certificates 2>/dev/null || true
 ldconfig
 
