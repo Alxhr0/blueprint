@@ -6,8 +6,8 @@ cp -avf "/ctx/system_files/edward"/. /
 
 zypper refresh
 
-zypper addrepo --refresh --no-gpg-checks https://download.nvidia.com/opensuse/tumbleweed NVIDIA
-zypper --gpg-auto-import-keys refresh NVIDIA
+zypper install -y openSUSE-repos-Tumbleweed-NVIDIA
+zypper refresh
 
 PACKAGES=(
     firefox
@@ -46,7 +46,7 @@ PACKAGES=(
     systemd
     dracut
     ostree
-    nvidia-driver
+    nvidia-open-driver-G07-signed-kmp-meta
     nvidia-compute
     nvidia-uvm
     plasma-desktop
