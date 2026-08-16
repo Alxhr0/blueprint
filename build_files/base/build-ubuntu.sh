@@ -117,7 +117,8 @@ chmod +x /usr/sbin/update-initramfs /usr/sbin/mkinitramfs \
     /usr/sbin/update-grub /usr/sbin/grub-mkconfig
 mkdir -p /etc/kernel/postinst.d
 printf '#!/bin/sh\nexit 0\n' > /etc/kernel/postinst.d/kdump-tools
-chmod +x /etc/kernel/postinst.d/kdump-tools
+printf '#!/bin/sh\nexit 0\n' > /etc/kernel/postinst.d/dracut
+chmod +x /etc/kernel/postinst.d/kdump-tools /etc/kernel/postinst.d/dracut
 
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--no-triggers" \
