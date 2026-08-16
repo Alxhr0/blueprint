@@ -13,13 +13,7 @@ else
   mkdir -p /root
 fi
 
-mkdir -p /usr/local/bin || true
-
-curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
-  | sh -s -- install linux \
-    --init none \
-    --no-confirm \
-    --extra-conf "sandbox = false"
+curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sh -s -- --daemon
 
 echo '. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' \
   > /etc/profile.d/nix.sh
@@ -29,12 +23,6 @@ systemctl enable nix-daemon.socket nix-daemon.service
 
 mkdir -p /etc/nix && \
 echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf
-
-cat <<EOF > /etc/profile.d/nix.sh
-if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
-    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-fi
-EOF
 
 dnf5 -y install terra-release terra-release-extras || true
 
