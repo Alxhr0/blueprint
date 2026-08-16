@@ -44,6 +44,7 @@ PACKAGES=(
     libcap2-bin
     chrony
     passwd
+    zstd
 )
 
 # Prevent the kernel postinst (called by linux-image) from invoking

@@ -92,6 +92,7 @@ PACKAGES=(
     x11-xserver-utils
     xdg-desktop-portal
     xfsprogs
+    zstd
 )
 
 # Prevent the kernel postinst (called by linux-image) from invoking
