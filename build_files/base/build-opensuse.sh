@@ -58,8 +58,6 @@ ln -sT var/opt /opt
 ln -sT var/home /home
 ln -sT var/usrlocal /usr/local
 
-cp /boot/vmlinuz-* "$(find /usr/lib/modules -maxdepth 1 -mindepth 1 -type d | tail -n 1)/vmlinuz"
-
 KVER=$(basename "$(find /usr/lib/modules -maxdepth 1 -mindepth 1 -type d | tail -n 1)")
 printf '[composefs]\nenabled = yes\n[sysroot]\nreadonly = true\n' > /usr/lib/ostree/prepare-root.conf
 dracut --force --no-hostonly --reproducible --zstd --verbose --kver "$KVER" "/usr/lib/modules/$KVER/initramfs.img"

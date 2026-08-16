@@ -13,17 +13,20 @@ else
   mkdir -p /root
 fi
 
-mkdir -p /nix/var/nix/db
-chmod 1777 /nix/var/nix/db
-
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
   | sh -s -- install linux \
     --init none \
     --no-confirm \
-    --no-modify-profile \
-    --prefer-upstream-nix
+    --extra-conf "sandbox = false"
 
-mkdir -p /nix
+echo '. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' \
+  > /etc/profile.d/nix.sh
+PATH="/nix/var/nix/profiles/default/bin:${PATH}"
+
+systemctl enable nix-daemon.socket nix-daemon.service
+
+mkdir -p /etc/nix && \
+echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf
 
 cat <<EOF > /etc/profile.d/nix.sh
 if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
