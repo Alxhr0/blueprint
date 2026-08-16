@@ -6,6 +6,12 @@ COPY system_files/edward /system_files/edward
 FROM ghcr.io/huntedraven7/blueprint:ubuntu
 
 COPY --from=ghcr.io/ublue-os/brew:latest /system_files /
+RUN --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=tmpfs,dst=/tmp \
+    /usr/bin/systemctl preset brew-setup.service && \
+    /usr/bin/systemctl preset brew-update.timer && \
+    /usr/bin/systemctl preset brew-upgrade.timer
 
 COPY brew/packages-edward.Brewfile /usr/share/ublue-os/homebrew/preinstall.d/packages-edward.Brewfile
 
