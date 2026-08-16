@@ -6,7 +6,7 @@ cp -avf "/ctx/system_files/edward"/. /
 
 zypper refresh
 
-zypper addrepo --refresh https://download.nvidia.com/opensuse/tumbleweed NVIDIA
+zypper addrepo --refresh --no-gpg-checks https://download.nvidia.com/opensuse/tumbleweed NVIDIA
 zypper --gpg-auto-import-keys refresh NVIDIA
 
 PACKAGES=(
