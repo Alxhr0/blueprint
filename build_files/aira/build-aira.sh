@@ -13,14 +13,7 @@ else
   mkdir -p /root
 fi
 
-curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sh -s -- --daemon
-
-echo '. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' \
-  > /etc/profile.d/nix.sh
-PATH="/nix/var/nix/profiles/default/bin:${PATH}"
-
-mkdir -p /etc/nix && \
-echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf
+source /ctx/core/nix-setup.sh
 
 dnf5 -y install terra-release terra-release-extras || true
 
@@ -52,7 +45,3 @@ systemctl enable sshd.service
 systemctl enable install-aira-configs.service
 
 systemctl enable setup-kwin-effects.service
-
-if command -v chcon > /dev/null; then
-    chcon -R -u system_u -r object_r -t unconfined_mgmt_t /nix 2>/dev/null || true
-fi
