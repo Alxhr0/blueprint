@@ -1,5 +1,5 @@
 tap "ublue-os/tap", trusted: true
-tap "Kilo-Org/tap", trusted: true
+tap "/usr/share/ublue-os/homebrew/ghostty-tap"
 tap "ublue-os/experimental-tap", trusted: true
 
 cask "ublue-os/tap/antigravity-cli-linux"
@@ -8,10 +8,6 @@ cask "ublue-os/tap/goose-linux"
 
 cask "ublue-os/experimental-tap/emacs-app-linux"
 cask "ublue-os/experimental-tap/opencode-desktop-linux"
-
-brew "kilo-org/tap/kilo"
-
-cask "claude-desktop-linux"
 
 brew "eza"
 brew "bun"
