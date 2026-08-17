@@ -95,6 +95,7 @@ packages = [
     "chrony",
     "iwd",
     "sudo",
+    "cdrtools",
 ]
 
 [install_excluded]

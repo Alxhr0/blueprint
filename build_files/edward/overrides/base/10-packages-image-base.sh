@@ -20,6 +20,9 @@ dnf config-manager --set-enabled epel
 dnf config-manager --add-repo=https://negativo17.org/repos/epel-multimedia.repo
 dnf config-manager --set-disabled epel-multimedia
 
+# cdrtools from negativo17
+dnf config-manager --add-repo=https://negativo17.org/repos/cdrtools/epel-10.repo
+
 # Install dnf versionlock plugin
 dnf -y install 'dnf-command(versionlock)'
 
