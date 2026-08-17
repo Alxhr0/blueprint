@@ -109,6 +109,7 @@ build $target_image="" $tag="" $dx="0" $nvidia="1" $kernel_pin="" $gnome_version
     #!/usr/bin/env bash
 
     set -euo pipefail
+    export PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
 
     PRIMARY_STEM="$(basename "{{ primary_env }}" .env)"
     if [[ -z "${target_image}" ]]; then
@@ -514,7 +515,7 @@ build-gnome-iso: && (_rebuild-bib "ghcr.io/huntedraven7/blueprint" "edward" "iso
 
 # Build a server installer ISO using BIB (Anaconda-based)
 [group('Build Virtal Machine Image')]
-build-server-iso: && (_rebuild-bib "ghcr.io/huntedraven7/blueprint" "server" "iso" "disk_config/iso-server.toml")
+build-server-iso: && (_build-bib "ghcr.io/huntedraven7/blueprint" "server" "iso" "disk_config/iso-server.toml")
 
 # Rebuild a QCOW2 virtual machine image
 [group('Build Virtal Machine Image')]
