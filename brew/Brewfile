@@ -2,4 +2,13 @@ tap "ublue-os/tap", trusted: true
 tap "Kilo-Org/tap", trusted: true
 tap "ublue-os/experimental-tap", trusted: true
 
+# Shared packages from common repo
+import "fonts.Brewfile"
+import "fonts-dev.Brewfile"
+import "cli.Brewfile"
+import "ide.Brewfile"
+import "experimental-ide.Brewfile"
+import "ai-tools.Brewfile"
+
+# Edward-specific packages
 import "edward/packages.Brewfile"
