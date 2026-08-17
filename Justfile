@@ -510,7 +510,7 @@ build-iso $target_image=("localhost/" + image_name) $tag=default_tag: && (_build
 
 # Build a server installer ISO using BIB (Anaconda-based)
 [group('Build Virtal Machine Image')]
-build-server-iso: && (_build-bib "localhost/blueprint" "server" "iso" "disk_config/iso-server.toml")
+build-server-iso: && (_build-bib "ghcr.io/huntedraven7/blueprint" "server" "iso" "disk_config/iso-server.toml")
 
 # Rebuild a QCOW2 virtual machine image
 [group('Build Virtal Machine Image')]

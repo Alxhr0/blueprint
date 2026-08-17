@@ -6,8 +6,8 @@ systemctl enable gdm.service
 systemctl enable firewalld.service
 systemctl enable fwupd.service
 systemctl --global enable podman-auto-update.timer
-systemctl disable rpm-ostree.service
-systemctl enable dconf-update.service
+systemctl disable rpm-ostree.service 2>/dev/null || true
+systemctl enable dconf-update.service 2>/dev/null || true
 systemctl enable tailscaled.service
 systemctl enable brew-setup.service
 systemctl enable brew-bundle.service
