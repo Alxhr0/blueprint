@@ -1,9 +1,30 @@
 ARG KERNEL_VERSION="${KERNEL_VERSION:-}"
 ARG NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_VERSION:-565.57.01}"
 
+FROM quay.io/almalinuxorg/almalinux-bootc:10 AS fetcher
+
+# Download kernel and devel RPMs for the target kernel
+RUN --mount=type=tmpfs,dst=/opt \
+    --mount=type=tmpfs,dst=/tmp \
+    dnf -y install dnf-plugins-core curl && \
+    dnf config-manager --set-enabled crb && \
+    dnf -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm" && \
+    dnf config-manager --set-enabled epel && \
+    dnf config-manager --add-repo=https://negativo17.org/repos/nvidia/fedora-44/x86_64/ && \
+    KVER="${KERNEL_VERSION:-$(rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel | tail -1)}" && \
+    dnf download -y \
+        "kernel-devel-${KVER}" \
+        "kernel-${KVER}" \
+        "kernel-core-${KVER}" \
+        "kernel-modules-${KVER}" \
+        "kernel-modules-core-${KVER}" \
+        "kernel-modules-extra-${KVER}" && \
+    mv /kernel-*.rpm /tmp/kernel-rpms/ && \
+    dnf clean all
+
 FROM quay.io/almalinuxorg/almalinux-bootc:10 AS builder
 
-# Install build dependencies and enable repos
+# Install build dependencies
 RUN --mount=type=tmpfs,dst=/opt \
     --mount=type=tmpfs,dst=/tmp \
     dnf -y install dnf-plugins-core && \
@@ -14,29 +35,29 @@ RUN --mount=type=tmpfs,dst=/opt \
     dnf -y install \
         gcc \
         make \
-        rpm \
-        elfutils-libelf-devel \
         rpm-build \
+        elfutils-libelf-devel \
         dkms \
     && dnf clean all
 
-# Install kernel-devel for the running kernel (auto-detected)
-RUN KVER=$(rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel | tail -1) && \
-    dnf -y install "kernel-devel-${KVER}" && \
+# Copy kernel RPMs and install them
+COPY --from=fetcher /tmp/kernel-rpms/ /tmp/kernel-rpms/
+RUN --mount=type=tmpfs,dst=/opt \
+    --mount=type=tmpfs,dst=/tmp \
+    KVER="${KERNEL_VERSION:-$(rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel | tail -1)}" && \
+    dnf -y install /tmp/kernel-rpms/kernel-devel-*.rpm && \
     dnf -y install akmods-nvidia nvidia-driver nvidia-settings && \
-    dnf clean all
-
-# Build the NVIDIA kernel module for the running kernel
-RUN KVER=$(rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel | tail -1) && \
+    dnf clean all && \
     akmods --force --kernels "${KVER}" nvidia || true
 
 # Find and collect the built RPMs
 RUN mkdir -p /rpms /kernel-rpms && \
-    KVER=$(rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel | tail -1) && \
+    KVER="${KERNEL_VERSION:-$(rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel | tail -1)}" && \
     find /var/cache/akmods/nvidia -name "kmod-nvidia-*.rpm" -exec cp {} /rpms/ \; 2>/dev/null || true && \
     if rpm -q kmod-nvidia >/dev/null 2>&1; then \
         rpm -q --queryformat '%{SOURCERPM}' kmod-nvidia | head -1 | xargs -I{} dnf download --alldeps --destdir=/kernel-rpms {} 2>/dev/null || true; \
-    fi
+    fi && \
+    cp /tmp/kernel-rpms/*.rpm /kernel-rpms/ 2>/dev/null || true
 
 FROM scratch AS akmods-nvidia-open
 COPY --from=builder /rpms /rpms
