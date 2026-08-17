@@ -5,15 +5,19 @@ on:
     - cron: '0 2 1 * *' # 2:00am UTC on the 1st of each month
   workflow_dispatch:
 
-permissions:
-  contents: read
-  packages: write
-  id-token: write
+env:
+  IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
+  TMPDIR: /tmp
 
 jobs:
   build-akmods:
     name: Build and push akmods-edward
     runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
 
     steps:
       - name: Checkout
@@ -31,13 +35,15 @@ jobs:
           update-podman: false
           install-tools: '["just", "cosign"]'
 
-      - name: Build Akmods Image
+      - name: Build Image
         id: build-akmods
+        env:
+          TMPDIR: /tmp
         run: |
           sudo -E "$(command -v just)" build-akmods
 
-      - name: Tag Image
-        id: tag-images
+      - name: Generate Build Tags
+        id: gen-build-tags
         run: |
           DATE=$(date +%Y%m%d)
           BUILD_TAGS=()
@@ -51,6 +57,16 @@ jobs:
           echo "${BUILD_TAGS[*]}"
           echo "alias_tags=${BUILD_TAGS[*]}" >> "$GITHUB_OUTPUT"
 
+      - name: Tag Image
+        id: tag-images
+        env:
+          ALIAS_TAGS: ${{ steps.gen-build-tags.outputs.alias_tags }}
+        run: |
+          sudo -E "$(command -v just)" tag-images \
+            blueprint \
+            akmods-edward \
+            "${ALIAS_TAGS}"
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
@@ -61,18 +77,17 @@ jobs:
       - name: Push To GHCR
         id: push-image
         env:
-          ALIAS_TAGS: ${{ steps.tag-images.outputs.alias_tags }}
-          OWNER_LOWER: ${{ github.repository_owner }}
+          ALIAS_TAGS: ${{ steps.gen-build-tags.outputs.alias_tags }}
         run: |
           set -euox pipefail
 
-          OWNER_LOWER="${OWNER_LOWER,,}"
+          REGISTRY="${IMAGE_REGISTRY,,}"
 
           for tag in ${ALIAS_TAGS}; do
             sudo -E podman push \
               --digestfile=/tmp/digestfile \
-              "blueprint:akmods-edward" \
-              "ghcr.io/${OWNER_LOWER}/blueprint:${tag}"
+              "blueprint:${tag}" \
+              "${REGISTRY}/blueprint:${tag}"
           done
 
           digest="$(< /tmp/digestfile)"
@@ -89,4 +104,4 @@ jobs:
             --new-bundle-format=false \
             --use-signing-config=false \
             --key env://COSIGN_PRIVATE_KEY \
-            "ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/blueprint@${DIGEST}"
+            "${IMAGE_REGISTRY,,}/blueprint@${DIGEST}"

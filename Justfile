@@ -198,18 +198,22 @@ build-akmods:
     #!/usr/bin/env bash
     set -euo pipefail
 
+    set -a
+    source "images/akmods-edward.env"
+    set +a
+
     SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
     CONTEXT_DIR="$(dirname "$SCRIPT_DIR")"
 
     echo "Building akmods image using AlmaLinux bootc base (kernel auto-detected inside container)..."
 
     podman build \
-        --tag "blueprint:akmods-edward" \
-        --tag "ghcr.io/huntedraven7/blueprint:akmods-edward" \
+        --tag "${IMAGE_NAME}:${DEFAULT_TAG}" \
+        --tag "ghcr.io/${REPO_ORGANIZATION}/${IMAGE_NAME}:${DEFAULT_TAG}" \
         --file "containerfiles/Containerfile.akmods-edward" \
         "${CONTEXT_DIR}"
 
-    echo "Akmods image built: blueprint:akmods-edward"
+    echo "Akmods image built: ${IMAGE_NAME}:${DEFAULT_TAG}"
 
 # Build the fsdk image using BuildStream (pure FSDK composition, no apt)
 [group('Build')]
@@ -370,7 +374,7 @@ list-images:
         stem="${stem%.env}"
         if [[ -f "containerfiles/Containerfile.${stem}" ]] || [[ -f "buildstream/Containerfile.${stem}" ]]; then
             case "${stem}" in
-                arch|holo-amd|holo-nvidia|ai|debian|gentoo|opensuse|ubuntu|nixos|fsdk) continue ;;
+                arch|holo-amd|holo-nvidia|ai|debian|gentoo|opensuse|ubuntu|nixos|fsdk|akmods-edward) continue ;;
             esac
             IMAGES+=("${stem}")
         fi
