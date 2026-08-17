@@ -36,16 +36,8 @@ dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.r
 
 # Terra EL10 repo (for additional packages not in EPEL)
 # https://docs.terrapkg.com/usage/installing/
-cat > /etc/yum.repos.d/terra-el10.repo <<'EOF'
-[terra-el10]
-name=Terra EL10
-baseurl=https://repos.fyralabs.com/terrael$releasever
-skip_if_unavailable=True
-gpgcheck=1
-gpgkey=https://repos.fyralabs.com/terra-gpg-keys
-enabled=1
-EOF
-dnf -y install --nogpgcheck terra-release terra-gpg-keys 2>/dev/null || echo "Terra repo unavailable, continuing without it"
+# Use --repofrompath so it's only active for this command, avoiding broken metadata issues
+dnf -y install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terrael$releasever' terra-release terra-gpg-keys 2>/dev/null || echo "Terra repo unavailable, continuing without it"
 
 # Install dnf versionlock plugin
 dnf -y install 'dnf-command(versionlock)'
