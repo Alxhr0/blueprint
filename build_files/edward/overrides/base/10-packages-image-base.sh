@@ -31,6 +31,9 @@ gpgkey=https://negativo17.org/repos/RPM-GPG-KEY-sleyssieres
 enabled=1
 EOF
 
+# Docker CE repo
+dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+
 # Install dnf versionlock plugin
 dnf -y install 'dnf-command(versionlock)'
 

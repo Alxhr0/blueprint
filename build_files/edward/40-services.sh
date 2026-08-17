@@ -14,6 +14,8 @@ systemctl enable flatpak-preinstall.service
 systemctl enable flatpak-appstream-refresh.service
 systemctl enable ublue-system-setup.service
 systemctl --global enable ublue-user-setup.service
+systemctl enable docker.service
+systemctl enable containerd.service
 systemctl mask bootc-fetch-apply-updates.timer bootc-fetch-apply-updates.service
 systemctl mask rpm-ostree-countme.service rpm-ostree-countme.timer
 
