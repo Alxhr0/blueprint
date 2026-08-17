@@ -508,6 +508,10 @@ build-raw $target_image=("localhost/" + image_name) $tag=default_tag: && (_build
 [group('Build Virtal Machine Image')]
 build-iso $target_image=("localhost/" + image_name) $tag=default_tag: && (_build-bib target_image tag "iso" "disk_config/iso.toml")
 
+# Build a server installer ISO using BIB (Anaconda-based)
+[group('Build Virtal Machine Image')]
+build-server-iso: && (_build-bib "localhost/blueprint" "server" "iso" "disk_config/iso-server.toml")
+
 # Rebuild a QCOW2 virtual machine image
 [group('Build Virtal Machine Image')]
 rebuild-qcow2 $target_image=("localhost/" + image_name) $tag=default_tag: && (_rebuild-bib target_image tag "qcow2" "disk_config/disk.toml")
@@ -574,6 +578,10 @@ run-vm-raw $target_image=("localhost/" + image_name) $tag=default_tag: && (_run-
 [group('Run Virtal Machine')]
 run-vm-iso $target_image=("localhost/" + image_name) $tag=default_tag: && (_run-vm target_image tag "iso" "disk_config/iso.toml")
 
+# Run the server installer ISO in a VM
+[group('Run Virtal Machine')]
+run-server-iso: && (_run-vm "localhost/blueprint" "server" "iso" "disk_config/iso-server.toml")
+
 # Run a virtual machine using systemd-vmspawn
 [group('Run Virtal Machine')]
 spawn-vm rebuild="0" type="qcow2" ram="6G":
@@ -616,53 +624,4 @@ format:
     # Run shfmt on all Bash scripts
     find . -iname "*.sh" -type f -exec shfmt --write "{}" ';'
 
-build-coreos-iso stream="stable" arch="amd64":
-    ./scripts/build-coreos-iso.sh --stream {{ stream }} --arch {{ arch }}
 
-run-coreos-iso stream="stable" arch="amd64":
-    #!/usr/bin/env bash
-    set -euo pipefail
-
-    ISO="output/blueprint-coreos-installer-{{ stream }}-{{ arch }}.iso"
-    if [[ ! -f "$ISO" ]]; then
-        echo "No ISO found. Building..."
-        just build-coreos-iso {{ stream }} {{ arch }}
-    fi
-
-    OVMF=""
-    if [[ "{{ arch }}" == "arm64" ]]; then
-        for candidate in /usr/share/AAVMF/AAVMF_CODE.fd /usr/share/qemu-efi-aarch64/QEMU_EFI.fd; do
-            [[ -f "$candidate" ]] && OVMF="$candidate" && break
-        done
-    else
-        for candidate in \
-            /usr/share/OVMF/OVMF_CODE_4M.fd \
-            /usr/share/OVMF/OVMF_CODE.fd \
-            /usr/share/edk2/ovmf/OVMF_CODE_4M.fd \
-            /usr/share/edk2/ovmf/OVMF_CODE.fd; do
-            [[ -f "$candidate" ]] && OVMF="$candidate" && break
-        done
-    fi
-    [[ -n "$OVMF" ]] || { echo "OVMF not found -- install ovmf (amd64) or qemu-efi-aarch64 (arm64)"; exit 1; }
-
-    mkdir -p .vm
-    [[ -f .vm/coreos-target.qcow2 ]] || qemu-img create -f qcow2 .vm/coreos-target.qcow2 20G >/dev/null
-
-    QEMU="qemu-system-x86_64"
-    QEMU_ARGS=(-m 4096 -smp 2 -enable-kvm -cpu host)
-    if [[ "{{ arch }}" == "arm64" ]]; then
-        QEMU="qemu-system-aarch64"
-        QEMU_ARGS=(-m 4096 -smp 2 -M virt -cpu cortex-a57)
-    fi
-
-    echo "Booting CoreOS installer ISO (stream={{ stream }}, arch={{ arch }})..."
-    echo "  Target disk: .vm/coreos-target.qcow2 (20G)"
-    echo "  After install: just spawn-vm to boot the provisioned server"
-    echo ""
-    exec "$QEMU" \
-        "${QEMU_ARGS[@]}" \
-        -drive if=pflash,format=raw,readonly=on,file="$OVMF" \
-        -cdrom "$ISO" \
-        -drive if=virtio,file=.vm/coreos-target.qcow2,format=qcow2 \
-        -net nic,model=virtio -net user,hostfwd=tcp::2222-:22 \
-        -display gtk

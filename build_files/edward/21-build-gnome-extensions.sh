@@ -20,8 +20,6 @@ curl -fsSL "$BMS_URL" -o /tmp/blur-my-shell.zip
 unzip -o /tmp/blur-my-shell.zip -d "$EXTENSIONS_DIR/blur-my-shell@aunetx"
 rm /tmp/blur-my-shell.zip
 
-# Bazaar Companion (installed by RPM, schemas compiled below)
-
 # Caffeine
 CAFFEINE_URL="https://extensions.gnome.org/extension-data/caffeinepatapon.info.v60.shell-extension.zip"
 curl -fsSL "$CAFFEINE_URL" -o /tmp/caffeine.zip
@@ -46,13 +44,11 @@ curl -fsSL "$GSCONNECT_URL" -o /tmp/gsconnect.zip
 unzip -o /tmp/gsconnect.zip -d "$EXTENSIONS_DIR/gsconnect@andyholmes.github.io"
 rm /tmp/gsconnect.zip
 
-# Gradia Capture (not on extensions.gnome.org yet, build from source)
-dnf -y install meson sassc cmake dbus-devel
-GRADIA_DIR="$EXTENSIONS_DIR/gradia-integration@alexandervanhee.github.io"
-bash "$GRADIA_DIR/build.sh"
-unzip -o "$GRADIA_DIR/gradia-integration@alexandervanhee.github.io.shell-extension.zip" -d "$GRADIA_DIR"
-rm -f "$GRADIA_DIR/gradia-integration@alexandervanhee.github.io.shell-extension.zip"
-dnf -y remove meson sassc cmake dbus-devel
+# Gradia Capture
+GRADIA_URL="https://extensions.gnome.org/extension-data/gradia-integrationalexandervanhee.github.io.v1.shell-extension.zip"
+curl -fsSL "$GRADIA_URL" -o /tmp/gradia-capture.zip
+unzip -o /tmp/gradia-capture.zip -d "$EXTENSIONS_DIR/gradia-integration@alexandervanhee.github.io"
+rm /tmp/gradia-capture.zip
 
 # Search Light (v37 for GNOME 47; v42+ requires GNOME 48+)
 SEARCHLIGHT_URL="https://extensions.gnome.org/extension-data/search-lighticedman.github.com.v37.shell-extension.zip"
@@ -64,6 +60,5 @@ rm -f /usr/share/glib-2.0/schemas/gschemas.compiled
 glib-compile-schemas /usr/share/glib-2.0/schemas
 
 dnf -y remove glib2-devel
-rm -rf "$EXTENSIONS_DIR/tmp"
 
 echo "::endgroup::"
