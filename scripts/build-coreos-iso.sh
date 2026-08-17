@@ -111,6 +111,8 @@ Type=idle
 ExecStart=/opt/install-server
 StandardInput=tty-force
 StandardOutput=tty
+StandardError=tty
+Environment=TERM=xterm
 TTYPath=/dev/tty1
 TTYReset=yes
 TTYVHangup=yes
@@ -157,6 +159,7 @@ echo "[3/3] Customizing FCOS live ISO with coreos-installer..."
 
 mkdir -p "$OUTPUT_DIR"
 ISO_OUT="$OUTPUT_DIR/blueprint-coreos-installer-${STREAM}-${ARCH}.iso"
+rm -f "$ISO_OUT"
 
 coreos-installer iso customize \
     --force \

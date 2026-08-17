@@ -254,6 +254,7 @@ ${INSTALL_LOG}" 14 70
         "$IMAGE_REF" \
         bootc install \
             --target-device "$TARGET_DISK" \
+            --ignition-file /config.ign \
             --transport registry \
             --image-ref "$IMAGE_REF"
 
