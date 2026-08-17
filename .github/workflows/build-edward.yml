@@ -1,4 +1,4 @@
-name: Build Edward image (monthly)
+name: Build Edward image (every month)
 
 on:
   schedule:

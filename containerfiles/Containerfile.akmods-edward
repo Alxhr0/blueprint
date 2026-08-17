@@ -11,8 +11,8 @@ RUN --mount=type=tmpfs,dst=/opt \
     dnf -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm" && \
     dnf config-manager --set-enabled epel && \
     KVER="${KERNEL_VERSION:-$(rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel | tail -1)}" && \
-    mkdir -p /tmp/kernel-rpms && \
-    dnf download -y --destdir=/tmp/kernel-rpms \
+    mkdir -p /kernel-rpms && \
+    dnf download -y --destdir=/kernel-rpms \
         "kernel-devel-${KVER}" \
         "kernel-${KVER}" \
         "kernel-core-${KVER}" \
@@ -40,11 +40,11 @@ RUN --mount=type=tmpfs,dst=/opt \
     && dnf clean all
 
 # Copy kernel RPMs and install them
-COPY --from=fetcher /tmp/kernel-rpms/ /tmp/kernel-rpms/
+COPY --from=fetcher /kernel-rpms/ /kernel-rpms/
 RUN --mount=type=tmpfs,dst=/opt \
     --mount=type=tmpfs,dst=/tmp \
     KVER="${KERNEL_VERSION:-$(rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel | tail -1)}" && \
-    dnf -y install /tmp/kernel-rpms/kernel-devel-*.rpm && \
+    dnf -y install /kernel-rpms/kernel-devel-*.rpm && \
     dnf -y install akmods-nvidia nvidia-driver nvidia-settings && \
     dnf clean all && \
     akmods --force --kernels "${KVER}" nvidia || true
@@ -56,7 +56,7 @@ RUN mkdir -p /rpms /kernel-rpms && \
     if rpm -q kmod-nvidia >/dev/null 2>&1; then \
         rpm -q --queryformat '%{SOURCERPM}' kmod-nvidia | head -1 | xargs -I{} dnf download --alldeps --destdir=/kernel-rpms {} 2>/dev/null || true; \
     fi && \
-    cp /tmp/kernel-rpms/*.rpm /kernel-rpms/ 2>/dev/null || true
+    cp /kernel-rpms/*.rpm /kernel-rpms/ 2>/dev/null || true
 
 FROM scratch AS akmods-nvidia-open
 COPY --from=builder /rpms /rpms

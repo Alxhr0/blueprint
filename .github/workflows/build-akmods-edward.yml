@@ -1,4 +1,4 @@
-name: Build Akmods Edward (every 2 weeks)
+name: Build Akmods Edward (every month)
 
 on:
   schedule:
