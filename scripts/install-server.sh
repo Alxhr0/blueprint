@@ -5,7 +5,9 @@ DEFAULT_IMAGE="ghcr.io/huntedraven7/blueprint:server"
 DEFAULT_USERNAME="core"
 INSTALL_LOG="/tmp/install-server.log"
 
-exec > >(tee -a "$INSTALL_LOG") 2>&1
+log() {
+    echo "$(date '+%H:%M:%S') $*" >> "$INSTALL_LOG"
+}
 
 probe_disks() {
     mapfile -t DISKS < <(
@@ -237,10 +239,10 @@ to ${TARGET_DISK}.\n\n\
 This may take several minutes. Watch the log:\n\
 ${INSTALL_LOG}" 14 70
 
-    echo "=== Pulling container image: ${IMAGE_REF} ==="
+    log "=== Pulling container image: ${IMAGE_REF} ==="
     podman pull "$IMAGE_REF"
 
-    echo "=== Running bootc install ==="
+    log "=== Running bootc install ==="
     local bootc_args=(
         run --privileged --pid=host --network=host
         --volume /var/lib/containers:/var/lib/containers
