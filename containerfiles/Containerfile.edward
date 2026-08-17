@@ -4,8 +4,8 @@ FROM ${BREW_IMAGE_REF} AS brew
 
 FROM scratch AS ctx
 
-COPY --from=brew /system_files /files
-COPY system_files /files
+COPY --from=brew /system_files /system_files
+COPY system_files/ /system_files
 COPY brew /brew
 COPY build_files/edward /build_scripts
 COPY image-versions.yaml /image-versions.yaml
