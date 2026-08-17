@@ -52,6 +52,7 @@ jobs:
               BUILD_TAGS+=("akmods-${GIT_SHA}")
               BUILD_TAGS+=("akmods-${DATE}-${GIT_SHA}")
           fi
+          BUILD_TAGS+=("akmods-edward")
           BUILD_TAGS+=("akmods-${DATE}")
           BUILD_TAGS+=("latest")
           echo "${BUILD_TAGS[*]}"
