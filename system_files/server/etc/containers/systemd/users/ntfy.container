@@ -1,12 +1,14 @@
 [Unit]
 Description=ntfy push notification server
 Documentation=https://ntfy.sh/docs/
+After=tailscale-ntfy.service
+Requires=tailscale-ntfy.service
 
 [Container]
 Image=docker.io/binwiederhier/ntfy:latest
 ContainerName=ntfy
 Exec=serve
-PublishPort=8081:80
+Network=container:tailscale-ntfy
 Volume=%h/.local/share/ntfy:/var/lib/ntfy:Z
 
 [Service]

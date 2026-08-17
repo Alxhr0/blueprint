@@ -3,3 +3,6 @@ _build_*
 output
 _build-*/**
 *_chunkah_*
+.fcos-iso-build/
+.iso-build/
+.vm/

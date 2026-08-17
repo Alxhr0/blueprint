@@ -2,8 +2,9 @@
 FROM scratch AS ctx
 COPY build_files /
 COPY system_files/global /system_files/global
+COPY system_files/server /system_files/server
 
-FROM quay.io/fedora/fedora-bootc:44
+FROM ghcr.io/ublue-os/ucore:stable
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/cache \
