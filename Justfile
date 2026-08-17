@@ -154,15 +154,16 @@ build $target_image="" $tag="" $dx="0" $nvidia="1" $kernel_pin="" $gnome_version
             podman build \
                 --build-arg "KERNEL_VERSION=${KERNEL_VERSION}" \
                 --tag "blueprint:akmods-edward" \
+                --tag "ghcr.io/huntedraven7/blueprint:akmods-edward" \
                 --file "containerfiles/Containerfile.akmods-edward" \
                 .
-            BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=blueprint:akmods-edward")
+            BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=ghcr.io/huntedraven7/blueprint:akmods-edward")
         else
             echo "WARNING: Could not detect kernel version, skipping custom akmods build"
-            BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=blueprint:akmods-edward")
+            BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=ghcr.io/huntedraven7/blueprint:akmods-edward")
         fi
     else
-        BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=blueprint:akmods-edward")
+        BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=ghcr.io/huntedraven7/blueprint:akmods-edward")
     fi
     if [[ -z "$(git status -s)" ]]; then
         BUILD_ARGS+=("--build-arg" "SHA_HEAD_SHORT=$(git rev-parse --short HEAD)")
@@ -204,6 +205,7 @@ build-akmods:
 
     podman build \
         --tag "blueprint:akmods-edward" \
+        --tag "ghcr.io/huntedraven7/blueprint:akmods-edward" \
         --file "containerfiles/Containerfile.akmods-edward" \
         "${CONTEXT_DIR}"
 
