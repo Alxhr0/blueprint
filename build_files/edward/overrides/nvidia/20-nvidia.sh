@@ -14,7 +14,7 @@ else
 fi
 
 # Use negativo17 NVIDIA repo — akmods-nvidia auto-rebuilds against the AlmaLinux kernel
-NVIDIA_REPO_URL="https://negativo17.org/repos/nvidia/fedora-40/${ARCH}/"
+NVIDIA_REPO_URL="https://negativo17.org/repos/nvidia/fedora-44/${ARCH}/"
 dnf config-manager --add-repo "${NVIDIA_REPO_URL}"
 
 # Install akmods-nvidia so the kernel module rebuilds automatically on kernel updates
