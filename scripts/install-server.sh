@@ -93,24 +93,32 @@ step_ssh() {
 }
 
 step_network() {
-    local net_choices=()
-    for iface in "${IFACES[@]}"; do
-        local ip
-        ip=$(get_ip "$iface")
-        if [[ -n "$ip" ]]; then
-            net_choices+=("$iface" "$ip")
-        else
-            net_choices+=("$iface" "(no address)")
-        fi
-    done
-
     NET_MODE=$(whiptail --title "Network" --menu \
         "Select network configuration mode:" \
-        12 50 2 \
+        12 50 3 \
         "dhcp" "Automatic (DHCP)" \
-        "static" "Static IP" 3>&1 1>&2 2>&3) || exit 0
+        "static" "Static IP" \
+        "wifi" "WiFi (nmtui)" 3>&1 1>&2 2>&3) || exit 0
 
-    if [[ "$NET_MODE" == "static" ]]; then
+    if [[ "$NET_MODE" == "wifi" ]]; then
+        whiptail --title "WiFi" --msgbox \
+            "nmtui will open to configure WiFi.\n\nSelect your network, enter the password,\nthen press OK when connected." 10 55
+        clear
+        nmtui-connect
+        NET_MODE="dhcp"
+    elif [[ "$NET_MODE" == "static" ]]; then
+        probe_interfaces
+        local net_choices=()
+        for iface in "${IFACES[@]}"; do
+            local ip
+            ip=$(get_ip "$iface")
+            if [[ -n "$ip" ]]; then
+                net_choices+=("$iface" "$ip")
+            else
+                net_choices+=("$iface" "(no address)")
+            fi
+        done
+
         NET_IFACE=$(whiptail --title "Network Interface" --menu \
             "Select the network interface:" \
             12 50 4 "${net_choices[@]}" 3>&1 1>&2 2>&3) || exit 0
@@ -271,7 +279,6 @@ main() {
 
     step_welcome
     probe_disks
-    probe_interfaces
     step_disk
     step_hostname
     step_user

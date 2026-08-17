@@ -20,8 +20,7 @@ curl -fsSL "$BMS_URL" -o /tmp/blur-my-shell.zip
 unzip -o /tmp/blur-my-shell.zip -d "$EXTENSIONS_DIR/blur-my-shell@aunetx"
 rm /tmp/blur-my-shell.zip
 
-# Bazaar Companion
-mv "$EXTENSIONS_DIR/tmp/bazaar-integration@kolunmi.github.io/src/" "$EXTENSIONS_DIR/bazaar-integration@kolunmi.github.io/"
+# Bazaar Companion (installed by RPM, schemas compiled below)
 
 # Caffeine
 CAFFEINE_URL="https://extensions.gnome.org/extension-data/caffeinepatapon.info.v60.shell-extension.zip"

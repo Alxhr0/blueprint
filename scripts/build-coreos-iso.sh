@@ -109,7 +109,7 @@ ConditionPathExists=/opt/install-server
 [Service]
 Type=idle
 ExecStart=/opt/install-server
-StandardInput=tty-force
+StandardInput=tty
 StandardOutput=tty
 StandardError=tty
 Environment=TERM=xterm
