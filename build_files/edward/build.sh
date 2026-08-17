@@ -56,6 +56,10 @@ mkdir -p /usr/share/ublue-os/homebrew
 cp -avf "${CONTEXT_PATH}/brew/." /usr/share/ublue-os/homebrew/
 
 CUSTOM_NAME="edward"
+cp -avf "${CONTEXT_PATH}/system_files/usr/." /usr/
+cp -avf "${CONTEXT_PATH}/system_files/etc/." /etc/
+cp -avf "${CONTEXT_PATH}/system_files/global/." / /
+
 copy_systemfiles_for ../files
 run_buildscripts_for ..
 CUSTOM_NAME=""
