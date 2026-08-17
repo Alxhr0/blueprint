@@ -12,5 +12,5 @@ dnf5 -y install \
     git \
     htop
 
-systemctl enable cockpit.socket
+systemctl enable cockpit.service
 systemctl enable sshd.service
