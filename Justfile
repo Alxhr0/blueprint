@@ -149,19 +149,25 @@ build $target_image="" $tag="" $dx="0" $nvidia="1" $kernel_pin="" $gnome_version
 
     # Build custom akmods image for NVIDIA if enabled
     if [ "{{ nvidia }}" = "1" ] && grep -q "AKMODS_IMAGE_REF" "${CONTAINERFILE}" 2>/dev/null; then
-        echo "Building custom NVIDIA akmods image..."
-        KERNEL_VERSION=$(podman run --rm --pull=newer "quay.io/almalinuxorg/almalinux-bootc:10-kitten" rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel 2>/dev/null | tail -1 || echo "")
-        if [ -n "$KERNEL_VERSION" ]; then
-            podman build \
-                --build-arg "KERNEL_VERSION=${KERNEL_VERSION}" \
-                --tag "blueprint:akmods-edward" \
-                --tag "ghcr.io/huntedraven7/blueprint:akmods-edward" \
-                --file "containerfiles/Containerfile.akmods-edward" \
-                .
-            BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=blueprint:akmods-edward")
+        AKMODS_REF="ghcr.io/huntedraven7/blueprint:akmods-edward"
+        if podman image exists "${AKMODS_REF}" 2>/dev/null || podman pull "${AKMODS_REF}" 2>/dev/null; then
+            echo "Using pre-built akmods image: ${AKMODS_REF}"
+            BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=${AKMODS_REF}")
         else
-            echo "WARNING: Could not detect kernel version, skipping custom akmods build"
-            BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=ghcr.io/huntedraven7/blueprint:akmods-edward")
+            echo "Pre-built akmods image unavailable, building locally..."
+            KERNEL_VERSION=$(podman run --rm --pull=newer "quay.io/almalinuxorg/almalinux-bootc:10-kitten" rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel 2>/dev/null | tail -1 || echo "")
+            if [ -n "$KERNEL_VERSION" ]; then
+                podman build \
+                    --build-arg "KERNEL_VERSION=${KERNEL_VERSION}" \
+                    --tag "blueprint:akmods-edward" \
+                    --tag "ghcr.io/huntedraven7/blueprint:akmods-edward" \
+                    --file "containerfiles/Containerfile.akmods-edward" \
+                    .
+                BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=blueprint:akmods-edward")
+            else
+                echo "WARNING: Could not detect kernel version, skipping custom akmods build"
+                BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=${AKMODS_REF}")
+            fi
         fi
     elif grep -q "AKMODS_IMAGE_REF" "${CONTAINERFILE}" 2>/dev/null; then
         BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=ghcr.io/huntedraven7/blueprint:akmods-edward")
