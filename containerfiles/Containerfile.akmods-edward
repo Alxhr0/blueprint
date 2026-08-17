@@ -1,7 +1,7 @@
 ARG KERNEL_VERSION="${KERNEL_VERSION:-}"
 ARG NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_VERSION:-565.57.01}"
 
-FROM quay.io/almalinuxorg/almalinux-bootc:10 AS fetcher
+FROM quay.io/almalinuxorg/almalinux-bootc:10-kitten AS fetcher
 
 # Download kernel and devel RPMs for the target kernel
 RUN --mount=type=tmpfs,dst=/opt \
@@ -10,7 +10,6 @@ RUN --mount=type=tmpfs,dst=/opt \
     dnf config-manager --set-enabled crb && \
     dnf -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm" && \
     dnf config-manager --set-enabled epel && \
-    dnf config-manager --add-repo=https://negativo17.org/repos/nvidia/fedora-44/x86_64/ && \
     KVER="${KERNEL_VERSION:-$(rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel | tail -1)}" && \
     mkdir -p /tmp/kernel-rpms && \
     dnf download -y --destdir=/tmp/kernel-rpms \
@@ -22,7 +21,7 @@ RUN --mount=type=tmpfs,dst=/opt \
         "kernel-modules-extra-${KVER}" && \
     dnf clean all
 
-FROM quay.io/almalinuxorg/almalinux-bootc:10 AS builder
+FROM quay.io/almalinuxorg/almalinux-bootc:10-kitten AS builder
 
 # Install build dependencies
 RUN --mount=type=tmpfs,dst=/opt \
