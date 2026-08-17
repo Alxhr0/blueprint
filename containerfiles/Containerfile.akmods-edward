@@ -12,14 +12,14 @@ RUN --mount=type=tmpfs,dst=/opt \
     dnf config-manager --set-enabled epel && \
     dnf config-manager --add-repo=https://negativo17.org/repos/nvidia/fedora-44/x86_64/ && \
     KVER="${KERNEL_VERSION:-$(rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel | tail -1)}" && \
-    dnf download -y \
+    mkdir -p /tmp/kernel-rpms && \
+    dnf download -y --destdir=/tmp/kernel-rpms \
         "kernel-devel-${KVER}" \
         "kernel-${KVER}" \
         "kernel-core-${KVER}" \
         "kernel-modules-${KVER}" \
         "kernel-modules-core-${KVER}" \
         "kernel-modules-extra-${KVER}" && \
-    mv /kernel-*.rpm /tmp/kernel-rpms/ && \
     dnf clean all
 
 FROM quay.io/almalinuxorg/almalinux-bootc:10 AS builder
