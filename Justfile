@@ -98,7 +98,7 @@ sudoif command *args:
 [private]
 _ensure-yq:
     #!/usr/bin/env bash
-    if ! command -v yq &> /dev/null; then
+    if ! command -v yq &> /dev/null && ! /home/linuxbrew/.linuxbrew/bin/yq --version &> /dev/null; then
         echo "Missing requirement: 'yq' is not installed."
         echo "Please install yq (e.g. 'brew install yq')"
         exit 1
@@ -507,6 +507,10 @@ build-raw $target_image=("localhost/" + image_name) $tag=default_tag: && (_build
 # Build an ISO virtual machine image
 [group('Build Virtal Machine Image')]
 build-iso $target_image=("localhost/" + image_name) $tag=default_tag: && (_build-bib target_image tag "iso" "disk_config/iso.toml")
+
+# Build a GNOME installer ISO using bootc-installer
+[group('Build Virtal Machine Image')]
+build-gnome-iso: && (_rebuild-bib "ghcr.io/huntedraven7/blueprint" "edward" "iso" "disk_config/iso-gnome.toml")
 
 # Build a server installer ISO using BIB (Anaconda-based)
 [group('Build Virtal Machine Image')]

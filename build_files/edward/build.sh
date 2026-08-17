@@ -58,7 +58,8 @@ cp -avf "${CONTEXT_PATH}/brew/." /usr/share/ublue-os/homebrew/
 CUSTOM_NAME="edward"
 cp -avf "${CONTEXT_PATH}/system_files/usr/." /usr/
 cp -avf "${CONTEXT_PATH}/system_files/etc/." /etc/
-cp -avf "${CONTEXT_PATH}/system_files/global/." / /
+cp -avf "${CONTEXT_PATH}/system_files/global/usr/." /usr/
+cp -avf "${CONTEXT_PATH}/system_files/global/etc/." /etc/
 
 copy_systemfiles_for ../files
 run_buildscripts_for ..
