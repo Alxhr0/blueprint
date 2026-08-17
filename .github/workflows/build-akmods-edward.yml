@@ -55,10 +55,13 @@ jobs:
         id: push-image
         env:
           ALIAS_TAGS: ${{ steps.tag-images.outputs.alias_tags }}
+          OWNER_LOWER: ${{ github.repository_owner }}
         run: |
           set -euox pipefail
 
-          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          OWNER_LOWER="${OWNER_LOWER,,}"
+
+          echo "${GITHUB_TOKEN}" | sudo podman login ghcr.io -u "${OWNER_LOWER}" --password-stdin
 
           for tag in ${ALIAS_TAGS}; do
             sudo -E podman push \
