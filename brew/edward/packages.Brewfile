@@ -28,6 +28,7 @@ brew "fd"
 brew "dysk"
 brew "opencode"
 brew "ghostty"
+brew "npm"
 
 flatpak "io.github.tanaybhomia.Whisp"
 flatpak "com.discordapp.Discord"
