@@ -30,7 +30,7 @@ RUN --mount=type=tmpfs,dst=/opt \
     dnf config-manager --set-enabled crb && \
     dnf -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm" && \
     dnf config-manager --set-enabled epel && \
-    dnf config-manager --add-repo=https://negativo17.org/repos/nvidia/fedora-44/x86_64/ && \
+    dnf config-manager --add-repo=https://negativo17.org/repos/epel-nvidia.repo && \
     dnf -y install \
         gcc \
         make \
@@ -45,7 +45,7 @@ RUN --mount=type=tmpfs,dst=/opt \
     --mount=type=tmpfs,dst=/tmp \
     KVER="${KERNEL_VERSION:-$(rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel | tail -1)}" && \
     dnf -y install /kernel-rpms/kernel-devel-*.rpm && \
-    dnf -y install akmods-nvidia nvidia-driver nvidia-settings && \
+    dnf -y install akmod-nvidia nvidia-driver nvidia-settings && \
     dnf clean all && \
     akmods --force --kernels "${KVER}" nvidia || true
 

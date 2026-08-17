@@ -30,7 +30,7 @@ else
     NVIDIA_REPO_URL="https://negativo17.org/repos/nvidia/fedora-44/${ARCH}/"
     dnf config-manager --add-repo "${NVIDIA_REPO_URL}"
     dnf -y install \
-        akmods-nvidia \
+        akmod-nvidia \
         nvidia-driver \
         nvidia-settings \
         kernel-devel
