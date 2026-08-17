@@ -29,7 +29,7 @@ jobs:
         with:
           storage-backend: remove-software
           update-podman: false
-          install-tools: '["just"]'
+          install-tools: '["just", "cosign"]'
 
       - name: Build Akmods Image
         id: build-akmods
@@ -51,6 +51,13 @@ jobs:
           echo "${BUILD_TAGS[*]}"
           echo "alias_tags=${BUILD_TAGS[*]}" >> "$GITHUB_OUTPUT"
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Push To GHCR
         id: push-image
         env:
@@ -61,8 +68,6 @@ jobs:
 
           OWNER_LOWER="${OWNER_LOWER,,}"
 
-          echo "${GITHUB_TOKEN}" | sudo podman login ghcr.io -u "${OWNER_LOWER}" --password-stdin
-
           for tag in ${ALIAS_TAGS}; do
             sudo -E podman push \
               --digestfile=/tmp/digestfile \
@@ -72,3 +77,16 @@ jobs:
 
           digest="$(< /tmp/digestfile)"
           echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+
+      - name: Sign container image
+        if: github.event_name != 'pull_request'
+        env:
+          COSIGN_EXPERIMENTAL: false
+          COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+          DIGEST: ${{ steps.push-image.outputs.digest }}
+        run: |
+          cosign sign -y \
+            --new-bundle-format=false \
+            --use-signing-config=false \
+            --key env://COSIGN_PRIVATE_KEY \
+            "ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/blueprint@${DIGEST}"

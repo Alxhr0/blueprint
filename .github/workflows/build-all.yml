@@ -32,7 +32,7 @@ jobs:
         with:
           storage-backend: remove-software
           update-podman: false
-          install-tools: '["just"]'
+          install-tools: '["just", "cosign"]'
 
       - name: Build Image
         id: build-image
@@ -127,3 +127,23 @@ jobs:
 
           digest="$(< /tmp/digestfile)"
           echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+
+      - name: Sign container image
+        if: github.event_name != 'pull_request'
+        env:
+          COSIGN_EXPERIMENTAL: false
+          COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+          DIGEST: ${{ steps.push-image.outputs.digest }}
+        run: |
+          set -euo pipefail
+          REGISTRY="${IMAGE_REGISTRY,,}"
+          if [[ "${{ matrix.image }}" == "homepage" ]]; then
+            IMAGE_NAME="homepage"
+          else
+            IMAGE_NAME="blueprint"
+          fi
+          cosign sign -y \
+            --new-bundle-format=false \
+            --use-signing-config=false \
+            --key env://COSIGN_PRIVATE_KEY \
+            "${REGISTRY}/${IMAGE_NAME}@${DIGEST}"
