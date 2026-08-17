@@ -14,4 +14,4 @@ ln -sf /var/usrlocal /usr/local
 
 chmod 644 /usr/share/ublue-os/image-info.json
 
-bootc container lint --fatal-warnings || true
+bootc container lint --fatal-warnings

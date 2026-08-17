@@ -114,8 +114,7 @@ StandardOutput=tty
 TTYPath=/dev/tty1
 TTYReset=yes
 TTYVHangup=yes
-Restart=on-failure
-RestartSec=3
+Restart=no
 
 [Install]
 WantedBy=multi-user.target"""
@@ -160,6 +159,7 @@ mkdir -p "$OUTPUT_DIR"
 ISO_OUT="$OUTPUT_DIR/blueprint-coreos-installer-${STREAM}-${ARCH}.iso"
 
 coreos-installer iso customize \
+    --force \
     --live-ignition "$IGN_FILE" \
     --output "$ISO_OUT" \
     "$LIVE_ISO"

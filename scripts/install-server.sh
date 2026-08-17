@@ -64,6 +64,21 @@ step_user() {
     USERNAME=$(whiptail --title "User" --inputbox \
         "Enter the username for the primary user:" 8 50 "$DEFAULT_USERNAME" 3>&1 1>&2 2>&3) || exit 0
     [[ -z "$USERNAME" ]] && USERNAME="$DEFAULT_USERNAME"
+
+    PASSWORD=""
+    while true; do
+        PASSWORD=$(whiptail --title "Password" --passwordbox \
+            "Set password for ${USERNAME}:" 8 50 3>&1 1>&2 2>&3) || exit 0
+        [[ -z "$PASSWORD" ]] && { whiptail --title "Error" --msgbox "Password cannot be empty." 6 40; continue; }
+
+        local confirm
+        confirm=$(whiptail --title "Password" --passwordbox \
+            "Confirm password for ${USERNAME}:" 8 50 3>&1 1>&2 2>&3) || exit 0
+        if [[ "$PASSWORD" == "$confirm" ]]; then
+            break
+        fi
+        whiptail --title "Error" --msgbox "Passwords do not match. Try again." 6 40
+    done
 }
 
 step_ssh() {
@@ -121,35 +136,42 @@ step_review() {
     local ssh_detail="none"
     [[ -n "$SSH_KEY" ]] && ssh_detail="(key provided)"
 
+    local pass_detail="set"
+    [[ -z "$PASSWORD" ]] && pass_detail="none"
+
     whiptail --title "Review" --msgbox \
         "Installation summary:\n\n\
   Target disk:  ${TARGET_DISK}\n\
   Hostname:     ${HOSTNAME}\n\
   Username:     ${USERNAME}\n\
+  Password:     ${pass_detail}\n\
   SSH key:      ${ssh_detail}\n\
   Network:      ${NET_MODE} ${net_detail}\n\
   Image:        ${IMAGE_REF}\n\n\
-Press OK to begin installation." 18 70
+Press OK to begin installation." 20 70
 }
 
 generate_ignition() {
     local ign_file="/tmp/blueprint-install.ign"
 
+    local password_hash
+    password_hash=$(openssl passwd -6 "$PASSWORD")
+
     local user_block
     if [[ -n "$SSH_KEY" ]]; then
         user_block=$(python3 -c "
 import json, sys
-user = {'name': sys.argv[1], 'groups': ['wheel']}
-if sys.argv[2]:
-    user['sshAuthorizedKeys'] = [sys.argv[2]]
+user = {'name': sys.argv[1], 'groups': ['wheel'], 'passwordHash': sys.argv[2]}
+if sys.argv[3]:
+    user['sshAuthorizedKeys'] = [sys.argv[3]]
 print(json.dumps(user))
-" "$USERNAME" "$SSH_KEY")
+" "$USERNAME" "$password_hash" "$SSH_KEY")
     else
         user_block=$(python3 -c "
 import json, sys
-user = {'name': sys.argv[1], 'groups': ['wheel']}
+user = {'name': sys.argv[1], 'groups': ['wheel'], 'passwordHash': sys.argv[2]}
 print(json.dumps(user))
-" "$USERNAME")
+" "$USERNAME" "$password_hash")
     fi
 
     local networkd_files="[]"
@@ -241,6 +263,8 @@ main() {
         echo "This installer must be run as root." >&2
         exit 1
     fi
+
+    rm -f /opt/install-server
 
     step_welcome
     probe_disks

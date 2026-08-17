@@ -1,5 +1,4 @@
 ARG KERNEL_VERSION="${KERNEL_VERSION:-}"
-ARG NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_VERSION:-565.57.01}"
 
 FROM quay.io/almalinuxorg/almalinux-bootc:10-kitten AS fetcher
 
@@ -47,9 +46,8 @@ RUN --mount=type=tmpfs,dst=/opt \
     dnf -y install /kernel-rpms/kernel-devel-*.rpm && \
     dnf -y install akmod-nvidia nvidia-driver nvidia-settings && \
     dnf clean all && \
-    akmods --force --kernels "${KVER}" --akmod nvidia || true
+    akmods --force --kernels "${KVER}" --akmod nvidia
 
-# Find and collect the built RPMs
 RUN mkdir -p /rpms /kernel-rpms && \
     KVER="${KERNEL_VERSION:-$(rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel | tail -1)}" && \
     find /var/cache/akmods/nvidia -name "kmod-nvidia-*.rpm" -exec cp {} /rpms/ \; 2>/dev/null || true && \

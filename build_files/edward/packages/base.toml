@@ -49,7 +49,6 @@ packages = [
     "NetworkManager-openconnect-gnome",
     "NetworkManager-openvpn-gnome",
     "btrfs-progs",
-    "containerd",
     "ddcutil",
     "distrobox",
     "fastfetch",

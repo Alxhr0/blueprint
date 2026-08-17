@@ -28,7 +28,7 @@ dnf versionlock add "${VERSIONLOCK_PKGS[@]}"
 # Everything that depends on external repositories should be after this.
 # Make sure to set them as disabled and enable them only when you are going to use their packages.
 
-dnf config-manager --add-repo "https://pkgs.tailscale.com/stable/almalinux/${MAJOR_VERSION_NUMBER}/tailscale.repo"
+dnf config-manager --add-repo "https://pkgs.tailscale.com/stable/centos/10/tailscale.repo"
 dnf config-manager --set-disabled "tailscale-stable"
 dnf -y --enablerepo "tailscale-stable" install \
     tailscale
