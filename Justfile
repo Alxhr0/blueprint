@@ -150,7 +150,7 @@ build $target_image="" $tag="" $dx="0" $nvidia="1" $kernel_pin="" $gnome_version
     # Build custom akmods image for NVIDIA if enabled
     if [ "{{ nvidia }}" = "1" ]; then
         echo "Building custom NVIDIA akmods image..."
-        KERNEL_VERSION=$(rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel | tail -1 || echo "")
+        KERNEL_VERSION=$(podman run --rm --pull=newer "quay.io/almalinuxorg/almalinux-bootc:10-kitten" rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel 2>/dev/null | tail -1 || echo "")
         if [ -n "$KERNEL_VERSION" ]; then
             podman build \
                 --build-arg "KERNEL_VERSION=${KERNEL_VERSION}" \
@@ -158,7 +158,7 @@ build $target_image="" $tag="" $dx="0" $nvidia="1" $kernel_pin="" $gnome_version
                 --tag "ghcr.io/huntedraven7/blueprint:akmods-edward" \
                 --file "containerfiles/Containerfile.akmods-edward" \
                 .
-            BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=ghcr.io/huntedraven7/blueprint:akmods-edward")
+            BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=blueprint:akmods-edward")
         else
             echo "WARNING: Could not detect kernel version, skipping custom akmods build"
             BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=ghcr.io/huntedraven7/blueprint:akmods-edward")
