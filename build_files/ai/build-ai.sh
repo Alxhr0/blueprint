@@ -3,16 +3,6 @@ set -ouex pipefail
 
 cp -avf "/ctx/system_files/global"/. /
 
-curl -fsSL https://bun.sh/install | bash
-curl -fsSL https://pi.dev/install.sh | sh
-bun add -g opencode-ai
-bun add -g @kilocode/cli
-curl -LsSf https://llama.app/install.sh | sh
-curl -fsSL https://ollama.com/install.sh | sh
-curl -fsSL https://cli.kiro.dev/install | bash
-curl -fsSL https://antigravity.google/cli/install.sh | bash
-curl https://cursor.com/install -fsS | bash
-
 PACKAGES=(
     build-essential
     git
@@ -28,6 +18,16 @@ PACKAGES=(
     locales
     tzdata
 )
+
+curl -fsSL https://bun.sh/install | bash
+curl -fsSL https://pi.dev/install.sh | sh
+bun add -g opencode-ai
+bun add -g @kilocode/cli
+curl -LsSf https://llama.app/install.sh | sh
+curl -fsSL https://ollama.com/install.sh | sh
+curl -fsSL https://cli.kiro.dev/install | bash
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+curl https://cursor.com/install -fsS | bash
 
 apt-get update
 apt-get install -y --no-install-recommends "${PACKAGES[@]}"
