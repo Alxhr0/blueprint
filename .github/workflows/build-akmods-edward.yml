@@ -58,13 +58,15 @@ jobs:
         run: |
           set -euox pipefail
 
-          sudo podman tag "blueprint:akmods-edward" "ghcr.io/${{ github.repository_owner }}/blueprint:akmods-edward"
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+
+          sudo podman tag "blueprint:akmods-edward" "ghcr.io/${OWNER_LOWER}/blueprint:akmods-edward"
 
           for tag in ${ALIAS_TAGS}; do
             sudo -E podman push \
               --digestfile=/tmp/digestfile \
-              "ghcr.io/${{ github.repository_owner }}/blueprint:akmods-edward" \
-              "ghcr.io/${{ github.repository_owner }}/blueprint:akmods-edward:${tag}"
+              "ghcr.io/${OWNER_LOWER}/blueprint:akmods-edward" \
+              "ghcr.io/${OWNER_LOWER}/blueprint:akmods-edward:${tag}"
           done
 
           digest="$(< /tmp/digestfile)"
