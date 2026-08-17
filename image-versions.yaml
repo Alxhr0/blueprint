@@ -7,6 +7,10 @@ images:
     image: ghcr.io/ublue-os/brew
     tag: latest
     digest: sha256:de0391c67209703bdf1249079c8d478d44eff864d62e7ec6f12aaa382bdf21df
+  - name: akmods-edward
+    image: ghcr.io/huntedraven7/blueprint:akmods-edward
+    tag: latest
+    digest: sha256:local-build
 
 downloads:
   uupd: "v1.4.0"

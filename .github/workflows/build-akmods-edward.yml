@@ -1,0 +1,71 @@
+name: Build Akmods Edward (every 2 weeks)
+
+on:
+  schedule:
+    - cron: '0 4 1,15 * *' # 4:00am UTC on the 1st and 15th of each month
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  build-akmods:
+    name: Build and push akmods-edward
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Maximize build space
+        uses: ublue-os/remove-unwanted-software@695eb75bc387dbcd9685a8e72d23439d8686cba6
+
+      - name: Setup runner
+        uses: projectbluefin/actions/bootc-build/setup-runner@v1
+        with:
+          storage-backend: remove-software
+          update-podman: false
+          install-tools: '["just"]'
+
+      - name: Build Akmods Image
+        id: build-akmods
+        run: |
+          sudo -E "$(command -v just)" build-akmods
+
+      - name: Tag Image
+        id: tag-images
+        run: |
+          DATE=$(date +%Y%m%d)
+          BUILD_TAGS=()
+          if [[ -z "$(git status -s)" ]]; then
+              GIT_SHA=$(git rev-parse --short HEAD)
+              BUILD_TAGS+=("akmods-${GIT_SHA}")
+              BUILD_TAGS+=("akmods-${DATE}-${GIT_SHA}")
+          fi
+          BUILD_TAGS+=("akmods-${DATE}")
+          BUILD_TAGS+=("latest")
+          echo "${BUILD_TAGS[*]}"
+          echo "alias_tags=${BUILD_TAGS[*]}" >> "$GITHUB_OUTPUT"
+
+      - name: Push To GHCR
+        id: push-image
+        env:
+          ALIAS_TAGS: ${{ steps.tag-images.outputs.alias_tags }}
+        run: |
+          set -euox pipefail
+
+          sudo podman tag "blueprint:akmods-edward" "ghcr.io/${{ github.repository_owner }}/blueprint:akmods-edward"
+
+          for tag in ${ALIAS_TAGS}; do
+            sudo -E podman push \
+              --digestfile=/tmp/digestfile \
+              "ghcr.io/${{ github.repository_owner }}/blueprint:akmods-edward" \
+              "ghcr.io/${{ github.repository_owner }}/blueprint:akmods-edward:${tag}"
+          done
+
+          digest="$(< /tmp/digestfile)"
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"

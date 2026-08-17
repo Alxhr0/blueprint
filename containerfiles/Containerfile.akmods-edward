@@ -1,0 +1,36 @@
+ARG KERNEL_VERSION="${KERNEL_VERSION:-6.12.0-211.el10_2}"
+ARG NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_VERSION:-565.57.01}"
+
+FROM quay.io/almalinuxorg/almalinux-bootc:10 AS builder
+
+# Install build dependencies and enable repos
+RUN --mount=type=tmpfs,dst=/opt \
+    --mount=type=tmpfs,dst=/tmp \
+    dnf -y install dnf-plugins-core && \
+    dnf config-manager --set-enabled crb && \
+    dnf -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm" && \
+    dnf config-manager --set-enabled epel && \
+    dnf config-manager --add-repo=https://negativo17.org/repos/nvidia/fedora-44/x86_64/ && \
+    dnf -y install \
+        gcc \
+        make \
+        kernel-devel-${KERNEL_VERSION} \
+        akmods-nvidia \
+        nvidia-driver \
+        nvidia-settings \
+        elfutils-libelf-devel \
+        rpm-build \
+        dkms \
+    && dnf clean all
+
+# Build the NVIDIA kernel module for the target kernel
+RUN akmods --force --kernels "${KERNEL_VERSION}" nvidia || true
+
+# Find and collect the built RPMs
+RUN mkdir -p /rpms /kernel-rpms && \
+    find /var/cache/akmods/nvidia -name "kmod-nvidia-*.rpm" -exec cp {} /rpms/ \; 2>/dev/null || true && \
+    rpm -q --queryformat '%{SOURCERPM}' kmod-nvidia 2>/dev/null | head -1 | xargs -I{} dnf download --alldeps --destdir=/kernel-rpms {} 2>/dev/null || true
+
+FROM scratch AS akmods-nvidia-open
+COPY --from=builder /rpms /rpms
+COPY --from=builder /kernel-rpms /kernel-rpms

@@ -13,20 +13,30 @@ else
     NVIDIA_ARCH="$ARCH"
 fi
 
-# Use negativo17 NVIDIA repo — akmods-nvidia auto-rebuilds against the AlmaLinux kernel
-NVIDIA_REPO_URL="https://negativo17.org/repos/nvidia/fedora-44/${ARCH}/"
-dnf config-manager --add-repo "${NVIDIA_REPO_URL}"
+# Try custom akmods RPMs first (built for this kernel)
+NVIDIA_KMOD_RPMS=()
+if ls /tmp/akmods-nvidia-open-rpms/kmods/kmod-nvidia-*"${QUALIFIED_KERNEL}"*.rpm 1>/dev/null 2>&1; then
+    NVIDIA_KMOD_RPMS=(/tmp/akmods-nvidia-open-rpms/kmods/kmod-nvidia-*"${QUALIFIED_KERNEL}"*.rpm)
+elif ls /tmp/akmods-nvidia-open-rpms/kmods/kmod-nvidia-*.rpm 1>/dev/null 2>&1; then
+    mapfile -t NVIDIA_KMOD_RPMS < <(find /tmp/akmods-nvidia-open-rpms/kmods -name 'kmod-nvidia-*.rpm' -print)
+fi
 
-# Install akmods-nvidia so the kernel module rebuilds automatically on kernel updates
-dnf -y install \
-    akmods-nvidia \
-    nvidia-driver \
-    nvidia-settings \
-    kernel-devel
-
-# Ensure the module is built for the current kernel
-if command -v akmods &>/dev/null; then
-    akmods --force --kernels "${QUALIFIED_KERNEL}" nvidia || true
+if ((${#NVIDIA_KMOD_RPMS[@]} > 0)); then
+    echo "Installing custom NVIDIA akmods RPMs"
+    mapfile -t NVIDIA_UBLUE_RPMS < <(find /tmp/akmods-nvidia-open-rpms/ublue-os -maxdepth 1 -type f -name '*.rpm' -print 2>/dev/null)
+    dnf -y install "${NVIDIA_KMOD_RPMS[@]}" "${NVIDIA_UBLUE_RPMS[@]}"
+else
+    echo "WARNING: no matching custom akmods RPMs found for kernel ${QUALIFIED_KERNEL}, falling back to negativo17 repo"
+    NVIDIA_REPO_URL="https://negativo17.org/repos/nvidia/fedora-44/${ARCH}/"
+    dnf config-manager --add-repo "${NVIDIA_REPO_URL}"
+    dnf -y install \
+        akmods-nvidia \
+        nvidia-driver \
+        nvidia-settings \
+        kernel-devel
+    if command -v akmods &>/dev/null; then
+        akmods --force --kernels "${QUALIFIED_KERNEL}" nvidia || true
+    fi
 fi
 
 # If the module was built, install it
