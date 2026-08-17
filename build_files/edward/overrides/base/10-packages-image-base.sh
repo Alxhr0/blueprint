@@ -20,17 +20,6 @@ dnf config-manager --set-enabled epel
 dnf config-manager --add-repo=https://negativo17.org/repos/epel-multimedia.repo
 dnf config-manager --set-disabled epel-multimedia
 
-# cdrtools from negativo17 (manual repo, no .repo file available)
-cat > /etc/yum.repos.d/negativo17-cdrtools-epel-10.repo <<'EOF'
-[negativo17-cdrtools-epel-10]
-name=negativo17 cdrtools for EPEL 10
-baseurl=https://negativo17.org/repos/cdrtools/epel-10/$basearch/
-skip_if_unavailable=True
-gpgcheck=1
-gpgkey=https://negativo17.org/repos/RPM-GPG-KEY-sleyssieres
-enabled=1
-EOF
-
 # Docker CE repo
 dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
 

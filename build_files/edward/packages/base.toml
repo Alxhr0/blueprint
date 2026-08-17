@@ -95,7 +95,6 @@ packages = [
     "openssh",
     "chrony",
     "sudo",
-    "cdrecord",
 ]
 
 [install_excluded]
