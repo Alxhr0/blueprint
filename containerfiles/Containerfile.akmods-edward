@@ -47,7 +47,7 @@ RUN --mount=type=tmpfs,dst=/opt \
     dnf -y install /kernel-rpms/kernel-devel-*.rpm && \
     dnf -y install akmod-nvidia nvidia-driver nvidia-settings && \
     dnf clean all && \
-    akmods --force --kernels "${KVER}" nvidia || true
+    akmods --force --kernels "${KVER}" --akmod nvidia || true
 
 # Find and collect the built RPMs
 RUN mkdir -p /rpms /kernel-rpms && \
