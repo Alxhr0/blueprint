@@ -193,24 +193,16 @@ build $target_image="" $tag="" $dx="0" $nvidia="1" $kernel_pin="" $gnome_version
 
 # Build custom NVIDIA akmods image for AlmaLinux + CoreOS kernel
 [group('Build')]
-build-akmods $kernel_version="":
+build-akmods:
     #!/usr/bin/env bash
     set -euo pipefail
 
     SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
     CONTEXT_DIR="$(dirname "$SCRIPT_DIR")"
 
-    if [ -z "$kernel_version" ]; then
-        kernel_version=$(rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel | tail -1 || echo "")
-    fi
-    if [ -z "$kernel_version" ]; then
-        echo "ERROR: Could not detect kernel version. Pass it explicitly: just build-akmods <kernel-version>"
-        exit 1
-    fi
-    echo "Building akmods for kernel: ${kernel_version}"
+    echo "Building akmods image using AlmaLinux bootc base (kernel auto-detected inside container)..."
 
     podman build \
-        --build-arg "KERNEL_VERSION=${kernel_version}" \
         --tag "blueprint:akmods-edward" \
         --file "containerfiles/Containerfile.akmods-edward" \
         "${CONTEXT_DIR}"
