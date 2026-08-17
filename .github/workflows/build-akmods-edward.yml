@@ -60,13 +60,11 @@ jobs:
 
           OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
 
-          sudo podman tag "blueprint:akmods-edward" "ghcr.io/${OWNER_LOWER}/blueprint:akmods-edward"
-
           for tag in ${ALIAS_TAGS}; do
             sudo -E podman push \
               --digestfile=/tmp/digestfile \
-              "ghcr.io/${OWNER_LOWER}/blueprint:akmods-edward" \
-              "ghcr.io/${OWNER_LOWER}/blueprint:akmods-edward:${tag}"
+              "blueprint:akmods-edward" \
+              "ghcr.io/${OWNER_LOWER}/blueprint:${tag}"
           done
 
           digest="$(< /tmp/digestfile)"
