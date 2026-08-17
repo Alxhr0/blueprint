@@ -1,0 +1,15 @@
+[Unit]
+Description=Run brew bundle for main Brewfiles
+After=brew-setup.service
+ConditionPathExists=/usr/share/ublue-os/homebrew/Brewfile
+
+[Service]
+Type=oneshot
+User=1000
+Environment=HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar
+Environment=HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
+Environment=HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew
+ExecStart=/home/linuxbrew/.linuxbrew/bin/brew bundle --file=/usr/share/ublue-os/homebrew/Brewfile
+
+[Install]
+WantedBy=default.target

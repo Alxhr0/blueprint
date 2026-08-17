@@ -10,6 +10,9 @@ systemctl disable rpm-ostree.service
 systemctl enable dconf-update.service
 systemctl enable tailscaled.service
 systemctl enable brew-setup.service
+systemctl enable brew-bundle.service
+systemctl enable brew-update.timer
+systemctl enable brew-upgrade.timer
 systemctl enable flatpak-preinstall.service
 systemctl enable flatpak-appstream-refresh.service
 systemctl enable ublue-system-setup.service
