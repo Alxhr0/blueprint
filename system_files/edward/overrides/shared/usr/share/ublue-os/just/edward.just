@@ -3,7 +3,7 @@
 
 # List available recipes
 default:
-	@just --list
+    @just --list
 
 # Example: install a brew package
 # install-foo:
