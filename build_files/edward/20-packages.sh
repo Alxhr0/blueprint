@@ -7,6 +7,9 @@ PKGS_TOML="/run/context/build_scripts/packages/base.toml"
 # Install packages from manifest
 readarray -t INSTALL_PKGS < <($READ_PKGS "$PKGS_TOML" install)
 
+# Install config-manager plugin for repo management
+dnf -y install dnf-plugins-core
+
 # Docker CE repo (must come before docker package install)
 dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
