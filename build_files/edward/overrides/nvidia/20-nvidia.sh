@@ -63,7 +63,7 @@ fi
 dnf -y "${NVIDIA_DNF_ARGS[@]}" install \
     "${NVIDIA_KMOD_RPMS[@]}" "${NVIDIA_UBLUE_RPMS[@]}"
 
-dnf config-manager --set-enabled "nvidia-container-toolkit"
+sed -i 's/^enabled=0/enabled=1/' /etc/yum.repos.d/*nvidia-container-toolkit*.repo 2>/dev/null || true
 
 KMOD_VERSION="$(rpm -q --queryformat '%{VERSION}' kmod-nvidia)"
 NVIDIA_PKG_VERSION="3:${KMOD_VERSION}"
@@ -91,7 +91,7 @@ bootc kargs append -- \
     modprobe.blacklist=nouveau \
     nvidia-drm.modeset=1
 
-dnf config-manager --set-disabled nvidia-container-toolkit
+sed -i 's/^enabled=1/enabled=0/' /etc/yum.repos.d/*nvidia-container-toolkit*.repo 2>/dev/null || true
 
 systemctl enable ublue-nvctk-cdi.service
 
