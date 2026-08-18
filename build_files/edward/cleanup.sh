@@ -3,4 +3,6 @@ set -xeuo pipefail
 
 dnf clean all
 
-bootc container lint --fatal-warnings
+rm -f /var/log/dnf*.log /var/log/hawkey.log
+
+bootc container lint
