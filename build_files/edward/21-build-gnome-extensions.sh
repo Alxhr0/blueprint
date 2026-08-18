@@ -2,7 +2,7 @@
 
 set -eoux pipefail
 
-echo "::group:: ===$(basename "$0")==="
+echo "::group:: $(basename "$0")"
 
 # GNOME Shell extensions are no longer installed by this image.
 # The upstream bluefin-lts-nvidia base already enables the extensions

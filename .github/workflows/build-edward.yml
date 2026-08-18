@@ -1,8 +1,8 @@
-name: Build Edward image (every month)
+name: Build Edward image (every week)
 
 on:
   schedule:
-    - cron: '0 4 1 * *' # 4:00am UTC on the 1st of each month
+    - cron: '0 4 * * 0' # 4:00am UTC every Sunday
   workflow_dispatch:
 
 env:

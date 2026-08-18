@@ -19,7 +19,7 @@ run_buildscripts_for() {
 		if [ "${CUSTOM_NAME}" != "" ] ; then
 			WHAT=$CUSTOM_NAME
 		fi
-		printf "::group:: ===$WHAT-%s===\n" "$(basename "$script")"
+		printf "::group:: %s-%s\n" "$WHAT" "$(basename "$script")"
 		"$(realpath "$script")"
 		printf "::endgroup::\n"
 	done
@@ -32,7 +32,7 @@ copy_systemfiles_for() {
 	if [ "${CUSTOM_NAME}" != "" ] ; then
 		DISPLAY_NAME=$CUSTOM_NAME
 	fi
-	printf "::group:: ===%s-file-copying===\n" "${DISPLAY_NAME}"
+	printf "::group:: %s-file-copying\n" "${DISPLAY_NAME}"
 	case "$WHAT" in
 		../files)
 			cp -avf "${CONTEXT_PATH}/system_files/edward/." /
@@ -90,6 +90,6 @@ if [ "$ENABLE_NVIDIA" == "1" ]; then
 	run_buildscripts_for "$(arch)/nvidia"
 fi
 
-printf "::group:: ===Image Cleanup===\n"
+printf "::group:: Image Cleanup\n"
 "${BUILD_SCRIPTS_PATH}/cleanup.sh"
 printf "::endgroup::\n"
