@@ -18,7 +18,13 @@ dnf -y remove \
 curl -fsSL https://download.docker.com/linux/centos/docker-ce.repo \
     -o /etc/yum.repos.d/docker-ce.repo
 
-dnf -y install \
+dnf clean all
+
+dnf -y \
+    --refresh \
+    --setopt=retries=10 \
+    --setopt=timeout=60 \
+    install \
     docker-ce \
     docker-ce-cli \
     containerd.io \
