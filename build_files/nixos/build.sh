@@ -212,17 +212,20 @@ done
 
 ostree summary --repo=/sysroot/ostree/repo --update
 
+# NOTE: mktemp -d already creates STAGING as an existing directory. ostree
+# checkout insists on creating its own destination and errors with
+# "mkdirat: File exists" if the target already exists, so we check out into
+# a not-yet-existing subdirectory of STAGING instead.
 STAGING="$(mktemp -d)"
-ostree checkout --repo=/sysroot/ostree/repo blueprint/nixos "${STAGING}" 2>/dev/null || \
-    ostree checkout --repo=/sysroot/ostree/repo blueprint/nixos "${STAGING}"
+ostree checkout --repo=/sysroot/ostree/repo blueprint/nixos "${STAGING}/root"
 
 # Ensure stage tree explicitly includes kernel and initrd before commit
-mkdir -p "${STAGING}/usr/lib/modules/${KVER}"
-cp -L "${KERNEL_PATH}" "${STAGING}/usr/lib/modules/${KVER}/vmlinuz"
-cp -L "${INITRD_PATH}" "${STAGING}/usr/lib/modules/${KVER}/initramfs.img"
+mkdir -p "${STAGING}/root/usr/lib/modules/${KVER}"
+cp -L "${KERNEL_PATH}" "${STAGING}/root/usr/lib/modules/${KVER}/vmlinuz"
+cp -L "${INITRD_PATH}" "${STAGING}/root/usr/lib/modules/${KVER}/initramfs.img"
 
 if [ -d "${SYSTEM_PATH}/kernel-modules/lib/modules/${KVER}" ]; then
-    cp -rL "${SYSTEM_PATH}/kernel-modules/lib/modules/${KVER}/." "${STAGING}/usr/lib/modules/${KVER}/"
+    cp -rL "${SYSTEM_PATH}/kernel-modules/lib/modules/${KVER}/." "${STAGING}/root/usr/lib/modules/${KVER}/"
 fi
 
 ostree commit --repo=/sysroot/ostree/repo \
@@ -231,7 +234,7 @@ ostree commit --repo=/sysroot/ostree/repo \
     --add-metadata-string="version=$(date +%Y%m%d)" \
     --no-xattrs \
     --parent="$(ostree rev-parse --repo=/sysroot/ostree/repo blueprint/nixos)" \
-    "${STAGING}"
+    "${STAGING}/root"
 
 rm -rf "${STAGING}"
 
