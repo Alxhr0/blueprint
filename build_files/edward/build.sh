@@ -25,9 +25,6 @@ copy_systemfiles_for() {
 		edward)
 			cp -avf "${CONTEXT_PATH}/system_files/edward/." /
 			;;
-		common-nvidia)
-			cp -avf "${CONTEXT_PATH}/system_files/nvidia/." / 2>/dev/null || true
-			;;
 		*)
 			cp -avf "${CONTEXT_PATH}/system_files/edward/overrides/${what}/." / 2>/dev/null || true
 			;;
@@ -57,12 +54,6 @@ copy_systemfiles_for edward
 
 run_buildscripts_for layer
 run_buildscripts_for edward
-
-if [ "${ENABLE_NVIDIA:-0}" == "1" ]; then
-	copy_systemfiles_for common-nvidia
-	copy_systemfiles_for nvidia
-	run_buildscripts_for nvidia
-fi
 
 printf '::group:: Image Cleanup\n'
 "${BUILD_SCRIPTS_PATH}/cleanup.sh"
