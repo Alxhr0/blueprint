@@ -1,6 +1,12 @@
 tap "ublue-os/tap", trusted: true
 tap "ublue-os/experimental-tap", trusted: true
 
+cask "devpod-linux"
+cask "visual-studio-code-linux"
+cask "lm-studio-linux"
+cask "zed-linux"
+cask "jetbrains-toolbox-linux"
+
 brew "eza"
 brew "bun"
 brew "starship"

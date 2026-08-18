@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-set -xeuo pipefail
+set ${CI:+-x} -euo pipefail
 
 # Get qualified kernel version
 KERNEL_SUFFIX=""
-QUALIFIED_KERNEL="$(rpm -qa | grep -P 'kernel-(|'"${KERNEL_SUFFIX}"'-)(\d+\.\d+\.\d+)' | sed -E 's/kernel-(|'"${KERNEL_SUFFIX}"'-)//' | tail -n 1)"
+QUALIFIED_KERNEL="$(rpm -qa | grep -P 'kernel-(|'"$KERNEL_SUFFIX"'-)(\d+\.\d+\.\d+)' | sed -E 's/kernel-(|'"$KERNEL_SUFFIX"'-)//' | tail -n 1)"
 
 ARCH="$(uname -m)"
 if [ "$ARCH" = "aarch64" ]; then
@@ -40,7 +40,6 @@ NVIDIA_DNF_DRIVER_ARGS=(
     '--enablerepo=fedora-nvidia-lts-driver'
 )
 
-# Install kmod RPMs that match the running kernel
 NVIDIA_KMOD_RPMS=()
 while IFS= read -r rpm_file; do
     rpm_name="$(rpm -qp --qf '%{NAME}' "${rpm_file}")"
@@ -63,7 +62,7 @@ fi
 dnf -y "${NVIDIA_DNF_ARGS[@]}" install \
     "${NVIDIA_KMOD_RPMS[@]}" "${NVIDIA_UBLUE_RPMS[@]}"
 
-sed -i 's/^enabled=0/enabled=1/' /etc/yum.repos.d/*nvidia-container-toolkit*.repo 2>/dev/null || true
+dnf config-manager --set-enabled "nvidia-container-toolkit"
 
 KMOD_VERSION="$(rpm -q --queryformat '%{VERSION}' kmod-nvidia)"
 NVIDIA_PKG_VERSION="3:${KMOD_VERSION}"
@@ -86,14 +85,14 @@ blacklist nouveau
 options nouveau modeset=0
 EOF
 
-bootc kargs append -- \
-    rd.driver.blacklist=nouveau \
-    modprobe.blacklist=nouveau \
-    nvidia-drm.modeset=1
+tee /usr/lib/bootc/kargs.d/00-nvidia.toml <<'EOF'
+kargs = ["rd.driver.blacklist=nouveau", "modprobe.blacklist=nouveau", "nvidia-drm.modeset=1"]
+EOF
 
-sed -i 's/^enabled=1/enabled=0/' /etc/yum.repos.d/*nvidia-container-toolkit*.repo 2>/dev/null || true
+dnf config-manager --set-disabled nvidia-container-toolkit
 
 systemctl enable ublue-nvctk-cdi.service
+semodule --verbose --install /usr/share/selinux/packages/nvidia-container.pp
 
 if [[ -f /etc/modprobe.d/nvidia-modeset.conf ]]; then
     cp /etc/modprobe.d/nvidia-modeset.conf /usr/lib/modprobe.d/nvidia-modeset.conf

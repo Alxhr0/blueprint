@@ -10,10 +10,19 @@
       "customType": "regex",
       "fileMatch": ["^image-versions\\.yaml$"],
       "matchStrings": [
-        "- name: almalinux-bootc-kitten\n    image: quay\\.io/almalinuxorg/almalinux-bootc-kitten\n    tag: (?<currentValue>\\S+)\n    digest: (?<currentDigest>\\S+)"
+        "- name: bluefin-lts\n    image: ghcr\\.io/projectbluefin/bluefin-lts\n    tag: (?<currentValue>\\S+)\n    digest: (?<currentDigest>\\S+)"
       ],
       "datasourceTemplate": "docker",
-      "lookupNameTemplate": "quay.io/almalinuxorg/almalinux-bootc-kitten"
+      "lookupNameTemplate": "ghcr.io/projectbluefin/bluefin-lts"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^image-versions\\.yaml$"],
+      "matchStrings": [
+        "- name: akmods-nvidia-open\n    image: ghcr\\.io/ublue-os/akmods-nvidia-open\n    tag: (?<currentValue>\\S+)\n    digest: (?<currentDigest>\\S+)"
+      ],
+      "datasourceTemplate": "docker",
+      "lookupNameTemplate": "ghcr.io/ublue-os/akmods-nvidia-open"
     }
   ],
 
