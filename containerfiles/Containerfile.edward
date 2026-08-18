@@ -1,6 +1,6 @@
+ARG AKMODS_VERSION="${AKMODS_VERSION:-coreos-stable-43}"
 FROM quay.io/almalinuxorg/almalinux-bootc:10-kitten AS base
 
-ARG AKMODS_VERSION="${AKMODS_VERSION:-coreos-stable-43}"
 FROM ghcr.io/ublue-os/akmods-nvidia-open:${AKMODS_VERSION} AS akmods_nvidia_open
 
 FROM ghcr.io/projectbluefin/common:latest AS common
