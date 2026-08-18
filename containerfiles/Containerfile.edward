@@ -1,4 +1,7 @@
-FROM quay.io/almalinuxorg/almalinux-bootc-kitten:10 AS base
+FROM quay.io/almalinuxorg/almalinux-bootc:10-kitten AS base
+
+ARG AKMODS_VERSION="${AKMODS_VERSION:-coreos-stable-43}"
+FROM ghcr.io/ublue-os/akmods-nvidia-open:${AKMODS_VERSION} AS akmods_nvidia_open
 
 FROM ghcr.io/projectbluefin/common:latest AS common
 FROM ghcr.io/ublue-os/brew:latest AS brew
@@ -25,6 +28,7 @@ COPY brew/ /context/brew
 
 FROM base
 
+ARG AKMODS_VERSION="${AKMODS_VERSION:-coreos-stable-43}"
 ARG ENABLE_DX="${ENABLE_DX:-0}"
 ARG GNOME_VERSION="${GNOME_VERSION:-50}"
 ARG IMAGE_NAME="${IMAGE_NAME:-blueprint}"
@@ -37,6 +41,7 @@ RUN --mount=type=tmpfs,dst=/opt \
   --mount=type=tmpfs,dst=/tmp \
   --mount=type=tmpfs,dst=/var \
   --mount=type=tmpfs,dst=/boot \
+  --mount=type=bind,from=akmods_nvidia_open,src=/rpms,dst=/tmp/akmods-nvidia-open-rpms \
   --mount=type=bind,from=ctx,source=/context,target=/run/context \
   /run/context/build_scripts/build.sh
 

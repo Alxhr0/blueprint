@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 set -xeuo pipefail
 
-# Enable NVIDIA repos and install prebuilt kernel modules + userspace driver
-dnf install -y almalinux-release-nvidia-driver
-dnf install -y nvidia-open-kmod nvidia-driver nvidia-driver-cuda
+# Install prebuilt NVIDIA kernel modules + userspace driver from ublue akmods
+dnf install -y /tmp/akmods-nvidia-open-rpms/*.rpm
 
 # Blacklist nouveau
 cat > /usr/lib/modprobe.d/00-nouveau-blacklist.conf <<'EOF'
