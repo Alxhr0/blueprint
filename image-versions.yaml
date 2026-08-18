@@ -1,16 +1,8 @@
 images:
-  - name: almalinux-bootc
-    image: quay.io/almalinuxorg/almalinux-bootc
-    tag: 10-kitten
-    digest: sha256:95d73b4e20fd6562593272e8b1630b9376b4a34507ed10bdf5f56ae10f7d7438
-  - name: brew
-    image: ghcr.io/ublue-os/brew
-    tag: latest
-    digest: sha256:de0391c67209703bdf1249079c8d478d44eff864d62e7ec6f12aaa382bdf21df
-  - name: akmods-edward
-    image: ghcr.io/huntedraven7/blueprint:akmods-edward
-    tag: latest
-    digest: sha256:local-build
+  - name: bluefin-lts-nvidia
+    image: ghcr.io/projectbluefin/bluefin-lts-nvidia
+    tag: stable
+    digest: ""
 
 downloads:
   uupd: "v1.4.0"

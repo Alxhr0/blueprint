@@ -2,6 +2,11 @@
 mountpoint = "/"
 minsize = "20 GiB"
 
+[customizations.installer.kickstart]
+contents = """
+# Leave network and users unconfigured to force interactive setup
+"""
+
 [customizations.installer.modules]
 enable = [
   "org.fedoraproject.Anaconda.Modules.Storage",

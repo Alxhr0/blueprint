@@ -3,6 +3,9 @@ set -xeuo pipefail
 
 # Edward-specific customizations
 
+# Docker CE repo
+dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+
 source "$(dirname "$0")/../../core/nix-setup.sh"
 
 # Enable user services (only if they exist to avoid dangling symlinks)

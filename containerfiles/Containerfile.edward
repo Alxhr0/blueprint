@@ -1,22 +1,16 @@
-ARG BREW_IMAGE_REF
-ARG AKMODS_IMAGE_REF
-
-FROM ${AKMODS_IMAGE_REF} AS akmods-nvidia-open
-FROM ${BREW_IMAGE_REF} AS brew
+FROM ghcr.io/projectbluefin/bluefin-lts-nvidia:stable AS base
 
 FROM scratch AS ctx
 
-COPY --from=brew /system_files /system_files
 COPY system_files/ /system_files
 COPY brew /brew
 COPY build_files/edward /build_scripts
 COPY build_files/core /build_scripts/core
 COPY image-versions.yaml /image-versions.yaml
 
-FROM quay.io/almalinuxorg/almalinux-bootc:10-kitten@sha256:95d73b4e20fd6562593272e8b1630b9376b4a34507ed10bdf5f56ae10f7d7438
+FROM base
 
 ARG ENABLE_DX="${ENABLE_DX:-0}"
-ARG ENABLE_NVIDIA="${ENABLE_NVIDIA:-1}"
 ARG GNOME_VERSION="${GNOME_VERSION:-50}"
 ARG IMAGE_NAME="${IMAGE_NAME:-blueprint}"
 ARG IMAGE_VENDOR="${IMAGE_VENDOR:-huntedraven7}"
@@ -27,8 +21,6 @@ RUN --mount=type=tmpfs,dst=/opt \
   --mount=type=tmpfs,dst=/tmp \
   --mount=type=tmpfs,dst=/var \
   --mount=type=tmpfs,dst=/boot \
-  --mount=type=bind,from=akmods-nvidia-open,src=/rpms,dst=/tmp/akmods-nvidia-open-rpms \
-  --mount=type=bind,from=akmods-nvidia-open,src=/kernel-rpms,dst=/tmp/kernel-rpms \
   --mount=type=bind,from=ctx,source=/,target=/run/context \
   /run/context/build_scripts/build.sh
 

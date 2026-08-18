@@ -105,7 +105,7 @@ _ensure-yq:
     fi
 
 # Build the image using the specified parameters
-build $target_image="" $tag="" $dx="0" $nvidia="1" $kernel_pin="" $gnome_version="50" $almalinux_version="10": _ensure-yq
+build $target_image="" $tag="" $dx="0" $kernel_pin="" $gnome_version="50" $major_version="10": _ensure-yq
     #!/usr/bin/env bash
 
     set -euo pipefail
@@ -135,43 +135,12 @@ build $target_image="" $tag="" $dx="0" $nvidia="1" $kernel_pin="" $gnome_version
 
     ver="${tag}.$(date +%Y%m%d)"
 
-    brew_image_sha=$(yq -r '.images[] | select(.name == "brew") | .digest' image-versions.yaml)
-    brew_image_ref="ghcr.io/ublue-os/brew:latest@${brew_image_sha}"
-
     BUILD_ARGS=()
-    BUILD_ARGS+=("--build-arg" "BREW_IMAGE_REF=${brew_image_ref}")
-    BUILD_ARGS+=("--build-arg" "MAJOR_VERSION={{ almalinux_version }}")
+    BUILD_ARGS+=("--build-arg" "MAJOR_VERSION={{ major_version }}")
     BUILD_ARGS+=("--build-arg" "IMAGE_NAME=${IMAGE_NAME}")
     BUILD_ARGS+=("--build-arg" "IMAGE_VENDOR=${REPO_ORGANIZATION}")
     BUILD_ARGS+=("--build-arg" "ENABLE_DX={{ dx }}")
-    BUILD_ARGS+=("--build-arg" "ENABLE_NVIDIA={{ nvidia }}")
     BUILD_ARGS+=("--build-arg" "GNOME_VERSION={{ gnome_version }}")
-
-    # Build custom akmods image for NVIDIA if enabled
-    if [ "{{ nvidia }}" = "1" ] && grep -q "AKMODS_IMAGE_REF" "${CONTAINERFILE}" 2>/dev/null; then
-        AKMODS_REF="ghcr.io/huntedraven7/blueprint:akmods-edward"
-        if podman image exists "${AKMODS_REF}" 2>/dev/null || podman pull "${AKMODS_REF}" 2>/dev/null; then
-            echo "Using pre-built akmods image: ${AKMODS_REF}"
-            BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=${AKMODS_REF}")
-        else
-            echo "Pre-built akmods image unavailable, building locally..."
-            KERNEL_VERSION=$(podman run --rm --pull=newer "quay.io/almalinuxorg/almalinux-bootc:10-kitten" rpm -qa --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}' kernel 2>/dev/null | tail -1 || echo "")
-            if [ -n "$KERNEL_VERSION" ]; then
-                podman build \
-                    --build-arg "KERNEL_VERSION=${KERNEL_VERSION}" \
-                    --tag "blueprint:akmods-edward" \
-                    --tag "ghcr.io/huntedraven7/blueprint:akmods-edward" \
-                    --file "containerfiles/Containerfile.akmods-edward" \
-                    .
-                BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=blueprint:akmods-edward")
-            else
-                echo "WARNING: Could not detect kernel version, skipping custom akmods build"
-                BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=${AKMODS_REF}")
-            fi
-        fi
-    elif grep -q "AKMODS_IMAGE_REF" "${CONTAINERFILE}" 2>/dev/null; then
-        BUILD_ARGS+=("--build-arg" "AKMODS_IMAGE_REF=ghcr.io/huntedraven7/blueprint:akmods-edward")
-    fi
     if [[ -z "$(git status -s)" ]]; then
         BUILD_ARGS+=("--build-arg" "SHA_HEAD_SHORT=$(git rev-parse --short HEAD)")
     fi
@@ -198,29 +167,6 @@ build $target_image="" $tag="" $dx="0" $nvidia="1" $kernel_pin="" $gnome_version
     PODMAN_BUILD_ARGS=("${BUILD_ARGS[@]}" "${LABELS[@]}" "--pull=newer" "--tag" "${IMAGE_NAME}:${TAG}" "--file" "${CONTAINERFILE}")
 
     podman build "${PODMAN_BUILD_ARGS[@]}" .
-
-# Build custom NVIDIA akmods image for AlmaLinux + CoreOS kernel
-[group('Build')]
-build-akmods:
-    #!/usr/bin/env bash
-    set -euo pipefail
-
-    set -a
-    source "images/akmods-edward.env"
-    set +a
-
-    SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-    CONTEXT_DIR="$(dirname "$SCRIPT_DIR")"
-
-    echo "Building akmods image using AlmaLinux bootc base (kernel auto-detected inside container)..."
-
-    podman build \
-        --tag "${IMAGE_NAME}:${DEFAULT_TAG}" \
-        --tag "ghcr.io/${REPO_ORGANIZATION}/${IMAGE_NAME}:${DEFAULT_TAG}" \
-        --file "containerfiles/Containerfile.akmods-edward" \
-        "${CONTEXT_DIR}"
-
-    echo "Akmods image built: ${IMAGE_NAME}:${DEFAULT_TAG}"
 
 # Build the fsdk image using BuildStream (pure FSDK composition, no apt)
 [group('Build')]
@@ -381,7 +327,7 @@ list-images:
         stem="${stem%.env}"
         if [[ -f "containerfiles/Containerfile.${stem}" ]] || [[ -f "buildstream/Containerfile.${stem}" ]]; then
             case "${stem}" in
-                arch|holo-amd|holo-nvidia|ai|debian|gentoo|opensuse|ubuntu|nixos|fsdk|akmods-edward) continue ;;
+                arch|holo-amd|holo-nvidia|ai|debian|gentoo|opensuse|ubuntu|nixos|fsdk) continue ;;
             esac
             IMAGES+=("${stem}")
         fi
