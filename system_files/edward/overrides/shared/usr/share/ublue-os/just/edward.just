@@ -1,14 +1,5 @@
-# Example just recipes for Edward
-# See https://github.com/casey/just for syntax
+# Edward-specific ujust recipes.
+# Review appliance: ujust review-container | review-queue | review-doctor | review-stop
 
-# List available recipes
 default:
     @just --list
-
-# Example: install a brew package
-# install-foo:
-# 	brew install foo
-
-# Example: update flatpaks
-# update-flatpaks:
-# 	flatpak update -y
