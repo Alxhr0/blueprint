@@ -3,8 +3,6 @@ set -xeuo pipefail
 
 # Edward-specific customizations
 
-source "$(dirname "$0")/../../core/nix-setup.sh"
-
 # Enable user services (only if they exist to avoid dangling symlinks)
 mkdir -p /etc/systemd/user/graphical-session.target.wants
 mkdir -p /etc/systemd/user/default.target.wants
