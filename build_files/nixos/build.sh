@@ -168,31 +168,30 @@ nixos-rebuild build -I nixos=/root/.nix-defexpr/channels/nixos --flake /etc/nixo
 
 SYSTEM_PATH=$(readlink -f result)
 
-mkdir -p /boot
+# Direct artifact discovery from system profile
+KERNEL_PATH="$(readlink -f "${SYSTEM_PATH}/kernel")"
+INITRD_PATH="$(readlink -f "${SYSTEM_PATH}/initrd")"
 
-KERNEL="$(find /nix/store -maxdepth 2 -name 'bzImage' -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -n1 | cut -d' ' -f2)"
-if [ -n "$KERNEL" ]; then
-    MODDIR="$(dirname "$KERNEL")/lib/modules"
-    if [ -d "$MODDIR" ]; then
-        KVER="$(find "$MODDIR" -maxdepth 1 -type d ! -name '.' | head -n1 | xargs -r basename)"
-        if [ -n "$KVER" ]; then
-            mkdir -p "/usr/lib/modules/${KVER}"
-            cp "$KERNEL" "/usr/lib/modules/${KVER}/vmlinuz"
-            if [ -d "$MODDIR/$KVER" ]; then
-                cp -r "$MODDIR/$KVER"/. "/usr/lib/modules/${KVER}/"
-            fi
-        fi
-    else
-        KVER="$(find /nix/store -maxdepth 3 -type d -path "*/lib/modules/*" ! -name '.' 2>/dev/null | head -n1 | xargs -r basename)"
-        if [ -n "$KVER" ]; then
-            MODDIR="$(find /nix/store -maxdepth 3 -type d -path "*/lib/modules/${KVER}" 2>/dev/null | head -n1)"
-            if [ -n "$MODDIR" ] && [ -d "$MODDIR" ]; then
-                mkdir -p "/usr/lib/modules/${KVER}"
-                cp "$KERNEL" "/usr/lib/modules/${KVER}/vmlinuz"
-                cp -r "$MODDIR"/. "/usr/lib/modules/${KVER}/"
-            fi
-        fi
-    fi
+# Resolve kernel module directory name (kernel version string)
+KVER=""
+if [ -d "${SYSTEM_PATH}/kernel-modules/lib/modules" ]; then
+    KVER="$(ls "${SYSTEM_PATH}/kernel-modules/lib/modules" | head -n1)"
+fi
+
+if [ -z "${KVER}" ]; then
+    echo "ERROR: Failed to determine Kernel Version string from system profile." >&2
+    exit 1
+fi
+
+echo "Detected Kernel Version: ${KVER}"
+
+# Ensure root filesystem contains the kernel and initramfs for bootc discovery
+mkdir -p "/usr/lib/modules/${KVER}"
+cp -L "${KERNEL_PATH}" "/usr/lib/modules/${KVER}/vmlinuz"
+cp -L "${INITRD_PATH}" "/usr/lib/modules/${KVER}/initramfs.img"
+
+if [ -d "${SYSTEM_PATH}/kernel-modules/lib/modules/${KVER}" ]; then
+    cp -rL "${SYSTEM_PATH}/kernel-modules/lib/modules/${KVER}/." "/usr/lib/modules/${KVER}/"
 fi
 
 mkdir -p /sysroot/ostree/repo
@@ -213,24 +212,30 @@ done
 
 ostree summary --repo=/sysroot/ostree/repo --update
 
+# NOTE: mktemp -d already creates STAGING as an existing directory. ostree
+# checkout insists on creating its own destination and errors with
+# "mkdirat: File exists" if the target already exists, so we check out into
+# a not-yet-existing subdirectory of STAGING instead.
 STAGING="$(mktemp -d)"
-ostree checkout --repo=/sysroot/ostree/repo blueprint/nixos "${STAGING}" 2>/dev/null || \
-    ostree checkout --repo=/sysroot/ostree/repo blueprint/nixos "${STAGING}"
+ostree checkout --repo=/sysroot/ostree/repo blueprint/nixos "${STAGING}/root"
 
-if [ -n "${KVER}" ] && [ -n "${KERNEL}" ]; then
-    mkdir -p "${STAGING}/usr/lib/modules/${KVER}"
-    cp "${KERNEL}" "${STAGING}/usr/lib/modules/${KVER}/vmlinuz"
-    if [ -d "${MODDIR}/${KVER}" ]; then
-        cp -r "${MODDIR}/${KVER}/." "${STAGING}/usr/lib/modules/${KVER}/"
-    fi
-    ostree commit --repo=/sysroot/ostree/repo \
-        --branch=blueprint/nixos \
-        --subject="Add kernel" \
-        --add-metadata-string="version=$(date +%Y%m%d)" \
-        --no-xattrs \
-        --parent="$(ostree rev-parse --repo=/sysroot/ostree/repo blueprint/nixos)" \
-        "${STAGING}"
+# Ensure stage tree explicitly includes kernel and initrd before commit
+mkdir -p "${STAGING}/root/usr/lib/modules/${KVER}"
+cp -L "${KERNEL_PATH}" "${STAGING}/root/usr/lib/modules/${KVER}/vmlinuz"
+cp -L "${INITRD_PATH}" "${STAGING}/root/usr/lib/modules/${KVER}/initramfs.img"
+
+if [ -d "${SYSTEM_PATH}/kernel-modules/lib/modules/${KVER}" ]; then
+    cp -rL "${SYSTEM_PATH}/kernel-modules/lib/modules/${KVER}/." "${STAGING}/root/usr/lib/modules/${KVER}/"
 fi
+
+ostree commit --repo=/sysroot/ostree/repo \
+    --branch=blueprint/nixos \
+    --subject="Add kernel and initramfs for bootc" \
+    --add-metadata-string="version=$(date +%Y%m%d)" \
+    --no-xattrs \
+    --parent="$(ostree rev-parse --repo=/sysroot/ostree/repo blueprint/nixos)" \
+    "${STAGING}/root"
+
 rm -rf "${STAGING}"
 
 ostree summary --repo=/sysroot/ostree/repo --update
