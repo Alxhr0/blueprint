@@ -23,15 +23,6 @@
       ],
       "datasourceTemplate": "docker",
       "lookupNameTemplate": "ghcr.io/ublue-os/akmods-nvidia-open"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": ["^image-versions\\.yaml$"],
-      "matchStrings": [
-        "- name: review\n    image: ghcr\\.io/projectbluefin/review\n    tag: (?<currentValue>\\S+)\n    digest: (?<currentDigest>\\S+)"
-      ],
-      "datasourceTemplate": "docker",
-      "lookupNameTemplate": "ghcr.io/projectbluefin/review"
     }
   ],
 
