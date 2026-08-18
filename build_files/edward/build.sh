@@ -51,23 +51,12 @@ run_buildscripts_for base
 copy_systemfiles_for shared
 run_buildscripts_for shared
 
-# Install Edward's Brewfiles
+# Place Edward's custom Brewfile where ublue-os/brew expects it
+# (the brew infrastructure itself comes from the ublue-os/brew OCI image)
 mkdir -p /usr/share/ublue-os/homebrew
 cp -avf "${CONTEXT_PATH}/brew/." /usr/share/ublue-os/homebrew/
 
 CUSTOM_NAME="edward"
-if [ -d "${CONTEXT_PATH}/system_files/usr" ]; then
-    cp -avf "${CONTEXT_PATH}/system_files/usr/." /usr/
-fi
-if [ -d "${CONTEXT_PATH}/system_files/etc" ]; then
-    cp -avf "${CONTEXT_PATH}/system_files/etc/." /etc/
-fi
-if [ -d "${CONTEXT_PATH}/system_files/global/usr" ]; then
-    cp -avf "${CONTEXT_PATH}/system_files/global/usr/." /usr/
-fi
-if [ -d "${CONTEXT_PATH}/system_files/global/etc" ]; then
-    cp -avf "${CONTEXT_PATH}/system_files/global/etc/." /etc/
-fi
 
 copy_systemfiles_for ../files
 run_buildscripts_for ..

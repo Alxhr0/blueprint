@@ -193,6 +193,9 @@ build-all:
     just build holo-nvidia
     just build-fsdk
 
+# Build an image then rechunk it for smaller bootc delta updates
+build-rechunked $target_image=image_name $tag=default_tag: && (rechunk target_image tag)
+
 # Split the image for smaller updates (New)!
 rechunk $target_image=image_name $tag=default_tag:
     #!/usr/bin/env bash
@@ -469,6 +472,13 @@ build-gnome-iso: && (_rebuild-bib "ghcr.io/huntedraven7/blueprint" "edward" "iso
 [group('Build Virtal Machine Image')]
 build-server-iso: && (_build-bib "ghcr.io/huntedraven7/blueprint" "server" "iso" "disk_config/iso-server.toml")
 
+# Build the ncurses server installer ISO (uses lorax/livemedia-creator)
+[group('Build Virtal Machine Image')]
+build-installer-iso:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    just sudoif bash installer/build-installer-iso.sh
+
 # Rebuild a QCOW2 virtual machine image
 [group('Build Virtal Machine Image')]
 rebuild-qcow2 $target_image=("localhost/" + image_name) $tag=default_tag: && (_rebuild-bib target_image tag "qcow2" "disk_config/disk.toml")
@@ -538,6 +548,47 @@ run-vm-iso $target_image=("localhost/" + image_name) $tag=default_tag: && (_run-
 # Run the server installer ISO in a VM
 [group('Run Virtal Machine')]
 run-server-iso: && (_run-vm "localhost/blueprint" "server" "iso" "disk_config/iso-server.toml")
+
+# Run the ncurses installer ISO in a VM
+[group('Run Virtal Machine')]
+run-installer-iso:
+    #!/usr/bin/env bash
+    set -eoux pipefail
+
+    ISO_FILE="output/installer-iso/blueprint-server-installer-$(date +%Y%m%d).iso"
+    if [[ ! -f "$ISO_FILE" ]]; then
+        # Try to find any installer ISO
+        ISO_FILE=$(find output/installer-iso -name "*.iso" -type f 2>/dev/null | head -1)
+    fi
+
+    if [[ -z "$ISO_FILE" ]] || [[ ! -f "$ISO_FILE" ]]; then
+        echo "No installer ISO found. Building first..."
+        just build-installer-iso
+        ISO_FILE="output/installer-iso/blueprint-server-installer-$(date +%Y%m%d).iso"
+    fi
+
+    port=8006
+    while grep -q :${port} <<< $(ss -tunalp); do
+        port=$(( port + 1 ))
+    done
+    echo "Using Port: ${port}"
+    echo "Connect to http://localhost:${port}"
+
+    run_args=()
+    run_args+=(--rm --privileged)
+    run_args+=(--pull=newer)
+    run_args+=(--publish "127.0.0.1:${port}:8006")
+    run_args+=(--env "CPU_CORES=4")
+    run_args+=(--env "RAM_SIZE=8G")
+    run_args+=(--env "DISK_SIZE=64G")
+    run_args+=(--env "TPM=Y")
+    run_args+=(--env "GPU=Y")
+    run_args+=(--device=/dev/kvm)
+    run_args+=(--volume "${PWD}/${ISO_FILE}:/boot.iso")
+    run_args+=(docker.io/qemux/qemu)
+
+    (sleep 30 && xdg-open http://localhost:"$port") &
+    podman run "${run_args[@]}"
 
 # Run a virtual machine using systemd-vmspawn
 [group('Run Virtal Machine')]

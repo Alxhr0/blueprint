@@ -1,12 +1,27 @@
-FROM ghcr.io/projectbluefin/bluefin-lts-nvidia:testing AS base
+FROM quay.io/almalinuxorg/almalinux-bootc-kitten:10 AS base
+
+FROM ghcr.io/projectbluefin/common:latest AS common
+FROM ghcr.io/ublue-os/brew:latest AS brew
 
 FROM scratch AS ctx
 
-COPY system_files/ /system_files
-COPY brew /brew
-COPY build_files/edward /build_scripts
-COPY build_files/core /build_scripts/core
-COPY image-versions.yaml /image-versions.yaml
+# Edward's own system files and build scripts
+COPY system_files/ /context/system_files
+COPY build_files/edward /context/build_scripts
+COPY build_files/core /context/build_scripts/core
+COPY image-versions.yaml /context/image-versions.yaml
+
+# Common shared system files (ujust, setup services, udev rules, container policies, etc.)
+COPY --from=common /system_files/shared /context/system_files
+
+# Common NVIDIA system files (nvidia flatpak sync, systemd units, etc.)
+COPY --from=common /system_files/nvidia /context/system_files
+
+# Homebrew infrastructure (systemd timers, shell integration, pre-built tarball)
+COPY --from=brew /system_files /context/system_files
+
+# Edward's custom Brewfile — lands where ublue-os/brew expects it
+COPY brew/ /context/brew
 
 FROM base
 
@@ -16,11 +31,13 @@ ARG IMAGE_NAME="${IMAGE_NAME:-blueprint}"
 ARG IMAGE_VENDOR="${IMAGE_VENDOR:-huntedraven7}"
 ARG MAJOR_VERSION="${MAJOR_VERSION:-10}"
 ARG SHA_HEAD_SHORT="${SHA_HEAD_SHORT:-deadbeef}"
+ARG ENABLE_NVIDIA="${ENABLE_NVIDIA:-1}"
 
-RUN --mount=type=tmpfs,dst=/tmp \
+RUN --mount=type=tmpfs,dst=/opt \
+  --mount=type=tmpfs,dst=/tmp \
   --mount=type=tmpfs,dst=/var \
   --mount=type=tmpfs,dst=/boot \
-  --mount=type=bind,from=ctx,source=/,target=/run/context \
+  --mount=type=bind,from=ctx,source=/context,target=/run/context \
   /run/context/build_scripts/build.sh
 
 LABEL containers.bootc 1

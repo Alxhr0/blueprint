@@ -10,10 +10,10 @@
       "customType": "regex",
       "fileMatch": ["^image-versions\\.yaml$"],
       "matchStrings": [
-        "- name: bluefin-lts-nvidia\n    image: ghcr\\.io/projectbluefin/bluefin-lts-nvidia\n    tag: (?<currentValue>\\S+)\n    digest: (?<currentDigest>\\S+)"
+        "- name: almalinux-bootc-kitten\n    image: quay\\.io/almalinuxorg/almalinux-bootc-kitten\n    tag: (?<currentValue>\\S+)\n    digest: (?<currentDigest>\\S+)"
       ],
       "datasourceTemplate": "docker",
-      "lookupNameTemplate": "ghcr.io/projectbluefin/bluefin-lts-nvidia"
+      "lookupNameTemplate": "quay.io/almalinuxorg/almalinux-bootc-kitten"
     }
   ],
 

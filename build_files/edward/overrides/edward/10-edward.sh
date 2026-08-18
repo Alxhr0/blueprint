@@ -7,12 +7,8 @@ source "$(dirname "$0")/../../core/nix-setup.sh"
 
 # Enable user services (only if they exist to avoid dangling symlinks)
 mkdir -p /etc/systemd/user/graphical-session.target.wants
-if [ -f /usr/lib/systemd/user/brew-preinstall.service ]; then
-    ln -sfn /usr/lib/systemd/user/brew-preinstall.service \
-        /etc/systemd/user/graphical-session.target.wants/brew-preinstall.service
-fi
-
 mkdir -p /etc/systemd/user/default.target.wants
+
 if [ -f /usr/lib/systemd/user/homepage.service ]; then
     ln -sfn /usr/lib/systemd/user/homepage.service \
         /etc/systemd/user/default.target.wants/homepage.service

@@ -1,13 +1,5 @@
 tap "ublue-os/tap", trusted: true
-tap "/usr/share/ublue-os/homebrew/ghostty-tap"
 tap "ublue-os/experimental-tap", trusted: true
-
-cask "ublue-os/tap/antigravity-cli-linux"
-cask "ublue-os/tap/antigravity-ide-linux"
-cask "ublue-os/tap/goose-linux"
-
-cask "ublue-os/experimental-tap/emacs-app-linux"
-cask "ublue-os/experimental-tap/opencode-desktop-linux"
 
 brew "eza"
 brew "bun"
@@ -23,7 +15,6 @@ brew "stow"
 brew "fd"
 brew "dysk"
 brew "opencode"
-brew "ghostty"
 brew "npm"
 
 flatpak "io.github.tanaybhomia.Whisp"

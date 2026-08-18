@@ -1,0 +1,23 @@
+[Unit]
+Description=Blueprint Server Installer
+Documentation=https://github.com/huntedraven7/blueprint
+After=systemd-journald.service
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=!/var/lib/blueprint-installed
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/blueprint-install
+StandardInput=tty
+StandardOutput=tty
+StandardError=tty
+TTYPath=/dev/tty1
+RemainAfterExit=no
+TimeoutStartSec=0
+
+# The installer should not be restarted if it fails — user needs to see the error
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

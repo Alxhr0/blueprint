@@ -1,0 +1,29 @@
+# Blueprint Server Installer — Containerfile
+# Builds a container image with the installer scripts and dependencies.
+# This can be used for testing the installer TUI or as a base for ISO creation.
+
+FROM quay.io/centos-bootc/centos-bootc:stream10
+
+# Install installer dependencies
+RUN dnf5 install -y \
+        whiptail \
+        bootc \
+        util-linux \
+        parted \
+        gdisk \
+        NetworkManager \
+    && dnf5 clean all
+
+# Copy installer scripts
+COPY blueprint-install /usr/bin/blueprint-install
+COPY blueprint-install-backend /usr/libexec/blueprint-install-backend
+RUN chmod +x /usr/bin/blueprint-install /usr/libexec/blueprint-install-backend
+
+# Copy systemd service
+COPY systemd/blueprint-installer.service /etc/systemd/system/blueprint-installer.service
+RUN systemctl enable blueprint-installer.service
+
+# Set the default image reference
+ENV BLUEPRINT_IMAGE_REF=ghcr.io/huntedraven7/blueprint:server
+
+CMD ["/sbin/init"]

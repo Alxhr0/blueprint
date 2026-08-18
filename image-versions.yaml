@@ -1,7 +1,17 @@
 images:
-  - name: bluefin-lts-nvidia
-    image: ghcr.io/projectbluefin/bluefin-lts-nvidia
-    tag: stable
+  - name: almalinux-bootc-kitten
+    image: quay.io/almalinuxorg/almalinux-bootc-kitten
+    tag: "10"
+    digest: ""
+
+  - name: common
+    image: ghcr.io/projectbluefin/common
+    tag: latest
+    digest: ""
+
+  - name: brew
+    image: ghcr.io/ublue-os/brew
+    tag: latest
     digest: ""
 
 downloads:

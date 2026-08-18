@@ -84,6 +84,13 @@ jobs:
           sudo -E "$(command -v just)" build \
             "${TARGET_IMAGE}"
 
+      - name: Rechunk with Chunkah
+        id: rechunk
+        run: |
+          sudo -E "$(command -v just)" rechunk \
+            "blueprint" \
+            "${DEFAULT_TAG}"
+
       - name: Generate Build Tags
         id: gen-build-tags
         run: |

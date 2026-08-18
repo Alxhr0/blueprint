@@ -59,6 +59,14 @@ jobs:
             sudo -E "$(command -v just)" build "${{ matrix.image }}"
           fi
 
+      - name: Rechunk with Chunkah
+        if: ${{ matrix.image != 'fsdk' }}
+        id: rechunk
+        run: |
+          sudo -E "$(command -v just)" rechunk \
+            "blueprint" \
+            "${{ matrix.image }}"
+
       - name: Generate Build Tags
         id: gen-build-tags
         run: |
