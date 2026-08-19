@@ -31,9 +31,46 @@ apt-get install -y --no-install-recommends nodejs
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 
+# Runtime dependencies for Homebrew packages
+apt-get update
+apt-get install -y --no-install-recommends \
+    libstdc++6 \
+    libgcc-s1 \
+    libc6 \
+    libglib2.0-0 \
+    libx11-6 \
+    libxext6 \
+    libxrandr2 \
+    libxss1 \
+    libxcursor1 \
+    libxi6 \
+    libxtst6 \
+    libgtk-3-0 \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libdrm2 \
+    libgbm1 \
+    libasound2t64 \
+    libfontconfig1 \
+    libfreetype6 \
+    libdbus-1-3 \
+    libxcb1 \
+    libxkbcommon0 \
+    libatspi2.0-0 \
+    file \
+    xz-utils \
+    jq
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+
 # Homebrew
 NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+# Make brew available for all login shells
+cat > /etc/profile.d/linuxbrew.sh << 'BREWPROFILE'
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+BREWPROFILE
 
 # Brew taps
 brew tap ublue-os/tap
