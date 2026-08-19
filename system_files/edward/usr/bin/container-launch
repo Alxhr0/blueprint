@@ -33,11 +33,11 @@ notify-send -i "${ICON}" "${DISPLAY_NAME}" "${NAME} container ready"
 
 CMD=(podman exec -it "${NAME}" bash)
 
-# Prefer the user's configured default terminal emulator. xdg-terminal-exec is
-# the standard mechanism for "the default terminal that is there"; if it is
-# present but fails for any reason, fall through to the explicit list below.
+# Prefer the spec-compliant universal launcher if available. Its options must
+# be monolithic (--title=VALUE); a bare "--title VALUE" is discarded as an
+# unknown option and the title is then misparsed as the command to run.
 if command -v xdg-terminal-exec >/dev/null 2>&1; then
-    if xdg-terminal-exec --title "${DISPLAY_NAME}" -- "${CMD[@]}"; then
+    if xdg-terminal-exec "--title=${DISPLAY_NAME}" -- "${CMD[@]}"; then
         exit 0
     fi
 fi
@@ -77,7 +77,10 @@ for spec in "${TERMINALS[@]}"; do
         args+=(-- "${CMD[@]}")
     fi
 
-    exec "${args[@]}"
+    # Run (don't exec) so a failing terminal falls through to the next one.
+    if "${args[@]}"; then
+        exit 0
+    fi
 done
 
 notify-send -u critical -i dialog-error "${DISPLAY_NAME}" "No terminal emulator found"

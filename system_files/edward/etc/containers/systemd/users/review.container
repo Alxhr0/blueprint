@@ -25,6 +25,9 @@ Volume=%h/git:/root/workspace:Z
 Restart=always
 RestartSec=5
 ExecStartPre=/usr/bin/mkdir -p %h/git
+# Check out the projectbluefin/review source into the workspace so it can be
+# developed/contributed to from inside the container (run `just` from there).
+ExecStartPre=/usr/bin/bash -lc 'test -d %h/git/review || git clone https://github.com/projectbluefin/review %h/git/review'
 TimeoutStartSec=900
 
 [Install]
