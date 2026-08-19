@@ -8,6 +8,7 @@ PACKAGES=(
     git
     curl
     wget
+    unzip
     vim
     tmux
     nano
