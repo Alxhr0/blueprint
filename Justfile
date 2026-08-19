@@ -474,7 +474,7 @@ build-iso $target_image=("localhost/" + image_name) $tag=default_tag: && (_build
 
 # Build an installer ISO using bootc-installer
 [group('Build Virtal Machine Image')]
-build-iso: && (_rebuild-bib "ghcr.io/huntedraven7/blueprint" "edward" "iso" "disk_config/iso-gnome.toml")
+build-iso-gnome: && (_rebuild-bib "ghcr.io/huntedraven7/blueprint" "edward" "iso" "disk_config/iso-gnome.toml")
 
 # Build a server installer ISO using BIB (Anaconda-based)
 [group('Build Virtal Machine Image')]

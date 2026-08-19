@@ -9,6 +9,7 @@ ARG SHA_HEAD_SHORT="${SHA_HEAD_SHORT:-deadbeef}"
 FROM scratch AS ctx
 COPY system_files/edward /ctx/system_files/edward
 COPY build_files/edward /ctx/build_scripts
+COPY build_files/core /ctx/core
 COPY brew /ctx/brew
 
 RUN --mount=type=tmpfs,dst=/tmp \

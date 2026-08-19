@@ -3,6 +3,7 @@ set -eo pipefail
 
 CONTEXT_PATH="$(realpath "$(dirname "$0")/..")"
 BUILD_SCRIPTS_PATH="$(realpath "$(dirname "$0")")"
+CORE_PATH="$(realpath "$(dirname "$0")/../core")"
 MAJOR_VERSION_NUMBER="$(sh -c '. /usr/lib/os-release ; echo ${VERSION_ID%.*}')"
 export MAJOR_VERSION_NUMBER
 
@@ -20,7 +21,12 @@ printf '::endgroup::\n'
 # ghostty terminal + subpackages (packaged by Terra for EL — https://terrapkg.com).
 dnf install -y ghostty ghostty-terminfo ghostty-shell-integration
 
-# 3. Wire up the Homebrew bundle so it auto-installs on first boot.
+# 3. Install Nix in daemon mode for bootc (bind-mounts /nix -> /var/nix).
+printf '::group:: nix-bootc-setup\n'
+source "${CORE_PATH}/nix-bootc-setup.sh"
+printf '::endgroup::\n'
+
+# 4. Wire up the Homebrew bundle so it auto-installs on first boot.
 install_brew_bundle_config() {
   local brewfile_ref="${BREWFILE_REF:-main}"
   if [[ "${brewfile_ref}" == "main" && -n "${SHA_HEAD_SHORT:-}" && "${SHA_HEAD_SHORT}" != "deadbeef" ]]; then
@@ -36,12 +42,9 @@ EOF
 }
 install_brew_bundle_config
 
-# 4. Edward-specific build scripts (user services, service enablement).
+# 5. Edward-specific build scripts (user services, service enablement).
 "${BUILD_SCRIPTS_PATH}/overrides/edward/10-edward.sh"
 "${BUILD_SCRIPTS_PATH}/overrides/layer/40-services.sh"
-
-# 5. Edward image identity (layers on top of bluefin-lts's image-info).
-"${BUILD_SCRIPTS_PATH}/90-image-info.sh"
 
 # 6. Cleanup + bootc lint.
 "${BUILD_SCRIPTS_PATH}/cleanup.sh"
