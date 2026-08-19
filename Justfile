@@ -1,8 +1,8 @@
-set dotenv-filename := "images/almafin.env"
+set dotenv-filename := "images/edward.env"
 set dotenv-load
 
 # Primary image config + shared defaults (also sources the shared vars for other variants)
-primary_env := "images/almafin.env"
+primary_env := "images/edward.env"
 
 export image_name := env_var("IMAGE_NAME")
 export repo_organization := env_var("REPO_ORGANIZATION")
@@ -141,8 +141,9 @@ build $target_image="" $tag="" $dx="0" $kernel_pin="" $gnome_version="50" $major
     BUILD_ARGS+=("--build-arg" "IMAGE_VENDOR=${REPO_ORGANIZATION}")
     BUILD_ARGS+=("--build-arg" "ENABLE_DX={{ dx }}")
     BUILD_ARGS+=("--build-arg" "GNOME_VERSION={{ gnome_version }}")
-    if [[ "${target_image}" == "almafin" ]]; then
-        BUILD_ARGS+=("--build-arg" "ALMA_IMAGE=${ALMA_IMAGE}")
+    if [[ "${target_image}" == "edward" ]]; then
+        BUILD_ARGS+=("--build-arg" "BASE_IMAGE=${BASE_IMAGE}")
+        BUILD_ARGS+=("--build-arg" "MAJOR_VERSION=${MAJOR_VERSION}")
         BUILD_ARGS+=("--build-arg" "COMMON_IMAGE_REF=${COMMON_IMAGE_REF}")
         BUILD_ARGS+=("--build-arg" "BREW_IMAGE_REF=${BREW_IMAGE_REF}")
         BUILD_ARGS+=("--build-arg" "ENABLE_NVIDIA=${ENABLE_NVIDIA}")
@@ -187,7 +188,7 @@ build-fsdk $tag="fsdk":
 build-all:
     #!/usr/bin/env bash
     set -euo pipefail
-    just build almafin
+    just build edward
     just build aira
     just build server
     just build ai
@@ -471,9 +472,9 @@ build-raw $target_image=("localhost/" + image_name) $tag=default_tag: && (_build
 [group('Build Virtal Machine Image')]
 build-iso $target_image=("localhost/" + image_name) $tag=default_tag: && (_build-bib target_image tag "iso" "disk_config/iso.toml")
 
-# Build a GNOME installer ISO using bootc-installer
+# Build an installer ISO using bootc-installer
 [group('Build Virtal Machine Image')]
-build-gnome-iso: && (_rebuild-bib "ghcr.io/huntedraven7/blueprint" "almafin" "iso" "disk_config/iso-gnome.toml")
+build-iso: && (_rebuild-bib "ghcr.io/huntedraven7/blueprint" "edward" "iso" "disk_config/iso-gnome.toml")
 
 # Build a server installer ISO using BIB (Anaconda-based)
 [group('Build Virtal Machine Image')]

@@ -1,0 +1,23 @@
+[Unit]
+Description=Download and apply upstream Homebrew bundle
+After=network-online.target brew-setup.service
+Wants=network-online.target
+ConditionPathExists=/etc/ublue-os/brew-bundle.conf
+Documentation=file:///usr/share/ublue-os/homebrew/edward/packages.Brewfile
+StartLimitIntervalSec=600
+
+[Service]
+Type=oneshot
+User=1000
+Environment=HOME=/var/home
+Environment=HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar
+Environment=HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
+Environment=HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew
+ExecStart=/usr/libexec/brew-bundle-download
+RemainAfterExit=true
+Restart=on-failure
+RestartSec=30
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target

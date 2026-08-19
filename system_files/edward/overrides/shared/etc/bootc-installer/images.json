@@ -1,0 +1,18 @@
+{
+  "default_image": "ghcr.io/huntedraven7/blueprint:edward",
+  "fallback_flatpaks": [],
+  "images": [
+    {
+      "name": "AlmaFin",
+      "icon": "system",
+      "needs_user_creation": true,
+      "children": [
+        {
+          "name": "Stable",
+          "imgref": "ghcr.io/huntedraven7/blueprint:edward",
+          "desc": "AlmaFin — AlmaLinux 10 (Kitten) with GNOME and Homebrew"
+        }
+      ]
+    }
+  ]
+}

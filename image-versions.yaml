@@ -1,17 +1,12 @@
-# Pinned base images for the almafin flavor (tracked by Renovate).
+# Pinned base image for the edward flavor (tracked by Renovate).
+# Edward is a thin layer on top of bluefin-lts-nvidia:testing, which already
+# provides GNOME, the kernel, akmods and NVIDIA. We only add our own overlays
+# (containers, Terra repo, Homebrew bundle, Edward identity).
 images:
-  - name: almalinux-bootc
-    image: quay.io/almalinuxorg/almalinux-bootc
-    tag: 10-kitten
-    digest: ""
-  - name: common
-    image: ghcr.io/projectbluefin/common
-    tag: latest
-    digest: ""
-  - name: brew
-    image: ghcr.io/ublue-os/brew
-    tag: latest
-    digest: ""
+  - name: bluefin-lts-nvidia
+    image: ghcr.io/projectbluefin/bluefin-lts-nvidia
+    tag: testing
+    digest: sha256:629f6607cd649211f34720551b00cc1fb56909f7f70d49869a3b481e2f23fe0a
 
 # Pinned binary downloads (managed by Renovate)
 downloads:
