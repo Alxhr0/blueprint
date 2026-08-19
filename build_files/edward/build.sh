@@ -3,7 +3,6 @@ set -eo pipefail
 
 CONTEXT_PATH="$(realpath "$(dirname "$0")/..")"
 BUILD_SCRIPTS_PATH="$(realpath "$(dirname "$0")")"
-CORE_PATH="$(realpath "$(dirname "$0")/../core")"
 MAJOR_VERSION_NUMBER="$(sh -c '. /usr/lib/os-release ; echo ${VERSION_ID%.*}')"
 export MAJOR_VERSION_NUMBER
 
@@ -16,21 +15,13 @@ printf '::group:: edward-overlays\n'
 cp -avf "${CONTEXT_PATH}/system_files/edward/." /
 printf '::endgroup::\n'
 
-# 2. Enable the Terra repository (extra EL packages) and install what we want from it.
-"${BUILD_SCRIPTS_PATH}/21-terra.sh"
-# ghostty terminal + subpackages (packaged by Terra for EL — https://terrapkg.com).
-# --nogpgcheck: Terra's mirror sometimes serves repodata with mismatched checksums;
-# skip validation so the build isn't blocked by their infrastructure.
-if ! dnf install -y --nogpgcheck ghostty ghostty-terminfo ghostty-shell-integration; then
-    echo "build: ghostty install failed even with --nogpgcheck, skipping"
-fi
-
-# 3. Install Nix in daemon mode for bootc (bind-mounts /nix -> /var/nix).
-printf '::group:: nix-bootc-setup\n'
-source "${CORE_PATH}/nix-bootc-setup.sh"
+# 2. Enable the first-boot Nix setup service (installs Nix at boot via
+#    /usr/share/edward/scripts/setup-nix.sh, then disables itself).
+printf '::group:: nix-setup-service\n'
+systemctl enable setup-nix.service
 printf '::endgroup::\n'
 
-# 4. Wire up the Homebrew bundle so it auto-installs on first boot.
+# 3. Wire up the Homebrew bundle so it auto-installs on first boot.
 install_brew_bundle_config() {
   local brewfile_ref="${BREWFILE_REF:-main}"
   if [[ "${brewfile_ref}" == "main" && -n "${SHA_HEAD_SHORT:-}" && "${SHA_HEAD_SHORT}" != "deadbeef" ]]; then
@@ -46,9 +37,9 @@ EOF
 }
 install_brew_bundle_config
 
-# 5. Edward-specific build scripts (user services, service enablement).
+# 4. Edward-specific build scripts (user services, service enablement).
 "${BUILD_SCRIPTS_PATH}/overrides/edward/10-edward.sh"
 "${BUILD_SCRIPTS_PATH}/overrides/layer/40-services.sh"
 
-# 6. Cleanup + bootc lint.
+# 5. Cleanup + bootc lint.
 "${BUILD_SCRIPTS_PATH}/cleanup.sh"

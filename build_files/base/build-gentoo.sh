@@ -80,4 +80,4 @@ ln -sT var/srv /srv
 ln -sT var/mnt /mnt
 ln -sT var/opt /opt
 ln -sT var/home /home
-ln -sT var/usrlocal /usr/local
+ln -sT ../var/usrlocal /usr/local

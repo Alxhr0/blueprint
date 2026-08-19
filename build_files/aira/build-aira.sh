@@ -13,7 +13,7 @@ else
   mkdir -p /root
 fi
 
-source /ctx/core/nix-bootc-setup.sh
+systemctl enable setup-nix.service
 
 dnf5 -y install terra-release terra-release-extras || true
 

@@ -113,7 +113,7 @@ ln -sfnT var/srv /srv
 ln -sfnT var/mnt /mnt
 ln -sfnT var/opt /opt
 ln -sfnT var/home /home
-ln -sfnT var/usrlocal /usr/local
+ln -sfnT ../var/usrlocal /usr/local
 
 printf 'd /var/home 0755 root root -\nd /var/srv 0755 root root -\nd /var/mnt 0755 root root -\nd /var/opt 0755 root root -\nd /var/usrlocal 0755 root root -\nd /var/roothome 0700 root root -\nd /run/media 0755 root root -\n' > /usr/lib/tmpfiles.d/bootc-base-dirs.conf
 

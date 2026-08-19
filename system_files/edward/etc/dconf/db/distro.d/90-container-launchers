@@ -1,5 +1,5 @@
 [org/gnome/settings-daemon/plugins/media-keys]
-custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom6/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ubuntu/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/arch/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/fedora/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/centos10/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ai/']
+custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom6/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ubuntu/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/arch/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/fedora/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/centos10/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ai/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/review/']
 
 [org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ubuntu]
 binding='<Control><Alt>u'
@@ -25,3 +25,8 @@ name='Open CentOS 10 Container'
 binding='<Control><Alt>n'
 command='/usr/bin/container-launch ai'
 name='Open AI Sandbox'
+
+[org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/review]
+binding='<Control><Alt>r'
+command='/usr/bin/container-launch review'
+name='Open Review Container'

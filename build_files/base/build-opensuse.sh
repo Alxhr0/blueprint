@@ -55,7 +55,7 @@ ln -sT var/srv /srv
 ln -sT var/mnt /mnt
 ln -sT var/opt /opt
 ln -sT var/home /home
-ln -sT var/usrlocal /usr/local
+ln -sT ../var/usrlocal /usr/local
 
 KVER=$(basename "$(find /usr/lib/modules -maxdepth 1 -mindepth 1 -type d | tail -n 1)")
 printf '[composefs]\nenabled = yes\n[sysroot]\nreadonly = true\n' > /usr/lib/ostree/prepare-root.conf
