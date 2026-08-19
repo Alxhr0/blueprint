@@ -25,6 +25,12 @@ apt-get install -y --no-install-recommends "${PACKAGES[@]}"
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 
+# Node.js 22.x (Pi requires >= 22.19.0)
+curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+apt-get install -y --no-install-recommends nodejs
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+
 curl -fsSL https://bun.sh/install | bash
 curl -fsSL https://pi.dev/install.sh | sh
 bun add -g opencode-ai
