@@ -40,6 +40,10 @@ brew tap ublue-os/tap
 brew tap ublue-os/experimental-tap
 brew tap Kilo-Org/tap
 
+# Trust taps (required for cask installs)
+brew trust ublue-os/tap
+brew trust ublue-os/experimental-tap
+
 # Brew packages
 brew install bun ollama llama.cpp opencode
 brew install Kilo-Org/tap/kilo
