@@ -10,8 +10,10 @@
 
 `blueprint` builds a family of custom, container-native (bootc) OS images — one Containerfile per flavor, sharing common build scripts and system files where it makes sense.
 
-This also host images such as the AI, Edward, Crmy and Aira images these are not made to be for everyone infact these are made for myself and my friends it is not recommended to use unless 
+This also host images such as the AI, AlmaFin, Crmy and Aira images these are not made to be for everyone infact these are made for myself and my friends it is not recommended to use unless 
 unless you have read what the images do and they fit you!
+
+(The AlmaFin image is made to be a test bed for me for Bluefin LTS since I help with that!!)
 
 ## Flavors
 
@@ -19,7 +21,7 @@ To use any of these in your Containerfile do a `FROM ghcr.io/huntedraven/bluepri
 
 | Flavor | Containerfile | Notes |
 |:---|:---|:---|
-| edward | `containerfiles/Containerfile.edward` | Edward's own desktop image |
+| almafin | `containerfiles/Containerfile.almafin` | AlmaLinux 10 (Kitten) desktop with GNOME, NVIDIA (akmods) + Homebrew |
 | arch | `containerfiles/Containerfile.arch` | Arch-based |
 | debian | `containerfiles/Containerfile.debian` | Debian-based |
 | gentoo | `containerfiles/Containerfile.gentoo` | Gentoo-based |
@@ -49,7 +51,7 @@ blueprint/
 ├── disk_config/                 # disk/ISO layout configs (disk.toml, iso-*.toml)
 ├── images/                      # per-flavor .env build config
 ├── sysext/                      # systemd-sysext extensions (e.g. steam)
-├── system_files/                # files to all flavors such as Edward, Aira, Arch and Holo copied into the image
+├── system_files/                # files to all flavors such as AlmaFin, Aira, Arch and Holo copied into the image
 ```
 
 ## Building

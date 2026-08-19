@@ -1,0 +1,11 @@
+[Unit]
+Description=Weekly Bluefin LTS Count Me reporting
+Documentation=https://github.com/projectbluefin/bluefin-lts
+ConditionPathExists=/run/ostree-booted
+
+[Service]
+Type=oneshot
+# Plain dnf is used: dnf5 is unavailable in AlmaLinux 10 and EPEL 10. The dnf
+# CLI resolves the EPEL metalink correctly and reports the image User-Agent
+# from os-release, so the weekly countme ping lands.
+ExecStart=/usr/bin/dnf makecache

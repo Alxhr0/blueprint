@@ -3,7 +3,7 @@
 # Regression tests for the LTS drop-in that removes the local-fs.target cycle
 # from rechunker-group-fix.service while retaining its sysusers ordering.
 
-DROP_IN="${BATS_TEST_DIRNAME}/../../system_files/edward/overrides/shared/usr/lib/systemd/system/rechunker-group-fix.service.d/ordering.conf"
+DROP_IN="${BATS_TEST_DIRNAME}/../../system_files/almafin/overrides/shared/usr/lib/systemd/system/rechunker-group-fix.service.d/ordering.conf"
 
 @test "rechunker ordering: resets common local-fs dependencies" {
     run grep -E '^After=$|^Wants=$' "${DROP_IN}"

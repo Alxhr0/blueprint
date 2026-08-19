@@ -1,8 +1,8 @@
-set dotenv-filename := "images/edward.env"
+set dotenv-filename := "images/almafin.env"
 set dotenv-load
 
 # Primary image config + shared defaults (also sources the shared vars for other variants)
-primary_env := "images/edward.env"
+primary_env := "images/almafin.env"
 
 export image_name := env_var("IMAGE_NAME")
 export repo_organization := env_var("REPO_ORGANIZATION")
@@ -141,6 +141,13 @@ build $target_image="" $tag="" $dx="0" $kernel_pin="" $gnome_version="50" $major
     BUILD_ARGS+=("--build-arg" "IMAGE_VENDOR=${REPO_ORGANIZATION}")
     BUILD_ARGS+=("--build-arg" "ENABLE_DX={{ dx }}")
     BUILD_ARGS+=("--build-arg" "GNOME_VERSION={{ gnome_version }}")
+    if [[ "${target_image}" == "almafin" ]]; then
+        BUILD_ARGS+=("--build-arg" "ALMA_IMAGE=${ALMA_IMAGE}")
+        BUILD_ARGS+=("--build-arg" "COMMON_IMAGE_REF=${COMMON_IMAGE_REF}")
+        BUILD_ARGS+=("--build-arg" "BREW_IMAGE_REF=${BREW_IMAGE_REF}")
+        BUILD_ARGS+=("--build-arg" "ENABLE_NVIDIA=${ENABLE_NVIDIA}")
+        BUILD_ARGS+=("--build-arg" "AKMODS_VERSION=${AKMODS_VERSION}")
+    fi
     if [[ -z "$(git status -s)" ]]; then
         BUILD_ARGS+=("--build-arg" "SHA_HEAD_SHORT=$(git rev-parse --short HEAD)")
     fi
@@ -180,7 +187,7 @@ build-fsdk $tag="fsdk":
 build-all:
     #!/usr/bin/env bash
     set -euo pipefail
-    just build edward
+    just build almafin
     just build aira
     just build server
     just build ai
@@ -466,7 +473,7 @@ build-iso $target_image=("localhost/" + image_name) $tag=default_tag: && (_build
 
 # Build a GNOME installer ISO using bootc-installer
 [group('Build Virtal Machine Image')]
-build-gnome-iso: && (_rebuild-bib "ghcr.io/huntedraven7/blueprint" "edward" "iso" "disk_config/iso-gnome.toml")
+build-gnome-iso: && (_rebuild-bib "ghcr.io/huntedraven7/blueprint" "almafin" "iso" "disk_config/iso-gnome.toml")
 
 # Build a server installer ISO using BIB (Anaconda-based)
 [group('Build Virtal Machine Image')]

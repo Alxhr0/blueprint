@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [arch, edward, ai, debian, server, aira, homepage, gentoo, nixos, opensuse, ubuntu]
+        image: [arch, almafin, ai, debian, server, aira, homepage, gentoo, nixos, opensuse, ubuntu]
 
     steps:
       - name: Checkout

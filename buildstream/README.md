@@ -73,7 +73,7 @@ This builds every variant defined in `images/*.env` plus the fsdk image via Buil
 | Variant | Description |
 |---------|-------------|
 | `fsdk` | Unified FSDK dev image: Python + Skopeo + Buildah + OSTree, distroless |
-| `edward` | Ubuntu + GNOME desktop, dev tools, NVIDIA, gaming |
+| `almafin` | AlmaLinux 10 (Kitten) + GNOME desktop, dev tools, Homebrew |
 | `aira` | KDE Plasma, AMD-focused |
 | `holo-amd` | Arch + CachyOS kernel, AMD GPU, gaming |
 | `holo-nvidia` | Arch + CachyOS kernel, NVIDIA GPU, gaming |
