@@ -57,6 +57,12 @@ EOF
 # ---------------------------------------------------------------------------
 # 3. Install Nix (daemon mode, no-start for container builds)
 # ---------------------------------------------------------------------------
+# Ensure the nixbld group exists before the installer runs — in containers the
+# installer may skip user/group creation.
+if ! getent group nixbld > /dev/null 2>&1; then
+    groupadd -r nixbld
+fi
+
 if ! command -v nix > /dev/null 2>&1; then
     curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | \
         sh -s -- --daemon --no-start

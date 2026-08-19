@@ -19,6 +19,11 @@ PACKAGES=(
     tzdata
 )
 
+apt-get update
+apt-get install -y --no-install-recommends "${PACKAGES[@]}"
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+
 curl -fsSL https://bun.sh/install | bash
 curl -fsSL https://pi.dev/install.sh | sh
 bun add -g opencode-ai
@@ -28,8 +33,3 @@ curl -fsSL https://ollama.com/install.sh | sh
 curl -fsSL https://cli.kiro.dev/install | bash
 curl -fsSL https://antigravity.google/cli/install.sh | bash
 curl https://cursor.com/install -fsS | bash
-
-apt-get update
-apt-get install -y --no-install-recommends "${PACKAGES[@]}"
-apt-get clean
-rm -rf /var/lib/apt/lists/*

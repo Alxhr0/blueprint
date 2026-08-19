@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Open Ubuntu AI Container
+Name=Open AI Sandbox
 Exec=/usr/bin/container-launch ai
 Icon=applications-terminal
 NoDisplay=true

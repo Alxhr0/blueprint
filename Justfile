@@ -144,10 +144,10 @@ build $target_image="" $tag="" $dx="0" $kernel_pin="" $gnome_version="50" $major
     if [[ "${target_image}" == "edward" ]]; then
         BUILD_ARGS+=("--build-arg" "BASE_IMAGE=${BASE_IMAGE}")
         BUILD_ARGS+=("--build-arg" "MAJOR_VERSION=${MAJOR_VERSION}")
-        BUILD_ARGS+=("--build-arg" "COMMON_IMAGE_REF=${COMMON_IMAGE_REF}")
-        BUILD_ARGS+=("--build-arg" "BREW_IMAGE_REF=${BREW_IMAGE_REF}")
-        BUILD_ARGS+=("--build-arg" "ENABLE_NVIDIA=${ENABLE_NVIDIA}")
-        BUILD_ARGS+=("--build-arg" "AKMODS_VERSION=${AKMODS_VERSION}")
+        BUILD_ARGS+=("--build-arg" "COMMON_IMAGE_REF=${COMMON_IMAGE_REF:-}")
+        BUILD_ARGS+=("--build-arg" "BREW_IMAGE_REF=${BREW_IMAGE_REF:-}")
+        BUILD_ARGS+=("--build-arg" "ENABLE_NVIDIA=${ENABLE_NVIDIA:-}")
+        BUILD_ARGS+=("--build-arg" "AKMODS_VERSION=${AKMODS_VERSION:-}")
     fi
     if [[ -z "$(git status -s)" ]]; then
         BUILD_ARGS+=("--build-arg" "SHA_HEAD_SHORT=$(git rev-parse --short HEAD)")
