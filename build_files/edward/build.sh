@@ -19,10 +19,10 @@ printf '::endgroup::\n'
 # 2. Enable the Terra repository (extra EL packages) and install what we want from it.
 "${BUILD_SCRIPTS_PATH}/21-terra.sh"
 # ghostty terminal + subpackages (packaged by Terra for EL — https://terrapkg.com).
-# --repovalidation=none: Terra's mirror sometimes serves repodata with mismatched
-# checksums; skip validation so the build isn't blocked by their infrastructure.
-if ! dnf install -y --repovalidation=none ghostty ghostty-terminfo ghostty-shell-integration; then
-    echo "build: ghostty install failed even with repovalidation=none, skipping"
+# --nogpgcheck: Terra's mirror sometimes serves repodata with mismatched checksums;
+# skip validation so the build isn't blocked by their infrastructure.
+if ! dnf install -y --nogpgcheck ghostty ghostty-terminfo ghostty-shell-integration; then
+    echo "build: ghostty install failed even with --nogpgcheck, skipping"
 fi
 
 # 3. Install Nix in daemon mode for bootc (bind-mounts /nix -> /var/nix).

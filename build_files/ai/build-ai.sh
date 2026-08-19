@@ -31,12 +31,23 @@ apt-get install -y --no-install-recommends nodejs
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 
-curl -fsSL https://bun.sh/install | bash
+# Homebrew
+NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+# Brew taps
+brew tap ublue-os/tap
+brew tap ublue-os/experimental-tap
+brew tap Kilo-Org/tap
+
+# Brew packages
+brew install bun ollama llama.cpp opencode
+brew install Kilo-Org/tap/kilo
+
+# Brew casks (Linux)
+brew install --cask antigravity-cli-linux
+brew install --cask ublue-os/experimental-tap/cursor-linux
+brew install --cask ublue-os/experimental-tap/kiro-cli-linux
+
+# Non-brew installs
 curl -fsSL https://pi.dev/install.sh | sh
-bun add -g opencode-ai
-bun add -g @kilocode/cli
-curl -LsSf https://llama.app/install.sh | sh
-curl -fsSL https://ollama.com/install.sh | sh
-curl -fsSL https://cli.kiro.dev/install | bash
-curl -fsSL https://antigravity.google/cli/install.sh | bash
-curl https://cursor.com/install -fsS | bash
