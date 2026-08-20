@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    "docker:pinDigests",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "labels": ["dependencies"],
+  "schedule": ["before 5am on monday"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["pin", "digest"],
+      "automerge": true
+    }
+  ]
+}

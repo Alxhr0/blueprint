@@ -1,0 +1,6 @@
+ignored:
+  - SC1091
+trustedRegistries:
+  - docker.io
+  - ghcr.io
+  - quay.io
