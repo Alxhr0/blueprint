@@ -1,5 +1,5 @@
-#!/bin/bash
-set -ouex pipefail
+#!/bin/sh
+set -eux
 
 # The NixOS build is fully performed in the builder stage (builder-nixos.sh
 # runs /ctx/nixos/build.sh and populates /output). This system-stage script is

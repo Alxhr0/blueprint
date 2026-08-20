@@ -1,5 +1,5 @@
-#!/bin/bash
-set -ouex pipefail
+#!/bin/sh
+set -eux
 
 # NixOS toolchain bootstrap (moved from Containerfile.nixos into this
 # self-contained builder script so the unified root Containerfile can drive
