@@ -1,6 +1,15 @@
 #!/bin/bash
 set -ouex pipefail
 
+# Portage bootstrap for the system stage (the unified root Containerfile has no
+# separate portage stage; the builder stage populated /output with bootc).
+if [ ! -d /var/db/repos/gentoo/profiles ]; then
+    emerge-webrsync || emerge --sync
+fi
+
+rm -f /etc/portage/make.profile
+ln -s /var/db/repos/gentoo/profiles/default/linux/amd64/23.0/systemd /etc/portage/make.profile
+
 cp -avf "/ctx/system_files"/. /
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/gentoo"/. /

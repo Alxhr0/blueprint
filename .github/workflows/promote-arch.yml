@@ -1,0 +1,75 @@
+name: Promote Arch to Stable
+
+on:
+  workflow_dispatch:
+
+env:
+  IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
+
+jobs:
+  promote:
+    name: Create promote PR
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Get testing digest
+        id: digest
+        env:
+          REGISTRY: ${{ env.IMAGE_REGISTRY }}
+        run: |
+          set -euo pipefail
+          DIGEST=$(skopeo inspect "docker://${REGISTRY}/arch-bootc:testing" | jq -r '.Digest')
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "Testing digest: ${DIGEST}"
+
+      - name: Create PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DIGEST: ${{ steps.digest.outputs.digest }}
+        run: |
+          set -euo pipefail
+
+          BRANCH="promote/arch-stable-${DIGEST:0:12}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "${BRANCH}"
+
+          # Update the stable digest in image-versions.yaml
+          if grep -q "^  arch-bootc:" image-versions.yaml 2>/dev/null; then
+            sed -i "s|^  arch-bootc:.*|  arch-bootc:\n    digest: ${DIGEST}|" image-versions.yaml
+          else
+            cat >> image-versions.yaml << EOF
+
+          # Arch stable image (promoted from testing)
+          arch-bootc:
+            digest: ${DIGEST}
+          EOF
+          fi
+
+          git add image-versions.yaml
+          git commit -m "promote: arch-bootc testing → stable (${DIGEST:0:12})"
+          git push origin "${BRANCH}"
+
+          gh pr create \
+            --title "Promote arch-bootc:testing to stable" \
+            --body "## Promote arch-bootc:testing → arch-bootc:stable
+
+          **Testing digest:** \`${DIGEST}\`
+
+          This PR promotes the current \`arch-bootc:testing\` image to \`arch-bootc:stable\`.
+
+          When merged, the \`tag-arch-stable\` workflow will re-tag this image as \`arch-bootc:stable\` in the registry." \
+            --label "promote" \
+            --base main

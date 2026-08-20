@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [arch, debian, gentoo, nixos, opensuse, ubuntu, fsdk]
+        image: [fsdk]
 
     permissions:
       contents: read

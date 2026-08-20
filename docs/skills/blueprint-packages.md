@@ -1,0 +1,1 @@
+../../.agents/skills/blueprint-packages/SKILL.md

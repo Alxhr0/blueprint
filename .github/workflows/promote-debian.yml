@@ -1,0 +1,74 @@
+name: Promote Debian to Stable
+
+on:
+  workflow_dispatch:
+
+env:
+  IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
+
+jobs:
+  promote:
+    name: Create promote PR
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Get testing digest
+        id: digest
+        env:
+          REGISTRY: ${{ env.IMAGE_REGISTRY }}
+        run: |
+          set -euo pipefail
+          DIGEST=$(skopeo inspect "docker://${REGISTRY}/debian-bootc:testing" | jq -r '.Digest')
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "Testing digest: ${DIGEST}"
+
+      - name: Create PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DIGEST: ${{ steps.digest.outputs.digest }}
+        run: |
+          set -euo pipefail
+
+          BRANCH="promote/debian-stable-${DIGEST:0:12}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "${BRANCH}"
+
+          if grep -q "^  debian-bootc:" image-versions.yaml 2>/dev/null; then
+            sed -i "s|^  debian-bootc:.*|  debian-bootc:\n    digest: ${DIGEST}|" image-versions.yaml
+          else
+            cat >> image-versions.yaml << EOF
+
+          # Debian stable image (promoted from testing)
+          debian-bootc:
+            digest: ${DIGEST}
+          EOF
+          fi
+
+          git add image-versions.yaml
+          git commit -m "promote: debian-bootc testing → stable (${DIGEST:0:12})"
+          git push origin "${BRANCH}"
+
+          gh pr create \
+            --title "Promote debian-bootc:testing to stable" \
+            --body "## Promote debian-bootc:testing → debian-bootc:stable
+
+          **Testing digest:** \`${DIGEST}\`
+
+          This PR promotes the current \`debian-bootc:testing\` image to \`debian-bootc:stable\`.
+
+          When merged, the \`tag-debian-stable\` workflow will re-tag this image as \`debian-bootc:stable\` in the registry." \
+            --label "promote" \
+            --base main

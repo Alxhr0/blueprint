@@ -1,0 +1,1 @@
+../../.agents/skills/blueprint-onboarding/SKILL.md

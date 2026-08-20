@@ -1,8 +1,8 @@
-name: Build Holo Images
+name: Build NixOS Image
 
 on:
   schedule:
-    - cron: '0 4 * * *' # 4:00am UTC daily
+    - cron: '0 8 */2 * *' # 8:00am UTC every 2 days
   workflow_dispatch:
 
 env:
@@ -13,13 +13,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-holo:
-    name: Build ${{ matrix.image }}
+  build-nixos:
+    name: Build and push nixos-bootc:testing
     runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        image: [holo-amd, holo-nvidia]
 
     permissions:
       contents: read
@@ -49,61 +45,31 @@ jobs:
           sudo apt update
           sudo apt install -y skopeo
 
-      - name: Prepare environment
-        env:
-          TARGET_IMAGE: ${{ matrix.image }}
-        run: |
-          set -euo pipefail
-
-          echo "TARGET_IMAGE=${TARGET_IMAGE}" >> "$GITHUB_ENV"
-
-          source <(just variant-env "${TARGET_IMAGE}")
-
-          echo "IMAGE_NAME=${IMAGE_NAME}" >> "$GITHUB_ENV"
-          echo "DEFAULT_TAG=${DEFAULT_TAG}" >> "$GITHUB_ENV"
-
-          echo "IMAGE_REGISTRY=${IMAGE_REGISTRY,,}" >> "$GITHUB_ENV"
-
-      - name: Pull Arch Base Image
-        id: pull-arch
-        run: |
-          set -euo pipefail
-          REGISTRY="${IMAGE_REGISTRY,,}"
-          sudo -E podman pull "${REGISTRY}/arch-bootc:stable" || true
-          IMAGE_ID=$(sudo -E podman images --filter reference="${REGISTRY}/arch-bootc:stable" --format '{{.ID}}' | head -n1)
-          if [[ -z "${IMAGE_ID}" ]]; then
-            echo "Arch stable image not found in registry, building locally..."
-            sudo -E "$(command -v just)" build arch
-            sudo -E podman tag "arch-bootc:testing" "arch-bootc:stable"
-          else
-            sudo -E podman tag "${IMAGE_ID}" "arch-bootc:stable"
-          fi
-
-      - name: Build Holo Image
+      - name: Build NixOS Image
         id: build-image
         run: |
-          sudo -E "$(command -v just)" build \
-            "${TARGET_IMAGE}"
+          sudo -E "$(command -v just)" build nixos
 
       - name: Rechunk with Chunkah
         id: rechunk
         run: |
           sudo -E "$(command -v just)" rechunk \
-            "blueprint" \
-            "${DEFAULT_TAG}"
+            "nixos-bootc" \
+            "testing"
 
       - name: Generate Build Tags
         id: gen-build-tags
         run: |
+          set -euo pipefail
           DATE=$(date +%Y%m%d)
           BUILD_TAGS=()
           if [[ -z "$(git status -s)" ]]; then
               GIT_SHA=$(git rev-parse --short HEAD)
-              BUILD_TAGS+=("${DEFAULT_TAG}-${GIT_SHA}")
-              BUILD_TAGS+=("${DEFAULT_TAG}-${DATE}-${GIT_SHA}")
+              BUILD_TAGS+=("testing-${GIT_SHA}")
+              BUILD_TAGS+=("testing-${DATE}-${GIT_SHA}")
           fi
-          BUILD_TAGS+=("${DEFAULT_TAG}-${DATE}")
-          BUILD_TAGS+=("${DEFAULT_TAG}")
+          BUILD_TAGS+=("testing-${DATE}")
+          BUILD_TAGS+=("testing")
           echo "${BUILD_TAGS[*]}"
           echo "alias_tags=${BUILD_TAGS[*]}" >> "$GITHUB_OUTPUT"
 
@@ -112,21 +78,28 @@ jobs:
         env:
           ALIAS_TAGS: ${{ steps.gen-build-tags.outputs.alias_tags }}
         run: |
-          sudo -E "$(command -v just)" tag-images \
-            "${IMAGE_NAME}" \
-            "${DEFAULT_TAG}" \
-            "${ALIAS_TAGS}"
+          set -euo pipefail
+
+          IMAGE_ID=$(sudo -E podman images --filter reference="nixos-bootc:testing" --format '{{.ID}}' | head -n1)
+          sudo -E podman tag "${IMAGE_ID}" "nixos-bootc:testing"
+
+          for tag in ${ALIAS_TAGS}; do
+            if [[ "${tag}" != "testing" ]]; then
+              sudo -E podman tag "${IMAGE_ID}" "nixos-bootc:${tag}"
+            fi
+          done
+
+          sudo -E podman images
 
       - name: Push To GHCR
-        if: github.event_name != 'pull_request'
         id: push-image
         env:
           ALIAS_TAGS: ${{ steps.gen-build-tags.outputs.alias_tags }}
         uses: projectbluefin/actions/bootc-build/push-image@v1
         with:
-          image-name: ${{ env.IMAGE_NAME }}
+          image-name: nixos-bootc
           tags: ${{ steps.gen-build-tags.outputs.alias_tags }}
-          default-tag: ${{ env.DEFAULT_TAG }}
+          default-tag: testing
           registry: ghcr.io
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -141,4 +114,4 @@ jobs:
             --new-bundle-format=false \
             --use-signing-config=false \
             --key env://COSIGN_PRIVATE_KEY \
-            "${IMAGE_REGISTRY}/${IMAGE_NAME}@${DIGEST}"
+            "ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/nixos-bootc@${DIGEST}"
