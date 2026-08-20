@@ -26,7 +26,8 @@ zypper install -y \
     iwd \
     bubblewrap \
     cpio \
-    libcap-progs
+    libcap-progs \
+    libcrypto57
 
 if systemctl list-unit-files | grep -q '^systemd-networkd.service'; then
     systemctl enable systemd-networkd
