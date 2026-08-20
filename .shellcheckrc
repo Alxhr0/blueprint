@@ -1,0 +1,12 @@
+# SC2114: rm -rf on system dirs is intentional in container build scripts
+#         (cleaning up for smaller bootc images)
+disable=SC2114
+
+# SC2012: ls | head is fine for listing single-entry directories
+disable=SC2012
+
+# SC2016: Single quotes intentional in config file generation (e.g. portage make.conf)
+disable=SC2016
+
+# SC2129: Multiple redirects are readable enough in build scripts
+disable=SC2129
