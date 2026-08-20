@@ -28,7 +28,7 @@ env:
   REGISTRY_CACHE_WRITE: ${{ github.event_name != 'pull_request' && '1' || '0' }}
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ matrix.variant }}
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
