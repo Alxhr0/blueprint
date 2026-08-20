@@ -27,6 +27,8 @@ ARG GNOME_VERSION="50"
 ARG SHA_HEAD_SHORT="deadbeef"
 
 FROM scratch AS ctx
+# Re-declare args used after FROM (pre-FROM ARGs are out of scope in build steps).
+ARG VARIANT
 COPY build_files /
 COPY system_files/global /system_files/global
 COPY system_files/${VARIANT} /system_files/${VARIANT}
@@ -35,11 +37,14 @@ COPY system_files/${VARIANT} /system_files/${VARIANT}
 # For "derived" images (holo-*) this is a no-op; the real work happens in the
 # system stage via BUILD_SCRIPT.
 FROM ${BASE_IMAGE} AS builder
+ARG BUILDER_SCRIPT
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     /ctx/base/${BUILDER_SCRIPT}
 
 # System stage: install the actual system packages / finalize the image.
 FROM ${BASE_IMAGE} AS system
+ARG BUILD_SCRIPT
+ARG LINT
 COPY --from=builder /output /
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     /ctx/base/${BUILD_SCRIPT}
