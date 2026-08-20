@@ -15,18 +15,17 @@ BuildStream. All flavors share common build scripts and system files.
 
 ## Flavors
 
-To use any of these in your Containerfile do a `FROM ghcr.io/huntedraven7/blueprint:`
-then, right after the `:`, put one of the flavors below!
+To use one of the listed variants below just do a `FROM ghcr.io/huntedraven7/<INSERT FLAVOR>:stable` there is also testing for those that want that.
 
 | Flavor | Containerfile | Notes |
 |:---|:---|:---|
-| arch | `Containerfile` (`VARIANT=arch`) | Arch-based |
-| debian | `Containerfile` (`VARIANT=debian`) | Debian-based |
-| gentoo | `Containerfile` (`VARIANT=gentoo`) | Gentoo-based (local build only — see `docs/GENTOO.md`) |
+| arch-bootc | `Containerfile` (`VARIANT=arch`) | Arch-based |
+| debian-bootc | `Containerfile` (`VARIANT=debian`) | Debian-based |
+| gentoo-bootc | `Containerfile` (`VARIANT=gentoo`) | Gentoo-based (local build only — see `docs/GENTOO.md`) |
 | fsdk | `buildstream/` | Distroless FSDK-based (BuildStream) |
-| nixos | `Containerfile` (`VARIANT=nixos`) | NixOS-based bootc image |
-| opensuse | `Containerfile` (`VARIANT=opensuse`) | OpenSUSE Tumbleweed-based |
-| ubuntu | `Containerfile` (`VARIANT=ubuntu`) | Ubuntu 26.04-based |
+| nixos-bootc | `Containerfile` (`VARIANT=nixos`) | NixOS-based bootc image |
+| opensuse-bootc | `Containerfile` (`VARIANT=opensuse`) | OpenSUSE Tumbleweed-based |
+| ubuntu-bootc | `Containerfile` (`VARIANT=ubuntu`) | Ubuntu 26.04-based |
 | holo-amd / holo-nvidia | `Containerfile` (`VARIANT=holo`) | GPU-specific SteamOS-like variants |
 
 ## Repository layout
