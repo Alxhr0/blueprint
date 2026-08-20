@@ -3,6 +3,9 @@ name: Build All Images
 on:
   workflow_dispatch:
 
+env:
+  IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
+
 jobs:
   build-all:
     name: Build all images
@@ -16,7 +19,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [homepage, nixos, ubuntu, fsdk]
+        # Every base image plus the external homepage convenience build.
+        image: [homepage, arch, debian, opensuse, nixos, ubuntu, fsdk]
 
     steps:
       - name: Checkout
@@ -34,6 +38,33 @@ jobs:
           update-podman: false
           install-tools: '["just", "cosign"]'
 
+      - name: Prepare environment
+        env:
+          TARGET_IMAGE: ${{ matrix.image }}
+        run: |
+          set -euo pipefail
+
+          echo "TARGET_IMAGE=${TARGET_IMAGE}" >> "$GITHUB_ENV"
+
+          case "${TARGET_IMAGE}" in
+            homepage)
+              echo "IMAGE_NAME=homepage" >> "$GITHUB_ENV"
+              echo "DEFAULT_TAG=latest" >> "$GITHUB_ENV"
+              ;;
+            fsdk)
+              echo "IMAGE_NAME=blueprint" >> "$GITHUB_ENV"
+              echo "DEFAULT_TAG=fsdk" >> "$GITHUB_ENV"
+              ;;
+            *)
+              # Resolve this variant's image name and tag from its inline identity.
+              source <(just variant-env "${TARGET_IMAGE}")
+              echo "IMAGE_NAME=${IMAGE_NAME}" >> "$GITHUB_ENV"
+              echo "DEFAULT_TAG=${DEFAULT_TAG}" >> "$GITHUB_ENV"
+              ;;
+          esac
+
+          echo "IMAGE_REGISTRY=${IMAGE_REGISTRY,,}" >> "$GITHUB_ENV"
+
       - name: Build Image
         id: build-image
         run: |
@@ -43,6 +74,11 @@ jobs:
             git clone "${SOURCE_REPO}" /tmp/homepage
             cd /tmp/homepage
             sudo -E podman build -t "homepage:latest" .
+          elif [[ "${{ matrix.image }}" == "fsdk" ]]; then
+            # sudo's secure_path strips PATH (even with -E), hiding just from
+            # the recipe's nested `just build`; restore it explicitly. -E keeps
+            # GITHUB_ACTIONS so buildstream's bst recipe runs local, not the cluster.
+            sudo -E env "PATH=${PATH}" "$(command -v just)" build-fsdk
           else
             sudo -E "$(command -v just)" build "${{ matrix.image }}"
           fi
@@ -52,8 +88,8 @@ jobs:
         id: rechunk
         run: |
           sudo -E "$(command -v just)" rechunk \
-            "blueprint" \
-            "${{ matrix.image }}"
+            "${IMAGE_NAME}" \
+            "${DEFAULT_TAG}"
 
       - name: Generate Build Tags
         id: gen-build-tags
@@ -74,11 +110,11 @@ jobs:
             BUILD_TAGS=()
             if [[ -z "$(git status -s)" ]]; then
                 GIT_SHA=$(git rev-parse --short HEAD)
-                BUILD_TAGS+=("${{ matrix.image }}-${GIT_SHA}")
-                BUILD_TAGS+=("${{ matrix.image }}-${DATE}-${GIT_SHA}")
+                BUILD_TAGS+=("${DEFAULT_TAG}-${GIT_SHA}")
+                BUILD_TAGS+=("${DEFAULT_TAG}-${DATE}-${GIT_SHA}")
             fi
-            BUILD_TAGS+=("${{ matrix.image }}-${DATE}")
-            BUILD_TAGS+=("${{ matrix.image }}")
+            BUILD_TAGS+=("${DEFAULT_TAG}-${DATE}")
+            BUILD_TAGS+=("${DEFAULT_TAG}")
             echo "${BUILD_TAGS[*]}"
             echo "alias_tags=${BUILD_TAGS[*]}" >> "$GITHUB_OUTPUT"
           fi
@@ -98,15 +134,22 @@ jobs:
               fi
             done
           else
-            IMAGE_ID=$(sudo -E podman images --filter reference="blueprint:${{ matrix.image }}" --format '{{.ID}}' | head -n1)
-            sudo -E podman tag "${IMAGE_ID}" "blueprint:${{ matrix.image }}"
+            IMAGE_ID=$(sudo -E podman images --filter reference="${IMAGE_NAME}:${DEFAULT_TAG}" --format '{{.ID}}' | head -n1)
+            sudo -E podman tag "${IMAGE_ID}" "${IMAGE_NAME}:${DEFAULT_TAG}"
             for tag in ${ALIAS_TAGS}; do
-              if [[ "${tag}" != "${{ matrix.image }}" ]]; then
-                sudo -E podman tag "${IMAGE_ID}" "blueprint:${tag}"
+              if [[ "${tag}" != "${DEFAULT_TAG}" ]]; then
+                sudo -E podman tag "${IMAGE_ID}" "${IMAGE_NAME}:${tag}"
               fi
             done
           fi
           sudo -E podman images
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push To GHCR
         id: push-image
@@ -128,8 +171,8 @@ jobs:
             for tag in ${ALIAS_TAGS}; do
               sudo -E podman push \
                 --digestfile=/tmp/digestfile \
-                "blueprint:${tag}" \
-                "${REGISTRY}/blueprint:${tag}"
+                "${IMAGE_NAME}:${tag}" \
+                "${REGISTRY}/${IMAGE_NAME}:${tag}"
             done
           fi
 
@@ -142,14 +185,10 @@ jobs:
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
           DIGEST: ${{ steps.push-image.outputs.digest }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
         run: |
           set -euo pipefail
           REGISTRY="${IMAGE_REGISTRY,,}"
-          if [[ "${{ matrix.image }}" == "homepage" ]]; then
-            IMAGE_NAME="homepage"
-          else
-            IMAGE_NAME="blueprint"
-          fi
           cosign sign -y \
             --new-bundle-format=false \
             --use-signing-config=false \

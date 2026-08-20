@@ -34,7 +34,7 @@ description: >-
 
 | File | Trigger | Purpose |
 | --- | --- | --- |
-| `build-all.yml` | dispatch | `homepage`, `nixos`, `ubuntu`, `fsdk` (convenience) |
+| `build-all.yml` | dispatch | `homepage` + every base image (`arch`, `debian`, `opensuse`, `nixos`, `ubuntu`, `fsdk`) |
 | `build-base-images.yml` | schedule (every 3 days), dispatch | `fsdk` (BuildStream) |
 | `build-arch.yml` | schedule (every 2 days), dispatch | `arch-bootc:testing` |
 | `build-debian.yml` | schedule (every 2 days), dispatch | `debian-bootc:testing` |
