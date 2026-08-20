@@ -58,7 +58,7 @@ just build
 just build-all
 ```
 
-This builds every variant defined in `images/*.env` plus the fsdk image via BuildStream.
+This builds every variant defined in the `Justfile` `build` recipe `case` arms plus the fsdk image via BuildStream.
 
 ## Adding Packages
 
@@ -73,13 +73,11 @@ This builds every variant defined in `images/*.env` plus the fsdk image via Buil
 | Variant | Description |
 |---------|-------------|
 | `fsdk` | Unified FSDK dev image: Python + Skopeo + Buildah + OSTree, distroless |
-| `edward` | CentOS Stream 10 + KDE Plasma desktop, NVIDIA (akmods), dev tools, Homebrew |
-| `aira` | KDE Plasma, AMD-focused |
 | `holo-amd` | Arch + CachyOS kernel, AMD GPU, gaming |
 | `holo-nvidia` | Arch + CachyOS kernel, NVIDIA GPU, gaming |
-| `ai` | Ubuntu base for AI/ML containers |
-| `server` | Minimal server image |
 | `gentoo` | Gentoo-based image |
 | `opensuse` | openSUSE-based image |
 | `debian` | Debian-based image |
 | `ubuntu` | Ubuntu base image |
+| `arch` | Arch Linux base image |
+| `nixos` | NixOS-based image |

@@ -1,12 +1,7 @@
-# Pinned base image for the edward flavor (tracked by Renovate).
-# Edward is a thin layer on top of bluefin-lts-nvidia:testing, which already
-# provides GNOME, the kernel, akmods and NVIDIA. We only add our own overlays
-# (containers, Terra repo, Homebrew bundle, Edward identity).
-images:
-  - name: bluefin-lts-nvidia
-    image: ghcr.io/projectbluefin/bluefin-lts-nvidia
-    tag: testing
-    digest: sha256:629f6607cd649211f34720551b00cc1fb56909f7f70d49869a3b481e2f23fe0a
+# Pinned base image digests (tracked by Renovate).
+# promote-<base>.yml pins the current :testing digest here; tag-<base>-stable.yml
+# re-tags it as :stable.
+images: []
 
 # Pinned binary downloads (managed by Renovate)
 downloads:

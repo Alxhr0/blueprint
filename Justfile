@@ -1,16 +1,12 @@
-set dotenv-filename := "images/edward.env"
-set dotenv-load
-
-# Primary image config + shared defaults (also sources the shared vars for other variants)
-primary_env := "images/edward.env"
-
-export image_name := env_var("IMAGE_NAME")
-export repo_organization := env_var("REPO_ORGANIZATION")
-export image_desc := env_var("IMAGE_DESC")
-export image_keywords := env_var("IMAGE_KEYWORDS")
-export image_logo_url := env_var("IMAGE_LOGO_URL")
-export default_tag := env_var("DEFAULT_TAG")
-export bib_image := env_var("BIB_IMAGE")
+# No global dotenv: every variant's identity is inline in the `build` recipe
+# case arms (and mirrored in `variant-env`). There is no primary env file.
+export image_name := env_var_or_default("IMAGE_NAME", "blueprint")
+export repo_organization := env_var_or_default("REPO_ORGANIZATION", "huntedraven7")
+export image_desc := env_var_or_default("IMAGE_DESC", "")
+export image_keywords := env_var_or_default("IMAGE_KEYWORDS", "")
+export image_logo_url := env_var_or_default("IMAGE_LOGO_URL", "")
+export default_tag := env_var_or_default("DEFAULT_TAG", "latest")
+export bib_image := env_var_or_default("BIB_IMAGE", "quay.io/centos-bootc/bootc-image-builder:latest")
 
 alias build-vm := build-qcow2
 alias rebuild-vm := rebuild-qcow2
@@ -111,22 +107,94 @@ build $target_image="" $tag="" $dx="0" $kernel_pin="" $gnome_version="50" $major
     set -euo pipefail
     export PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
 
-    PRIMARY_STEM="$(basename "{{ primary_env }}" .env)"
+    PRIMARY_STEM="blueprint"
     if [[ -z "${target_image}" ]]; then
         target_image="${PRIMARY_STEM}"
     fi
 
-    set -a
-    source "{{ primary_env }}"
-    if [[ -f "images/${target_image}.env" && "images/${target_image}.env" != "{{ primary_env }}" ]]; then
-        source "images/${target_image}.env"
-    fi
-    set +a
+    # All variant identity is inline here; there are no per-variant env files.
+    case "${target_image}" in
+        arch*)
+            IMAGE_NAME="arch-bootc"
+            DEFAULT_TAG="testing"
+            IMAGE_DESC="Arch Linux Bootc Image"
+            IMAGE_KEYWORDS="bootc,oci,linux,arch"
+            IMAGE_LOGO_URL="https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
+            REPO_ORGANIZATION="huntedraven7"
+            BIB_IMAGE="quay.io/centos-bootc/bootc-image-builder:latest"
+            ;;
+        debian*)
+            IMAGE_NAME="debian-bootc"
+            DEFAULT_TAG="testing"
+            IMAGE_DESC="Debian Trixie Bootc Image"
+            IMAGE_KEYWORDS="bootc,oci,linux,debian,trixie"
+            IMAGE_LOGO_URL="https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
+            REPO_ORGANIZATION="huntedraven7"
+            BIB_IMAGE="quay.io/centos-bootc/bootc-image-builder:latest"
+            ;;
+        opensuse*)
+            IMAGE_NAME="opensuse-bootc"
+            DEFAULT_TAG="testing"
+            IMAGE_DESC="OpenSUSE Tumbleweed Bootc Image"
+            IMAGE_KEYWORDS="bootc,oci,linux,opensuse,tumbleweed"
+            IMAGE_LOGO_URL="https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
+            REPO_ORGANIZATION="huntedraven7"
+            BIB_IMAGE="quay.io/centos-bootc/bootc-image-builder:latest"
+            ;;
+        gentoo*)
+            IMAGE_NAME="blueprint"
+            DEFAULT_TAG="gentoo"
+            IMAGE_DESC="Gentoo Linux Bootc Image"
+            IMAGE_KEYWORDS="bootc,oci,linux,gentoo"
+            IMAGE_LOGO_URL="https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
+            REPO_ORGANIZATION="huntedraven7"
+            BIB_IMAGE="quay.io/centos-bootc/bootc-image-builder:latest"
+            ;;
+        nixos*)
+            IMAGE_NAME="nixos-bootc"
+            DEFAULT_TAG="testing"
+            IMAGE_DESC="NixOS Bootc Base Image"
+            IMAGE_KEYWORDS="bootc,oci,linux,nixos"
+            IMAGE_LOGO_URL="https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
+            REPO_ORGANIZATION="huntedraven7"
+            BIB_IMAGE="quay.io/centos-bootc/bootc-image-builder:latest"
+            ;;
+        ubuntu*)
+            IMAGE_NAME="ubuntu-bootc"
+            DEFAULT_TAG="testing"
+            IMAGE_DESC="Ubuntu 26.04 Bootc Base Image"
+            IMAGE_KEYWORDS="bootc,oci,linux,ubuntu"
+            IMAGE_LOGO_URL="https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
+            REPO_ORGANIZATION="huntedraven7"
+            BIB_IMAGE="quay.io/centos-bootc/bootc-image-builder:latest"
+            ;;
+        holo-amd*)
+            IMAGE_NAME="blueprint"
+            DEFAULT_TAG="holo-amd"
+            IMAGE_DESC="Arch Linux Gaming Bootc Image (AMD)"
+            IMAGE_KEYWORDS="bootc,oci,linux,arch,gaming,kde,steam,amd"
+            IMAGE_LOGO_URL="https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
+            REPO_ORGANIZATION="huntedraven7"
+            BIB_IMAGE="quay.io/centos-bootc/bootc-image-builder:latest"
+            ;;
+        holo-nvidia*)
+            IMAGE_NAME="blueprint"
+            DEFAULT_TAG="holo-nvidia"
+            IMAGE_DESC="Arch Linux Gaming Bootc Image (NVIDIA)"
+            IMAGE_KEYWORDS="bootc,oci,linux,arch,gaming,kde,steam,nvidia"
+            IMAGE_LOGO_URL="https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
+            REPO_ORGANIZATION="huntedraven7"
+            BIB_IMAGE="quay.io/centos-bootc/bootc-image-builder:latest"
+            ;;
+        *)
+            echo "Unknown variant: '${target_image}'. No inline identity and no env file." >&2
+            exit 1
+            ;;
+    esac
 
-    CONTAINERFILE="containerfiles/Containerfile.${PRIMARY_STEM}"
-    if [[ -f "containerfiles/Containerfile.${target_image}" ]]; then
-        CONTAINERFILE="containerfiles/Containerfile.${target_image}"
-    fi
+    # Every variant builds from the single root `Containerfile`; the per-variant
+    # containerfiles/Containerfile.<variant> files no longer exist.
+    CONTAINERFILE="Containerfile"
 
     TAG="${DEFAULT_TAG}"
     if [[ -n "${tag}" ]]; then
@@ -141,14 +209,38 @@ build $target_image="" $tag="" $dx="0" $kernel_pin="" $gnome_version="50" $major
     BUILD_ARGS+=("--build-arg" "IMAGE_VENDOR=${REPO_ORGANIZATION}")
     BUILD_ARGS+=("--build-arg" "ENABLE_DX={{ dx }}")
     BUILD_ARGS+=("--build-arg" "GNOME_VERSION={{ gnome_version }}")
-    if [[ "${target_image}" == "edward" ]]; then
-        BUILD_ARGS+=("--build-arg" "BASE_IMAGE=${BASE_IMAGE}")
-        BUILD_ARGS+=("--build-arg" "MAJOR_VERSION=${MAJOR_VERSION}")
-        BUILD_ARGS+=("--build-arg" "COMMON_IMAGE_REF=${COMMON_IMAGE_REF:-}")
-        BUILD_ARGS+=("--build-arg" "BREW_IMAGE_REF=${BREW_IMAGE_REF:-}")
-        BUILD_ARGS+=("--build-arg" "ENABLE_NVIDIA=${ENABLE_NVIDIA:-}")
-        BUILD_ARGS+=("--build-arg" "AKMODS_VERSION=${AKMODS_VERSION:-}")
+
+    # Unified root Containerfile args for the "other" images. These variants
+    # build from the single root `Containerfile` and select their base image
+    # and build/install scripts via build args.
+    if [[ "${CONTAINERFILE}" == "Containerfile" ]]; then
+        case "${target_image}" in
+            arch)
+                _base="archlinux:latest"; _sys="arch"; _b="builder-arch.sh"; _s="build-arch.sh" ;;
+            debian)
+                _base="docker.io/library/debian:testing"; _sys="debian"; _b="builder-debian.sh"; _s="build-debian.sh" ;;
+            ubuntu)
+                _base="ubuntu:26.04"; _sys="ubuntu"; _b="builder-ubuntu.sh"; _s="build-ubuntu.sh" ;;
+            opensuse)
+                _base="registry.opensuse.org/opensuse/tumbleweed:latest"; _sys="opensuse"; _b="builder-opensuse.sh"; _s="build-opensuse.sh" ;;
+            gentoo)
+                _base="gentoo/stage3:systemd"; _sys="gentoo"; _b="builder-gentoo.sh"; _s="build-gentoo.sh" ;;
+            nixos)
+                _base="nixos/nix:latest"; _sys="nixos"; _b="builder-nixos.sh"; _s="build-nixos.sh" ;;
+            holo-amd)
+                _base="arch-bootc:stable"; _sys="holo"; _b="holo/builder-holo-amd.sh"; _s="holo/build-amd.sh" ;;
+            holo-nvidia)
+                _base="arch-bootc:stable"; _sys="holo"; _b="holo/builder-holo-nvidia.sh"; _s="holo/build-nvidia.sh" ;;
+        esac
+        BUILD_ARGS+=("--build-arg" "VARIANT=${_sys}")
+        BUILD_ARGS+=("--build-arg" "BASE_IMAGE=${_base}")
+        BUILD_ARGS+=("--build-arg" "BUILDER_SCRIPT=${_b}")
+        BUILD_ARGS+=("--build-arg" "BUILD_SCRIPT=${_s}")
+        if [[ "${target_image}" == "nixos" ]]; then
+            BUILD_ARGS+=("--build-arg" "LINT=0")
+        fi
     fi
+
     if [[ -z "$(git status -s)" ]]; then
         BUILD_ARGS+=("--build-arg" "SHA_HEAD_SHORT=$(git rev-parse --short HEAD)")
     fi
@@ -158,7 +250,7 @@ build $target_image="" $tag="" $dx="0" $kernel_pin="" $gnome_version="50" $major
         GIT_SHA=$(git rev-parse --short HEAD)
         LABELS+=("--label" "io.artifacthub.package.readme-url=https://raw.githubusercontent.com/${REPO_ORGANIZATION}/${IMAGE_NAME}/${GIT_SHA}/README.md")
         LABELS+=("--label" "org.opencontainers.image.documentation=https://raw.githubusercontent.com/${REPO_ORGANIZATION}/${IMAGE_NAME}/${GIT_SHA}/README.md")
-        LABELS+=("--label" "org.opencontainers.image.source=https://github.com/${REPO_ORGANIZATION}/${IMAGE_NAME}/blob/${GIT_SHA}/containerfiles/Containerfile")
+        LABELS+=("--label" "org.opencontainers.image.source=https://github.com/${REPO_ORGANIZATION}/${IMAGE_NAME}/blob/${GIT_SHA}/${CONTAINERFILE}")
         LABELS+=("--label" "org.opencontainers.image.url=https://github.com/${REPO_ORGANIZATION}/${IMAGE_NAME}/tree/${GIT_SHA}")
         LABELS+=("--label" "org.opencontainers.image.version=${DEFAULT_TAG}.$(date +%Y%m%d)-${GIT_SHA}")
     fi
@@ -188,13 +280,7 @@ build-fsdk $tag="fsdk":
 build-all:
     #!/usr/bin/env bash
     set -euo pipefail
-    just build edward
-    just build aira
-    just build server
-    just build ai
     just build debian
-    just build gentoo
-    just build opensuse
     just build ubuntu
     just build nixos
     just build holo-amd
@@ -284,7 +370,7 @@ generate-build-tags $target_image=image_name $tag=default_tag:
     set -eoux pipefail
 
     # All alias tags are prefixed with the variant tag so variants sharing an
-    # image name (e.g. blueprint:latest, blueprint:aira) never overwrite each other
+    # image name (e.g. blueprint:latest, blueprint:holo-amd) never overwrite each other
     DATE=$(date +%Y%m%d)
     BUILD_TAGS=()
     if [[ -z "$(git status -s)" ]]; then
@@ -338,7 +424,7 @@ list-images:
         stem="${stem%.env}"
         if [[ -f "containerfiles/Containerfile.${stem}" ]] || [[ -f "buildstream/Containerfile.${stem}" ]]; then
             case "${stem}" in
-                arch|holo-amd|holo-nvidia|ai|debian|gentoo|opensuse|ubuntu|nixos|fsdk) continue ;;
+                arch|arch-bootc|debian-bootc|holo-amd|holo-nvidia|ai|debian|gentoo|opensuse|opensuse-bootc|ubuntu|nixos|fsdk) continue ;;
             esac
             IMAGES+=("${stem}")
         fi
@@ -353,12 +439,21 @@ variant-env $target_image=image_name:
     #!/usr/bin/env bash
     set -eoux pipefail
 
-    set -a
-    source "{{ primary_env }}"
-    if [[ -f "images/${target_image}.env" ]]; then
-        source "images/${target_image}.env"
-    fi
-    set +a
+    # Mirror the inline identity defined in the `build` recipe case arms.
+    case "${target_image}" in
+        arch*)        IMAGE_NAME="arch-bootc";   DEFAULT_TAG="testing" ;;
+        debian*)      IMAGE_NAME="debian-bootc"; DEFAULT_TAG="testing" ;;
+        opensuse*)    IMAGE_NAME="opensuse-bootc"; DEFAULT_TAG="testing" ;;
+        gentoo*)      IMAGE_NAME="blueprint";    DEFAULT_TAG="gentoo" ;;
+        nixos*)       IMAGE_NAME="nixos-bootc";  DEFAULT_TAG="testing" ;;
+        ubuntu*)      IMAGE_NAME="ubuntu-bootc"; DEFAULT_TAG="testing" ;;
+        holo-amd*)    IMAGE_NAME="blueprint";    DEFAULT_TAG="holo-amd" ;;
+        holo-nvidia*) IMAGE_NAME="blueprint";    DEFAULT_TAG="holo-nvidia" ;;
+        *)
+            echo "Unknown variant: '${target_image}'" >&2
+            exit 1
+            ;;
+    esac
 
     echo "IMAGE_NAME=${IMAGE_NAME}"
     echo "DEFAULT_TAG=${DEFAULT_TAG}"

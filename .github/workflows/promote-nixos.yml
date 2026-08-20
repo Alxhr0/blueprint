@@ -1,0 +1,77 @@
+name: Promote NixOS to Stable
+
+on:
+  schedule:
+    - cron: '0 4 1,15 * *' # 4:00am UTC on the 1st and 15th (~every 2 weeks)
+  workflow_dispatch:
+
+env:
+  IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
+
+jobs:
+  promote:
+    name: Create promote PR
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Get testing digest
+        id: digest
+        env:
+          REGISTRY: ${{ env.IMAGE_REGISTRY }}
+        run: |
+          set -euo pipefail
+          DIGEST=$(skopeo inspect "docker://${REGISTRY}/nixos-bootc:testing" | jq -r '.Digest')
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "Testing digest: ${DIGEST}"
+
+      - name: Create PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DIGEST: ${{ steps.digest.outputs.digest }}
+        run: |
+          set -euo pipefail
+
+          BRANCH="promote/nixos-stable-${DIGEST:0:12}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "${BRANCH}"
+
+          # Update the stable digest in image-versions.yaml
+          if grep -q "^  nixos-bootc:" image-versions.yaml 2>/dev/null; then
+            sed -i "s|^  nixos-bootc:.*|  nixos-bootc:\n    digest: ${DIGEST}|" image-versions.yaml
+          else
+            cat >> image-versions.yaml << EOF
+
+          # NixOS stable image (promoted from testing)
+          nixos-bootc:
+            digest: ${DIGEST}
+          EOF
+          fi
+
+          git add image-versions.yaml
+          git commit -m "promote: nixos-bootc testing → stable (${DIGEST:0:12})"
+          git push origin "${BRANCH}"
+
+          gh pr create \
+            --title "Promote nixos-bootc:testing to stable" \
+            --body "## Promote nixos-bootc:testing → nixos-bootc:stable
+
+          **Testing digest:** \`${DIGEST}\`
+
+          This PR promotes the current \`nixos-bootc:testing\` image to \`nixos-bootc:stable\`.
+
+          When merged, the \`tag-nixos-stable\` workflow will re-tag this image as \`nixos-bootc:stable\` in the registry." \
+            --label "promote" \
+            --base main

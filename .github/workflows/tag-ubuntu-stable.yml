@@ -1,0 +1,72 @@
+name: Tag Ubuntu Stable
+
+on:
+  pull_request:
+    types: [closed]
+    paths:
+      - 'image-versions.yaml'
+
+jobs:
+  tag-stable:
+    if: >
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'promote')
+    name: Tag ubuntu-bootc:stable
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Setup runner
+        uses: projectbluefin/actions/bootc-build/setup-runner@v1
+        with:
+          storage-backend: remove-software
+          update-podman: true
+          install-tools: '["cosign"]'
+
+      - name: Read stable digest
+        id: digest
+        run: |
+          set -euo pipefail
+          DIGEST=$(grep -A1 "ubuntu-bootc:" image-versions.yaml | grep "digest:" | awk '{print $2}')
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "Stable digest: ${DIGEST}"
+
+      - name: Pull, retag, and push
+        env:
+          REGISTRY: ${{ env.IMAGE_REGISTRY }}
+          DIGEST: ${{ steps.digest.outputs.digest }}
+        run: |
+          set -euo pipefail
+
+          # Pull the testing image by digest
+          sudo -E podman pull "${REGISTRY}/ubuntu-bootc@${DIGEST}"
+
+          # Tag as stable
+          sudo -E podman tag "${REGISTRY}/ubuntu-bootc@${DIGEST}" "${REGISTRY}/ubuntu-bootc:stable"
+          sudo -E podman tag "${REGISTRY}/ubuntu-bootc@${DIGEST}" "ubuntu-bootc:stable"
+
+          # Push stable tag
+          sudo -E podman push "${REGISTRY}/ubuntu-bootc:stable"
+
+          echo "Successfully tagged ubuntu-bootc:stable with digest ${DIGEST}"
+
+      - name: Sign stable image
+        env:
+          COSIGN_EXPERIMENTAL: false
+          COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+          DIGEST: ${{ steps.digest.outputs.digest }}
+        run: |
+          cosign sign -y \
+            --new-bundle-format=false \
+            --use-signing-config=false \
+            --key env://COSIGN_PRIVATE_KEY \
+            "ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/ubuntu-bootc@${DIGEST}"

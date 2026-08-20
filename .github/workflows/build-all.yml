@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [arch, edward, ai, debian, server, aira, homepage, gentoo, nixos, opensuse, ubuntu]
+        image: [homepage, nixos, ubuntu, fsdk]
 
     steps:
       - name: Checkout
@@ -48,7 +48,7 @@ jobs:
           fi
 
       - name: Rechunk with Chunkah
-        if: ${{ matrix.image != 'homepage' }}
+        if: ${{ matrix.image != 'homepage' && matrix.image != 'fsdk' }}
         id: rechunk
         run: |
           sudo -E "$(command -v just)" rechunk \
