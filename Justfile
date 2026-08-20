@@ -449,6 +449,7 @@ variant-env $target_image=image_name:
         ubuntu*)      IMAGE_NAME="ubuntu-bootc"; DEFAULT_TAG="testing" ;;
         holo-amd*)    IMAGE_NAME="blueprint";    DEFAULT_TAG="holo-amd" ;;
         holo-nvidia*) IMAGE_NAME="blueprint";    DEFAULT_TAG="holo-nvidia" ;;
+        fsdk*)        IMAGE_NAME="blueprint";    DEFAULT_TAG="fsdk" ;;
         *)
             echo "Unknown variant: '${target_image}'" >&2
             exit 1
