@@ -7,10 +7,16 @@ cp -avf "/ctx/system_files/arch"/. /
 
 sed -i 's/^#Include = \/etc\/pacman.conf.d\/\*.conf/Include = \/etc\/pacman.conf.d\/\*.conf/' /etc/pacman.conf
 
-# Enable the multilib repository (32-bit libraries) in the stock pacman.conf.
-sed -i -e 's|^#[[:space:]]*\[multilib\]|[multilib]|' \
-       -e 's|^#[[:space:]]*Include[[:space:]]*=[[:space:]]*/etc/pacman.d/mirrorlist|Include = /etc/pacman.d/mirrorlist|' \
-       /etc/pacman.conf
+# Enable the multilib repository (32-bit compatibility libraries on x86_64).
+# Recent archlinux base images no longer ship a commented [multilib] section,
+# so the old uncomment-only sed was a no-op. Use a robust check-and-append
+# approach (matching the holo build scripts).
+if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
+    sed -i '/^#\[multilib\]/s/^#//' /etc/pacman.conf
+    if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
+        echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
+    fi
+fi
 
 # Build against the stock pacman layout first: archlinux:latest ships its
 # installed packages tracked in /var/lib/pacman, so /var paths must stay in

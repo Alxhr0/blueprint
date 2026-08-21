@@ -106,6 +106,7 @@ release, update the matching arg and the digest together.
 | "Renovate won't notice a manually pinned digest in `FROM`."       | Renovate's dockerfile manager tracks `FROM image:tag@sha256:...` automatically.                      |
 | "I'll drop `bootc container lint` to speed up the build."         | It catches broken enablement symlinks and image structure regressions. Keep it.                     |
 | "fsdk can use `just build fsdk` like the others."                 | No — fsdk is BuildStream; use `just build-fsdk`.                                                     |
+| "I'll uncomment `[multilib]` in pacman.conf with a sed pattern match." | Recent `archlinux:latest` base images removed the commented `[multilib]` section (and `#Include = /etc/pacman.conf.d/*.conf`) entirely; the sed is a no-op. Use a check-and-append fallback: `if ! grep -q '^\[multilib]'; then sed -i '/^#\[multilib\]/s/^#//' ...; [ -z "$(grep '^\[multilib]' ...)" ] && echo '[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf; fi`. This pattern is mirrored in `build_files/base/build-arch.sh` and the holo build scripts. |
 
 ## Red Flags
 
