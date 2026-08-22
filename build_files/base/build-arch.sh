@@ -78,7 +78,9 @@ find /etc/ -name "*.pacnew" -type f -delete
 
 mkdir -p /usr/lib/systemd/system/sysinit.target.wants \
          /usr/lib/systemd/system/multi-user.target.wants \
-         /usr/lib/systemd/system/timers.target.wants
+         /usr/lib/systemd/system/timers.target.wants \
+         /usr/lib/systemd/system/network-online.target.wants \
+         /usr/lib/systemd/system/systemd-timesyncd.service.d
 
 # Enable services with /usr symlinks, not `systemctl enable`: in a bootc
 # image /etc is machine-local state that gets a three-way merge on upgrade,
@@ -100,6 +102,18 @@ ln -sfn /usr/lib/systemd/system/arch-bootc-prune-esp.timer \
 
 systemctl mask systemd-firstboot.service
 systemctl mask systemd-networkd-wait-online.service
+
+ln -sfn /usr/lib/systemd/system/NetworkManager-wait-online.service \
+    /usr/lib/systemd/system/network-online.target.wants/NetworkManager-wait-online.service
+
+# timesyncd normally starts early, but NTP/DNS cannot work until the
+# network has actually been configured. Pull in network-online.target
+# so the initial synchronization does not race NetworkManager.
+cat > /usr/lib/systemd/system/systemd-timesyncd.service.d/network.conf <<'EOF'
+[Unit]
+Wants=network-online.target
+After=network-online.target
+EOF
 
 printf 'L! /etc/resolv.conf - - - - /run/systemd/resolve/stub-resolv.conf\n' \
     > /usr/lib/tmpfiles.d/resolv-conf.conf
