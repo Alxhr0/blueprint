@@ -146,17 +146,16 @@ echo "::group:: COPR Repositories"
 # quickshell from errornointernet/quickshell (Qt-based desktop shell).
 # Enable the repo, install, then disable so it does not persist in the
 # final image.
-dnf -y copr enable errornointernet/quickshell
-dnf -y install quickshell
-dnf -y copr disable errornointernet/quickshell
-
-# niri from yalter/niri (wlroots-based Wayland compositor).
-# Enable the repo, install, then disable so it does not persist.
-dnf -y copr enable yalter/niri
-dnf -y install niri
-dnf -y copr disable yalter/niri
+dnf -y copr enable ligenix/enterprise-cosmic rhel+epel-10-x86_64
+dnf -y update  
+dnf -y install cosmic-desktop
+dnf -y install cosmic-ext-name
+dnf -y copr disable ligenix/enterprise-cosmic rhel+epel-10-x86_64
 
 echo "::endgroup::"
+
+systemctl disable gdm
+systemctl enable greetd
 
 echo "::group:: Overlay Brew Integration Files"
 
