@@ -84,6 +84,7 @@ jobs:
           TARGET_IMAGE: ${{ matrix.variant }}
         run: |
           set -euo pipefail
+          # shellcheck source=/dev/null
           source <(just variant-env "${TARGET_IMAGE}")
           echo "IMAGE_NAME=${IMAGE_NAME}" >> "${GITHUB_OUTPUT}"
           echo "DEFAULT_TAG=${DEFAULT_TAG}" >> "${GITHUB_OUTPUT}"
@@ -120,7 +121,6 @@ jobs:
         if: steps.detect-changes.outputs.should_build == 'true' || github.event_name != 'pull_request'
         run: |
           set -euo pipefail
-          TAG_STREAM="${TAG_STREAM}"
           DATE=$(date +%Y%m%d)
           BUILD_TAGS=()
           if [[ -z "$(git status -s)" ]]; then
