@@ -141,9 +141,23 @@ fi
 
 echo "::endgroup::"
 
+echo "::group:: Remove GNOME COPR packages from base image"
+
+# The bluefin-lts base ships GNOME 50 packages from the jreilly1821:c10s-gnome-50
+# COPR repo. These conflict with the enterprise-cosmic COPR: the COPR's
+# gdk-pixbuf2 obsoletes gdk-pixbuf2-modules which gtk3 requires. Remove the
+# COPR repo so dnf cannot pull conflicting updates from it.
+GNOME50_REPO=$(find /etc/yum.repos.d/ -name "*jreilly1821*gnome-50*" -print -quit 2>/dev/null || true)
+if [[ -n "${GNOME50_REPO}" ]]; then
+    rm -f "${GNOME50_REPO}"
+    echo "Removed GNOME 50 COPR repo: ${GNOME50_REPO}"
+fi
+
+echo "::endgroup::"
+
 echo "::group:: COPR Repositories"
 
-# quickshell from errornointernet/quickshell (Qt-based desktop shell).
+# enterprise-cosmic from ligenix (COSMIC desktop for Enterprise Linux).
 # Enable the repo, install, then disable so it does not persist in the
 # final image.
 dnf -y copr enable ligenix/enterprise-cosmic rhel+epel-10-x86_64
