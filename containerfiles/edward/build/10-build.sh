@@ -19,8 +19,8 @@ set -euo pipefail
 
 # Read build-time settings from /etc/environment if not already in the env
 if [[ -z "${IMAGE_NAME:-}" ]] && [[ -f /etc/environment ]]; then
-    # shellcheck disable=SC1091
-    . /etc/environment
+  # shellcheck disable=SC1091
+  . /etc/environment
 fi
 
 ###############################################################################
@@ -54,42 +54,42 @@ RPMDB_PATH="$(rpm --eval '%_dbpath')"
 # fail the build here, not silently produce an image whose package database
 # disagrees with its own contents.
 rpmdb_verify() {
-    local stage="$1"
-    local log=/tmp/rpmdb-verify.log
-    if rpmdb --verifydb >"${log}" 2>&1; then
-        echo "rpmdb integrity OK (${stage})"
-        return 0
-    fi
-    echo "ERROR: rpmdb integrity check failed (${stage})" >&2
-    head -n 15 "${log}" >&2
-    return 1
+  local stage="$1"
+  local log=/tmp/rpmdb-verify.log
+  if rpmdb --verifydb >"${log}" 2>&1; then
+    echo "rpmdb integrity OK (${stage})"
+    return 0
+  fi
+  echo "ERROR: rpmdb integrity check failed (${stage})" >&2
+  head -n 15 "${log}" >&2
+  return 1
 }
 
 echo "::group:: RPM Database Repair"
 
 if rpmdb --verifydb >/dev/null 2>&1; then
-    echo "rpmdb integrity OK, no repair needed"
+  echo "rpmdb integrity OK, no repair needed"
 else
-    echo "rpmdb inherited from the base image is corrupt, rebuilding it"
-    RPMDB_REPAIR_DIR=/tmp/rpmdb-repair # tmpfs mount: never lands in a layer
-    rm -rf "${RPMDB_REPAIR_DIR}"
-    mkdir -p "${RPMDB_REPAIR_DIR}"
-    cp "${RPMDB_PATH}/rpmdb.sqlite" "${RPMDB_REPAIR_DIR}/"
-    rpm --dbpath "${RPMDB_REPAIR_DIR}" --rebuilddb
-    rpmdb --dbpath "${RPMDB_REPAIR_DIR}" --verifydb
+  echo "rpmdb inherited from the base image is corrupt, rebuilding it"
+  RPMDB_REPAIR_DIR=/tmp/rpmdb-repair # tmpfs mount: never lands in a layer
+  rm -rf "${RPMDB_REPAIR_DIR}"
+  mkdir -p "${RPMDB_REPAIR_DIR}"
+  cp "${RPMDB_PATH}/rpmdb.sqlite" "${RPMDB_REPAIR_DIR}/"
+  rpm --dbpath "${RPMDB_REPAIR_DIR}" --rebuilddb
+  rpmdb --dbpath "${RPMDB_REPAIR_DIR}" --verifydb
 
-    # The base also ships -shm/-wal sidecars describing the old file; they are
-    # meaningless next to the rebuilt database.
-    rm -f "${RPMDB_PATH}/rpmdb.sqlite-shm" "${RPMDB_PATH}/rpmdb.sqlite-wal"
-    # --remove-destination unlinks the target first. The shipped db is
-    # hardlinked to /usr/lib/sysimage/rpm-ostree-base-db and to an ostree
-    # object under /sysroot, which must not be rewritten through the link.
-    cp --remove-destination "${RPMDB_REPAIR_DIR}/rpmdb.sqlite" \
-        "${RPMDB_PATH}/rpmdb.sqlite"
-    chmod 0644 "${RPMDB_PATH}/rpmdb.sqlite"
-    rm -rf "${RPMDB_REPAIR_DIR}"
+  # The base also ships -shm/-wal sidecars describing the old file; they are
+  # meaningless next to the rebuilt database.
+  rm -f "${RPMDB_PATH}/rpmdb.sqlite-shm" "${RPMDB_PATH}/rpmdb.sqlite-wal"
+  # --remove-destination unlinks the target first. The shipped db is
+  # hardlinked to /usr/lib/sysimage/rpm-ostree-base-db and to an ostree
+  # object under /sysroot, which must not be rewritten through the link.
+  cp --remove-destination "${RPMDB_REPAIR_DIR}/rpmdb.sqlite" \
+    "${RPMDB_PATH}/rpmdb.sqlite"
+  chmod 0644 "${RPMDB_PATH}/rpmdb.sqlite"
+  rm -rf "${RPMDB_REPAIR_DIR}"
 
-    rpmdb_verify "after rebuild"
+  rpmdb_verify "after rebuild"
 fi
 
 echo "::endgroup::"
@@ -101,8 +101,8 @@ echo "::group:: Third-party Repos"
 # enabled (EL variant of the same pattern as ublue-os/bazzite).
 # shellcheck disable=SC2016  # $releasever must reach dnf unexpanded
 dnf -y install --nogpgcheck \
-    --repofrompath='terra,https://repos.fyralabs.com/terrael$releasever' \
-    terra-release
+  --repofrompath='terra,https://repos.fyralabs.com/terrael$releasever' \
+  terra-release
 
 echo "::endgroup::"
 
@@ -113,30 +113,30 @@ mkdir -p /var/tmp
 # Base tooling. Most entries already ship with bluefin-lts; installing them
 # again is idempotent and keeps the brew/quadlet integration explicit.
 BASE_PACKAGES=(
-    rsync      # required for the brew overlay step
-    podman     # required by the container quadlets in system_files
-    flatpak    # required for /usr/share/flatpak/preinstall.d at first boot
-    tmux       # required by the default ujust recipes
-    gum        # required by the default ujust recipes for interactive prompts
-    git
-    python3-dnf-plugins-core  # provides the `dnf copr` plugin
+  rsync   # required for the brew overlay step
+  podman  # required by the container quadlets in system_files
+  flatpak # required for /usr/share/flatpak/preinstall.d at first boot
+  tmux    # required by the default ujust recipes
+  gum     # required by the default ujust recipes for interactive prompts
+  git
+  python3-dnf-plugins-core # provides the `dnf copr` plugin
 )
 
 # Skip packages the base image already ships: keeps the transaction small,
 # avoids pointless repo churn, and makes real gaps stand out in the log.
 MISSING_PACKAGES=()
 for pkg in "${BASE_PACKAGES[@]}"; do
-    if rpm -q "${pkg}" >/dev/null 2>&1; then
-        echo "Already installed, skipping: ${pkg}"
-    else
-        MISSING_PACKAGES+=("${pkg}")
-    fi
+  if rpm -q "${pkg}" >/dev/null 2>&1; then
+    echo "Already installed, skipping: ${pkg}"
+  else
+    MISSING_PACKAGES+=("${pkg}")
+  fi
 done
 
 if [[ ${#MISSING_PACKAGES[@]} -gt 0 ]]; then
-    dnf -y install "${MISSING_PACKAGES[@]}"
+  dnf -y install "${MISSING_PACKAGES[@]}"
 else
-    echo "All base packages already present."
+  echo "All base packages already present."
 fi
 
 echo "::endgroup::"
@@ -149,8 +149,8 @@ echo "::group:: Remove GNOME COPR packages from base image"
 # COPR repo so dnf cannot pull conflicting updates from it.
 GNOME50_REPO=$(find /etc/yum.repos.d/ -name "*jreilly1821*gnome-50*" -print -quit 2>/dev/null || true)
 if [[ -n "${GNOME50_REPO}" ]]; then
-    rm -f "${GNOME50_REPO}"
-    echo "Removed GNOME 50 COPR repo: ${GNOME50_REPO}"
+  rm -f "${GNOME50_REPO}"
+  echo "Removed GNOME 50 COPR repo: ${GNOME50_REPO}"
 fi
 
 echo "::endgroup::"
@@ -162,7 +162,6 @@ echo "::group:: COPR Repositories"
 # final image.
 dnf -y copr enable ligenix/enterprise-cosmic rhel+epel-10-x86_64
 dnf -y install cosmic-desktop
-dnf -y install cosmic-ext-name
 dnf -y copr disable ligenix/enterprise-cosmic rhel+epel-10-x86_64
 
 echo "::endgroup::"
@@ -205,11 +204,11 @@ echo "::endgroup::"
 
 echo "::group:: System Configuration"
 
-systemctl enable podman.socket                # quadlet/container support
-systemctl enable brew-setup.service           # extract Homebrew tarball once
-systemctl enable brew-update.timer            # brew metadata refresh
-systemctl enable brew-upgrade.timer           # brew package upgrades
-systemctl enable NetworkManager.service       # networking; idempotent when the base already presets it
+systemctl enable podman.socket          # quadlet/container support
+systemctl enable brew-setup.service     # extract Homebrew tarball once
+systemctl enable brew-update.timer      # brew metadata refresh
+systemctl enable brew-upgrade.timer     # brew package upgrades
+systemctl enable NetworkManager.service # networking; idempotent when the base already presets it
 
 # Display manager and desktop session come straight from the bluefin-lts base
 # (GDM + GNOME); audio comes up via the base's PipeWire units. Nothing to add.
