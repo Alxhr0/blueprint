@@ -2,7 +2,7 @@ kind: stack
 description: |
   Minimal distroless runtime: glibc + gcc-libs + base files, plus
   CA certificates and timezone data. No package manager.
-  
+
 depends:
   # FSDK 26.08beta.2 moved integration/ldconfig.bst's runtime-gnu dependency
   # from `depends:` to `build-depends:`, so a shell no longer reaches the

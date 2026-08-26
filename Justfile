@@ -275,6 +275,33 @@ build-fsdk $tag="fsdk":
     set -euo pipefail
     cd buildstream && just build
 
+# Build images from containerfiles/ subdirectories
+[group('Build')]
+build-containerfile $target_image="" $tag="stable":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    CONTAINERFILE_DIR="containerfiles/${target_image}"
+    if [[ ! -d "${CONTAINERFILE_DIR}" ]]; then
+        echo "No containerfile directory found for ${target_image}" >&2
+        exit 1
+    fi
+    cd "${CONTAINERFILE_DIR}"
+    CONTAINERFILE="Containerfile"
+    if [[ ! -f "${CONTAINERFILE}" ]]; then
+        CONTAINERFILE="Containerfile.${target_image}"
+    fi
+    if [[ ! -f "${CONTAINERFILE}" ]]; then
+        echo "No Containerfile found in ${CONTAINERFILE_DIR}" >&2
+        exit 1
+    fi
+    podman build \
+        --build-arg "IMAGE_NAME=${target_image}" \
+        --build-arg "UBLUE_IMAGE_TAG=${tag}" \
+        --pull=newer \
+        --tag "${target_image}:${tag}" \
+        --file "${CONTAINERFILE}" \
+        .
+
 # Build all images in the repo
 [group('Build')]
 build-all:
@@ -286,6 +313,10 @@ build-all:
     just build holo-amd
     just build holo-nvidia
     just build-fsdk
+    just build-containerfile server
+    just build-containerfile aira
+    just build-containerfile edward
+    just build-containerfile ai
 
 # Build an image then rechunk it for smaller bootc delta updates
 build-rechunked $target_image=image_name $tag=default_tag: && (rechunk target_image tag)
@@ -450,6 +481,10 @@ variant-env $target_image=image_name:
         holo-amd*)    IMAGE_NAME="blueprint";    DEFAULT_TAG="holo-amd" ;;
         holo-nvidia*) IMAGE_NAME="blueprint";    DEFAULT_TAG="holo-nvidia" ;;
         fsdk*)        IMAGE_NAME="blueprint";    DEFAULT_TAG="fsdk" ;;
+        server*)      IMAGE_NAME="server";       DEFAULT_TAG="testing" ;;
+        aira*)        IMAGE_NAME="aira";         DEFAULT_TAG="testing" ;;
+        edward*)      IMAGE_NAME="edward";       DEFAULT_TAG="testing" ;;
+        ai*)          IMAGE_NAME="ai";           DEFAULT_TAG="testing" ;;
         *)
             echo "Unknown variant: '${target_image}'" >&2
             exit 1

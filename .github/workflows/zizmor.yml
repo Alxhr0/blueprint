@@ -34,4 +34,3 @@ jobs:
         run: uvx zizmor@latest .
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
