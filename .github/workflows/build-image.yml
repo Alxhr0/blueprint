@@ -82,7 +82,7 @@ jobs:
 
       - name: Detect changes
         id: detect-changes
-        uses: projectbluefin/actions/bootc-build/detect-changes@08890ab9afb8cb03849d07d5ae5cb756c0ab4a76 # v1
+        uses: projectbluefin/actions/bootc-build/detect-changes@eb4c546389f19ad9e42f1af052623de73c620ebb # v1
         with:
           filters: |
             image:
@@ -107,7 +107,7 @@ jobs:
 
       - name: Preflight
         id: preflight
-        uses: projectbluefin/actions/bootc-build/preflight@5c323baacdc13b0eb8bdbc2ea78f8ac6f91657f2 # v1
+        uses: projectbluefin/actions/bootc-build/preflight@eb4c546389f19ad9e42f1af052623de73c620ebb # v1
         with:
           registry: ghcr.io
           github-token: ${{ secrets.GITHUB_TOKEN }}
