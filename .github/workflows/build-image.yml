@@ -74,11 +74,24 @@ jobs:
         uses: ublue-os/remove-unwanted-software@695eb75bc387dbcd9685a8e72d23439d8686cba6
 
       - name: Setup runner
-        uses: projectbluefin/actions/bootc-build/setup-runner@v1
+        uses: projectbluefin/actions/bootc-build/setup-runner@eb4c546389f19ad9e42f1af052623de73c620ebb # v1
         with:
           storage-backend: remove-software
           update-podman: true
           install-tools: '["just", "cosign"]'
+
+      - name: Detect changes
+        id: detect-changes
+        uses: projectbluefin/actions/bootc-build/detect-changes@08890ab9afb8cb03849d07d5ae5cb756c0ab4a76 # v1
+        with:
+          filters: |
+            image:
+              - 'Containerfile'
+              - 'Justfile'
+              - 'build_files/**'
+              - 'system_files/**'
+              - 'buildstream/**'
+              - 'disk_config/**'
 
       - name: Resolve variant identity
         id: variant
@@ -91,6 +104,14 @@ jobs:
           echo "DEFAULT_TAG=${DEFAULT_TAG}" >> "${GITHUB_OUTPUT}"
           echo "IMAGE_NAME=${IMAGE_NAME}" >> "${GITHUB_ENV}"
           echo "DEFAULT_TAG=${DEFAULT_TAG}" >> "${GITHUB_ENV}"
+
+      - name: Preflight
+        id: preflight
+        uses: projectbluefin/actions/bootc-build/preflight@5c323baacdc13b0eb8bdbc2ea78f8ac6f91657f2 # v1
+        with:
+          registry: ghcr.io
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          image-name: ${{ env.IMAGE_NAME }}
 
       - name: Pull arch base for holo variants
         if: startsWith(matrix.variant, 'holo-')
@@ -105,10 +126,11 @@ jobs:
             sudo -E podman tag "arch-bootc:testing" "arch-bootc:stable"
           else
             sudo -E podman tag "${IMAGE_ID}" "arch-bootc:stable"
-          fi
+           fi
 
       - name: Build image
         id: build-image
+        if: steps.detect-changes.outputs.should_build == 'true' || github.event_name != 'pull_request'
         env:
           TARGET_IMAGE: ${{ matrix.variant }}
         run: |
@@ -120,7 +142,7 @@ jobs:
           fi
 
       - name: Rechunk with Chunkah
-        if: matrix.variant != 'fsdk'
+        if: matrix.variant != 'fsdk' && (steps.detect-changes.outputs.should_build == 'true' || github.event_name != 'pull_request')
         id: rechunk
         run: |
           sudo -E "$(command -v just)" rechunk \
@@ -129,6 +151,7 @@ jobs:
 
       - name: Generate Build Tags
         id: gen-build-tags
+        if: steps.detect-changes.outputs.should_build == 'true' || github.event_name != 'pull_request'
         run: |
           set -euo pipefail
           TAG_STREAM="${TAG_STREAM}"
@@ -146,6 +169,7 @@ jobs:
 
       - name: Tag Image
         id: tag-images
+        if: steps.detect-changes.outputs.should_build == 'true' || github.event_name != 'pull_request'
         env:
           ALIAS_TAGS: ${{ steps.gen-build-tags.outputs.alias_tags }}
         run: |
@@ -171,11 +195,11 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push To GHCR
-        if: github.event_name != 'pull_request'
+        if: steps.detect-changes.outputs.should_build == 'true' || github.event_name != 'pull_request'
         id: push-image
         env:
           ALIAS_TAGS: ${{ steps.gen-build-tags.outputs.alias_tags }}
-        uses: projectbluefin/actions/bootc-build/push-image@v1
+        uses: projectbluefin/actions/bootc-build/push-image@eb4c546389f19ad9e42f1af052623de73c620ebb # v1
         with:
           image-name: ${{ env.IMAGE_NAME }}
           tags: ${{ steps.gen-build-tags.outputs.alias_tags }}
@@ -184,7 +208,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sign container image
-        if: github.event_name != 'pull_request'
+        if: steps.detect-changes.outputs.should_build == 'true' || github.event_name != 'pull_request'
         env:
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
@@ -197,7 +221,7 @@ jobs:
             "${IMAGE_REGISTRY}/${IMAGE_NAME}@${DIGEST}"
 
       - name: Build telemetry summary
-        if: always() && !cancelled()
+        if: always() && !cancelled() && (steps.detect-changes.outputs.should_build == 'true' || github.event_name != 'pull_request')
         shell: bash
         run: |
           IMAGE_SIZE=$(sudo podman image inspect "localhost/${IMAGE_NAME}:${DEFAULT_TAG}" \

@@ -1,0 +1,45 @@
+name: "Bug report"
+description: "Something is broken. You are the only person who can confirm it."
+labels: ["1-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Run `just build <variant>` and test the image locally before submitting. Include the variant name, exact error text, and what you expected to happen.
+
+  - type: checkboxes
+    id: clanker-opt-in
+    attributes:
+      label: "Agent assistance"
+      options:
+        - label: "Opt in to a clanker working on my issue"
+          required: false
+
+  - type: input
+    id: report-link
+    attributes:
+      label: "Diagnostic gist URL (optional)"
+      placeholder: "https://gist.github.com/..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: "What happened?"
+      description: "What did you see? What did you expect? Be specific — variant name, exact error text, what you were doing."
+      placeholder: |
+        The debian variant fails to build at the podman build step with:
+        Error: unable to locate package some-package
+        Expected it to install successfully as it does on debian:testing.
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: "Extra context"
+      description: "Optional — upstream bug links, 'works on X but not Y', anything that narrows the cause."
+      placeholder: "Works fine on the arch variant in the same setup. Appears on both debian:testing and debian:unstable."
+    validations:
+      required: false

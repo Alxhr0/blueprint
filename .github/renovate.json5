@@ -1,32 +1,64 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:best-practices"],
-  "rebaseWhen": "never",
+  "extends": [
+    "config:best-practices",
+    ":enablePreCommit"
+  ],
+  "prHourlyLimit": 10,
+  "prConcurrentLimit": 20,
+  "recreateWhen": "always",
+  "rebaseWhen": "auto",
 
-  "schedule": ["every day"],
-
-  "customManagers": [
+  # Custom manager: track pinned container images in Justfile variables
+  customManagers: [
     {
-      "customType": "regex",
-      "fileMatch": ["^image-versions\\.yaml$"],
-      "matchStrings": [
-        "- name: bluefin-lts-nvidia\n    image: ghcr\\.io/projectbluefin/bluefin-lts-nvidia\n    tag: (?<currentValue>\\S+)\n    digest: (?<currentDigest>\\S+)"
+      customType: "regex",
+      description: "Track pinned container images in Justfile variables",
+      managerFilePatterns: ["/^Justfile$/"],
+      matchStrings: [
+        "export\\s+\\w+\\s+:=\\s+env\\(\"[^\"]+\",\\s+\"(?<packageName>[^\\s:@]+(?:/[^\\s:@]+)+):(?<currentValue>[^\\s@\"]+)@(?<currentDigest>sha256:[a-f0-9]+)\"\\)"
       ],
-      "datasourceTemplate": "docker",
-      "lookupNameTemplate": "ghcr.io/projectbluefin/bluefin-lts-nvidia"
+      datasourceTemplate: "docker",
+      versioningTemplate: "docker"
+    },
+    {
+      customType: "regex",
+      description: "Track pinned tool versions in workflow env vars",
+      managerFilePatterns: ["/^\\.github/workflows/.+\\.yml$/"],
+      matchStrings: [
+        "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)\\n\\s+\\w+: \"(?<currentValue>[^\"]+)\""
+      ]
     }
   ],
 
-  "packageRules": [
+  packageRules: [
     {
-      "automerge": true,
-      "matchUpdateTypes": ["pin", "pinDigest"]
+      description: "Automerge safe low-risk updates (digest/pin only) when checks pass",
+      matchUpdateTypes: ["digest", "pin", "pinDigest"],
+      automerge: true,
+      automergeType: "pr",
+      automergeStrategy: "squash"
     },
     {
-      "enabled": false,
-      "matchUpdateTypes": ["digest", "pinDigest", "pin"],
-      "matchDepTypes": ["container"],
-      "matchFileNames": [".github/workflows/**.yaml", ".github/workflows/**.yml"]
+      description: "Keep the shared projectbluefin actions channel fresh",
+      matchPackageNames: ["projectbluefin/actions"],
+      matchUpdateTypes: ["digest", "pinDigest", "pin", "patch", "minor"],
+      automerge: true,
+      automergeType: "pr",
+      automergeStrategy: "squash"
+    },
+    {
+      description: "Keep first-party OCI context images fresh immediately",
+      matchDepNames: ["ghcr.io/projectbluefin/common", "ghcr.io/ublue-os/brew"],
+      matchUpdateTypes: ["digest", "pinDigest", "pin"],
+      automerge: true,
+      schedule: ["at any time"]
+    },
+    {
+      description: "Do not automatically cross Fedora major releases",
+      matchDepNames: ["quay.io/fedora-ostree-desktops/silverblue"],
+      matchUpdateTypes: ["major"],
+      enabled: false
     }
   ]
 }
