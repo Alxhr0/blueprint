@@ -161,7 +161,6 @@ echo "::group:: COPR Repositories"
 # Enable the repo, install, then disable so it does not persist in the
 # final image.
 dnf -y copr enable ligenix/enterprise-cosmic rhel+epel-10-x86_64
-dnf -y update  
 dnf -y install cosmic-desktop
 dnf -y install cosmic-ext-name
 dnf -y copr disable ligenix/enterprise-cosmic rhel+epel-10-x86_64
