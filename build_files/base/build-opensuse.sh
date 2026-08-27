@@ -57,6 +57,9 @@ ln -sT var/opt /opt
 ln -sT var/home /home
 ln -sT ../var/usrlocal /usr/local
 
+cp -rv /usr/etc/* /etc
+rm -r /usr/etc
+
 KVER=$(basename "$(find /usr/lib/modules -maxdepth 1 -mindepth 1 -type d | tail -n 1)")
 printf '[composefs]\nenabled = yes\n[sysroot]\nreadonly = true\n' > /usr/lib/ostree/prepare-root.conf
 dracut --force --no-hostonly --reproducible --zstd --verbose --kver "$KVER" "/usr/lib/modules/$KVER/initramfs.img"
@@ -67,3 +70,4 @@ zypper clean -a
 
 rm -rf /tmp/*
 find /run -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
+
