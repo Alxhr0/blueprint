@@ -10,7 +10,6 @@ fi
 rm -f /etc/portage/make.profile
 ln -s /var/db/repos/gentoo/profiles/default/linux/amd64/23.0/systemd /etc/portage/make.profile
 
-cp -avf "/ctx/system_files"/. /
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/gentoo"/. /
 

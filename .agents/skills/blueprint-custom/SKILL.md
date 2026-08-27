@@ -46,6 +46,11 @@ description: >-
   before `system_files/<variant>` so the variant overlay takes precedence.
 - Each variant's build script copies `system_files/<variant>` (after the shared
   `system_files/global`); see the variant's `build_files/` layout.
+- Copy each overlay with its **contents**, i.e. `cp -avf "/ctx/system_files/global"/. /`
+  then `cp -avf "/ctx/system_files/<variant>"/. /`. Never copy the parent
+  `system_files` dir into `/` (`cp -avf "/ctx/system_files"/. /`): that drops
+  the `global/` and `<variant>/` folders themselves into `/`, leaving stray
+  `/global` and `/<variant>` dirs in the image root (issue #19).
 - Don't ship secret material in overlays.
 
 ## Homebrew bundle: `brew/<variant>/packages.Brewfile`
