@@ -609,7 +609,7 @@ build-iso-gnome: && (_rebuild-bib "ghcr.io/huntedraven7/blueprint" "edward" "iso
 
 # Build a server installer ISO using BIB (Anaconda-based)
 [group('Build Virtal Machine Image')]
-build-server-iso: && (_build-bib "ghcr.io/huntedraven7/blueprint" "server" "iso" "disk_config/iso-server.toml")
+build-server-iso: (build-containerfile "server") && (_build-bib "ghcr.io/huntedraven7/blueprint" "server" "iso" "disk_config/iso-server.toml")
 
 # Build the ncurses server installer ISO (uses lorax/livemedia-creator)
 [group('Build Virtal Machine Image')]
