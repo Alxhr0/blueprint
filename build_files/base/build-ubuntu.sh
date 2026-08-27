@@ -1,7 +1,6 @@
 #!/bin/bash
 set -ouex pipefail
 
-cp -avf "/ctx/system_files"/. /
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/ubuntu"/. /
 
