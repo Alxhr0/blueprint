@@ -70,4 +70,3 @@ zypper clean -a
 
 rm -rf /tmp/*
 find /run -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
-
