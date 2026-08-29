@@ -19,7 +19,9 @@ fi
 
 echo "::group:: Copy System Files"
 
-cp -avf "/ctx/system_files/global"/. /
+if [ -d "/ctx/system_files/global" ]; then
+	cp -avf "/ctx/system_files/global"/. /
+fi
 cp -avf "/ctx/system_files/robin"/. /
 
 echo "::endgroup::"
@@ -34,8 +36,6 @@ if ! grep -q '^\[multilib\]' /etc/pacman.conf; then
 		echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf
 	fi
 fi
-
-rm -f /etc/pacman.d/mirrorlist
 
 echo "::endgroup::"
 
@@ -94,7 +94,6 @@ echo "::group:: System Configuration"
 
 systemctl enable sddm.service
 systemctl set-default graphical.target
-systemctl enable podman.socket
 systemctl enable NetworkManager.service
 
 systemctl enable robin-firstboot.service
