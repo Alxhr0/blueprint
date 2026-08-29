@@ -35,6 +35,14 @@ echo "::endgroup::"
 
 echo "::group:: System Update"
 
+# arch-bootc ships the stock `linux` kernel but wipes /boot during its own
+# build, so /boot/vmlinuz-linux does not exist and the stock kernel's
+# mkinitcpio hook fails during pacman -Syu. Remove it first so the system
+# update does not try to regenerate initramfs for a missing kernel.
+if pacman -Q linux >/dev/null 2>&1; then
+    pacman -Rdd --noconfirm linux
+fi
+
 pacman -Syu --noconfirm
 
 # mkinitcpio must be installed before the OGC kernel below (its install hook
@@ -46,22 +54,30 @@ echo "::endgroup::"
 echo "::group:: Install OGC Kernel + nvidia modules (akmods cache)"
 
 AKMODS_CACHE="/ctx/oci/akmods"
-if [[ -d "${AKMODS_CACHE}/kernel" ]]; then
-	# Install the pinned linux-ogc kernel + headers.
-	pacman -U --noconfirm "${AKMODS_CACHE}"/kernel/linux-ogc-*.pkg.tar.zst \
-		"${AKMODS_CACHE}"/kernel/linux-ogc-headers-*.pkg.tar.zst
+KERNEL_INFO="${AKMODS_CACHE}/kernel-info"
+KERNEL_VERSION=""
+if [[ -f "${KERNEL_INFO}" ]]; then
+    # shellcheck disable=SC1090
+    . "${KERNEL_INFO}"
+    echo "akmods kernel version: ${KERNEL_VERSION}"
 else
-	echo "WARNING: akmods cache kernel packages not found at ${AKMODS_CACHE}/kernel" >&2
+    echo "WARNING: akmods cache kernel-info missing" >&2
 fi
 
-# Kernel version the cache built modules for.
-KERNEL_INFO="${AKMODS_CACHE}/kernel-info"
-if [[ -f "${KERNEL_INFO}" ]]; then
-	# shellcheck disable=SC1090
-	. "${KERNEL_INFO}"
-	echo "akmods kernel version: ${KERNEL_VERSION}"
+if [[ -d "${AKMODS_CACHE}/kernel" ]]; then
+    if [[ -n "${KERNEL_VERSION:-}" ]]; then
+        pacman -U --noconfirm \
+            "${AKMODS_CACHE}/kernel/linux-ogc-${KERNEL_VERSION}.pkg.tar.zst" \
+            "${AKMODS_CACHE}/kernel/linux-ogc-headers-${KERNEL_VERSION}.pkg.tar.zst"
+    else
+        # Fallback to broad globs if kernel-info is missing. Use a pattern
+        # that only matches the kernel package (not headers) to avoid
+        # "duplicate target" when the same file matches both patterns.
+        pacman -U --noconfirm "${AKMODS_CACHE}"/kernel/linux-ogc-[0-9]*.pkg.tar.zst \
+            "${AKMODS_CACHE}"/kernel/linux-ogc-headers-*.pkg.tar.zst
+    fi
 else
-	echo "WARNING: akmods cache kernel-info missing" >&2
+    echo "WARNING: akmods cache kernel packages not found at ${AKMODS_CACHE}/kernel" >&2
 fi
 
 echo "::endgroup::"
@@ -90,12 +106,6 @@ PACKAGES=(
 )
 
 pacman -S --noconfirm --needed --ask=4 "${PACKAGES[@]}"
-
-# arch-bootc ships the stock `linux` kernel; drop it so linux-ogc (with its
-# matching nvidia modules) is the active kernel.
-if pacman -Q linux >/dev/null 2>&1; then
-	pacman -Rdd --noconfirm linux
-fi
 
 echo "::endgroup::"
 
