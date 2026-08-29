@@ -19,6 +19,7 @@ These skills encode how the repo is structured and how to extend it safely.
 | [`blueprint-onboarding`](blueprint-onboarding/SKILL.md) | How to add a new image variant to blueprint (Containerfile + env + workflow, or inline base case). |
 | [`blueprint-templates`](blueprint-templates/SKILL.md) | Defining a variant's image identity (IMAGE_NAME/DEFAULT_TAG/Containerfile/env or inline base case), AGENTS.md update rules. |
 | [`blueprint-packages`](blueprint-packages/SKILL.md) | Where packages go: Containerfile RUN, build_files scripts, brew bundle, BuildStream elements. |
+| [`blueprint-akmods`](blueprint-akmods/SKILL.md) | The akmods/ kernel-module cache for the OGC Arch kernel (nvidia + zfs), kernel pinning, and downstream consumption. |
 | [`blueprint-custom`](blueprint-custom/SKILL.md) | Runtime customization: system_files overlays, brew/, disk_config. |
 | [`blueprint-build`](blueprint-build/SKILL.md) | Containerfile, Justfile, build_files, buildstream, image digest pinning, rechunking. |
 | [`blueprint-ci`](blueprint-ci/SKILL.md) | GitHub Actions workflows, Renovate, projectbluefin/actions composite actions, the promote/tag-stable flow. |

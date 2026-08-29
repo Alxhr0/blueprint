@@ -78,6 +78,50 @@ FROM ${BASE_IMAGE}
 `FROM` lines). To change an image or tag, edit its `FROM` line; to bump a base
 release, update the matching arg and the digest together.
 
+## Consuming the akmods cache (Arch GNOME images)
+
+The `akmods/` sub-project publishes a scratch cache image
+`ghcr.io/huntedraven7/akmods:<ogc-tag>` carrying the pinned OGC `linux-ogc`
+kernel + headers packages and the nvidia modules built against them (see
+`blueprint-akmods`). A desktop variant like `edward` consumes it from a
+`containerfiles/<variant>/` standalone Containerfile:
+
+```dockerfile
+FROM ghcr.io/huntedraven7/akmods:ogc-x86_64 AS akmods
+FROM scratch AS ctx
+COPY --from=akmods /var/cache/rpms /oci/akmods
+...
+FROM ghcr.io/huntedraven7/arch-bootc:testing AS base
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx /ctx/build/10-build.sh
+```
+
+The build script then (in this order — run `pacman -Syu` FIRST so the kernel
+install resolves deps):
+1. `pacman -U` the `linux-ogc` + `linux-ogc-headers` packages from `/ctx/oci/akmods/kernel/`.
+2. Install the rest (e.g. `gnome` + `gdm` via pacman).
+3. Drop the base's stock `linux` so linux-ogc is active:
+   `if pacman -Q linux; then pacman -Rdd --noconfirm linux; fi`.
+4. Copy the cached `.ko` into `/usr/lib/modules/<kver>/extra/nvidia/`, then
+   `depmod -a <kver>`.
+5. `mkinitcpio -P` and `systemctl set-default graphical.target`.
+
+Two Arch-specific gotchas that matter for a non-stock kernel build:
+
+- **arch-bootc boots via dracut, but custom kernels use mkinitcpio.** Install
+  `mkinitcpio` *before* `pacman -U` of the OGC kernel (the kernel's install hook
+  regenerates the initramfs and fails if mkinitcpio is absent). holo and edward
+  both call `mkinitcpio -P` at the end.
+- **XFS must survive a `bootc switch`.** If the existing root `/` is XFS, verify
+  the active kernel has XFS support (module file or `CONFIG_XFS_FS=y/m`), fail
+  loudly otherwise, and pin `MODULES=(xfs)` in `/etc/mkinitcpio.conf` so the
+  initramfs mounts XFS. Install `xfsprogs` (provides `mkfs.xfs` for bootc's rootfs
+  creation). The arch-bootc base already ships `xfsprogs`.
+
+**Ordering dependency:** the consuming build `COPY --from=akmods ...` fails until
+`build-akmods.yml` has published the cache (the `--from` image must exist). Wire
+the akmods workflow's schedule/dispatch before expecting the variant build to
+pass; the two can race on a shared `main` push.
+
 ## Rechunking
 
 - `just rechunk <image> <tag>` — uses `quay.io/coreos/chunkah:latest` (currently
