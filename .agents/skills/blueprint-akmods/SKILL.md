@@ -14,7 +14,8 @@ description: >-
 ## When to Use
 
 - Changing anything under `akmods/` (Containerfile, `build_files/*`, `Justfile`,
-  `images.yaml`, `scripts/resolve-kernel.sh`, its `.github/workflows/`)
+  `images.yaml`, `scripts/resolve-kernel.sh`) or its workflow at
+  `.github/workflows/build-akmods.yml` (repo root)
 - Wiring a downstream image (e.g. holo-nvidia) to consume the akmods cache
 - Bumping/pinning the OGC kernel or the zfs release series
 
@@ -87,4 +88,4 @@ the build scripts read it from `$KERNEL_CACHE/kernel-version`.
 - [ ] `just --unstable --fmt --check -f akmods/Justfile` passes
 - [ ] `shellcheck` + `shfmt -d` clean on every `akmods/**/*.sh`
 - [ ] `python3 -c "import yaml; yaml.safe_load(open('<file>'))"` on YAML
-- [ ] `actionlint akmods/.github/workflows/*.yml`
+- [ ] `actionlint .github/workflows/build-akmods.yml`

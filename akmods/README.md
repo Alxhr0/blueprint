@@ -36,7 +36,7 @@ build_files/
   nvidia/build-kmod-nvidia.sh  nvidia-open-dkms against pinned kernel
   zfs/build-kmod-zfs.sh        OpenZFS source build against pinned kernel
   post/build-post.sh          assemble kernel pkgs + modules into the cache
-.github/workflows/      schedule + dispatch + push + cosign
+../.github/workflows/build-akmods.yml   schedule + dispatch + push + cosign (repo root; GitHub only runs root workflows)
 ```
 
 ## Bumping the kernel
