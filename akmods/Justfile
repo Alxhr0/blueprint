@@ -6,10 +6,7 @@ set dotenv-load := false
 podman := 'podman'
 reg := 'ghcr.io/huntedraven7'
 akmods_name := 'akmods'
-
-# Pinned OGC kernel OCI artifact (from images.yaml)
 _jd := justfile_directory()
-ogc_image := shell('python3 - <<PY\nimport yaml\nc = yaml.safe_load(open("{{ _jd }}/images.yaml"))\nprint(c["ogc"]["image"] + ":" + c["ogc"]["tag"])\nPY')
 
 # Local image name
 local_image := 'localhost/' + akmods_name
@@ -19,8 +16,10 @@ local_image := 'localhost/' + akmods_name
 build:
     #!/usr/bin/env bash
     set -euo pipefail
+    # Kernel pin lives only in images.yaml (single source of truth).
+    OGC_IMAGE="$(bash "{{ _jd }}/scripts/ogc-image.sh")"
     {{ podman }} build -f "{{ _jd }}/Containerfile" \
-        --build-arg OGC_IMAGE="{{ ogc_image }}" \
+        --build-arg OGC_IMAGE="${OGC_IMAGE}" \
         --target cache \
         --tag "{{ local_image }}:ogc-x86_64" \
         "{{ _jd }}"
