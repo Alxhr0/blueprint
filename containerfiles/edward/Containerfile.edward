@@ -1,21 +1,25 @@
 ###############################################################################
 # EDWARD CONTAINERFILE
 ###############################################################################
-# edward image: projectbluefin/bluefin-lts-nvidia (CentOS Stream 10 bootc +
-# GNOME + NVIDIA drivers). The base ships a matched kernel + nvidia driver
-# pair, so no separate akmods stage or 40-nvidia.sh is needed. Layered with
-# EPEL/terra repos plus quickshell and niri from COPR.
+# edward image: Arch-based GNOME desktop (ublue/Bluefin-style). Layers a GNOME
+# session, the OGC linux-ogc kernel + nvidia modules from the akmods cache, and
+# the ublue @ublue-os/brew integration on top of the minimal arch-bootc base.
 #
 # Usage:
-#   podman build -f custom/edward/container/Containerfile.edward -t edward:stable .
+#   podman build -f containerfiles/edward/Containerfile.edward -t edward:testing .
+#   just build-containerfile edward
 #
-# The project name is defined by IMAGE_NAME.
-# Build scripts live in build/edward/ (plain dnf — c10s ships no dnf5).
+# The project name is defined by IMAGE_NAME. Build scripts live in
+# build/edward/ (plain pacman).
 ###############################################################################
 
 ###############################################################################
 # OCI CONTEXT IMAGES (pinned; digests updated by Renovate)
 ###############################################################################
+# Akmods cache for the OGC linux-ogc kernel: pinned kernel + headers packages
+# and the nvidia modules built against them. Published by build-akmods.yml.
+FROM ghcr.io/huntedraven7/akmods:ogc-x86_64 AS akmods
+
 FROM ghcr.io/ublue-os/brew:latest@sha256:8f952ae54585db9f855a306ef365e13609ed7c7944b12b823ba7d5ce8e1a145b AS brew
 
 ###############################################################################
@@ -31,18 +35,15 @@ COPY system_files/ /system_files
 
 # Copy from OCI containers to distinct subdirectories to avoid conflicts
 COPY --from=brew /system_files /oci/brew
+# Copy the akmods cache contents (kernel pkgs, nvidia modules) into /oci/akmods
+COPY --from=akmods /var/cache/rpms /oci/akmods
 
 ###############################################################################
 # BASE IMAGE
 ###############################################################################
-# projectbluefin/bluefin-lts-nvidia:testing — CentOS Stream 10 bootc with
-# GNOME/GDM, NVIDIA driver (matched kernel + kmod pair) and ublue batteries
-# (brew/uupd/ujust groundwork, negativo17 multimedia codecs). The base ships
-# its own kernel with paired nvidia modules, so no separate akmods stage or
-# kernel swap is needed. Digest pinned; Renovate keeps it fresh. Version
-# strings are date-only (Justfile falls back when FEDORA_MAJOR_VERSION is
-# absent).
-FROM ghcr.io/projectbluefin/bluefin-lts-nvidia:testing@sha256:629f6607cd649211f34720551b00cc1fb56909f7f70d49869a3b481e2f23fe0a AS base
+# ghcr.io/huntedraven7/arch-bootc:testing — minimal Arch Linux bootc base
+# (systemd, NetworkManager, podman, pacman + keyring). No desktop, no nvidia.
+FROM ghcr.io/huntedraven7/arch-bootc:testing AS base
 
 ###############################################################################
 # IMAGE IDENTITY
@@ -51,6 +52,20 @@ ARG IMAGE_VENDOR="huntedraven7"
 ARG UBLUE_IMAGE_TAG="stable"
 ARG VERSION=""
 ARG IMAGE_NAME="edward"
+
+# Image metadata labels, mirroring projectbluefin/bluefin's set but for the
+# Arch-based Edward desktop (ublue/oci layout).
+LABEL containers.bootc="1"
+LABEL org.opencontainers.image.title="${IMAGE_NAME}"
+LABEL org.opencontainers.image.vendor="${IMAGE_VENDOR}"
+LABEL org.opencontainers.image.description="An Arch Linux GNOME desktop in the Bluefin tradition: reliability, performance, and sustainability — with brew, flatpaks, and ujust-style recipes."
+LABEL org.opencontainers.image.url="https://github.com/huntedraven7/blueprint"
+LABEL org.opencontainers.image.source="https://github.com/huntedraven7/blueprint/blob/main/containerfiles/edward/Containerfile.edward"
+LABEL org.opencontainers.image.version="${UBLUE_IMAGE_TAG}"
+LABEL io.artifacthub.package.deprecated="false"
+LABEL io.artifacthub.package.keywords="bootc,oci,linux,arch,gnome,universal-blue"
+LABEL io.artifacthub.package.logo-url="https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
+LABEL io.artifacthub.package.readme-url="https://raw.githubusercontent.com/huntedraven7/blueprint/main/README.md"
 
 # hadolint ignore=SC3040
 RUN <<SET_NAME
@@ -63,39 +78,21 @@ SET_NAME
 
 ### MODIFICATIONS
 ## The RUN directives below mount the ctx stage, which includes build scripts,
-## custom files, and @ublue-os/brew.
+## custom files, @ublue-os/brew, and the akmods cache.
 
-# Set dnf options before build scripts (persists across subsequent RUN layers).
-# Break the ostree hardlink first: base images ship /etc/dnf/dnf.conf as a
-# hardlink into the object store. Writing to it in-place under buildah/btrfs
-# corrupts the file (NUL bytes appended). Copy -> mv breaks the link safely.
-# c10s ships dnf4 (no dnf5), so options go straight into dnf.conf.
-RUN cp /etc/dnf/dnf.conf /etc/dnf/dnf.conf.tmp && \
-    mv /etc/dnf/dnf.conf.tmp /etc/dnf/dnf.conf && \
-    sed -i '/^\[main\]/a keepcache=1\ninstall_weak_deps=0' /etc/dnf/dnf.conf
-
-# Desktop runtime tooling, brew integration, EPEL/terra repos, and the
-# quickshell+niri COPR installs.
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
-    --mount=type=cache,dst=/var/cache/dnf \
-    --mount=type=cache,dst=/var/cache/libdnf5 \
-    --mount=type=cache,dst=/var/cache/rpm-ostree \
-    --mount=type=tmpfs,dst=/boot \
-    --mount=type=tmpfs,dst=/tmp \
+    --mount=type=cache,dst=/var/cache/pacman/pkg \
     /ctx/build/10-build.sh
 
 ### CLEANUP
-## Use Bluefin's clean-stage.sh to remove build artifacts before linting.
-## /run is deliberately not mounted as tmpfs here: clean-stage.sh must remove
-## image-layer files such as /run/dnf so bootc lint's nonempty-run-tmp check
-## passes.
+## Remove build artifacts before linting.
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
     --mount=type=tmpfs,dst=/boot \
     /ctx/build/clean-stage.sh
 
 ### /opt
-## Makes /opt writeable by default. This is for downstream images/stuff like k0s.
+## Makes /opt writeable by default.
 RUN rm -rf /opt && ln -s /var/opt /opt
 
 ### INIT

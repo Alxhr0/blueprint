@@ -33,6 +33,7 @@ description: >-
 | Add a new image variant to blueprint        | `blueprint-onboarding`                      |
 | Define a variant's image identity / AGENTS  | `blueprint-templates`                       |
 | Add/remove a package                        | `blueprint-packages`                        |
+| Change the akmods/ kernel-module cache      | `blueprint-akmods`                          |
 | Change system_files overlays, brew/, disk   | `blueprint-custom`                          |
 | Change Containerfile, Justfile, build_files, buildstream, digest pins | `blueprint-build`  |
 | Fix CI, Renovate, promote/tag-stable flow   | `blueprint-ci` / `blueprint-maintain`       |
