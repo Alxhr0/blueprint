@@ -3,7 +3,7 @@ set dotenv-load := false
 # Local Justfile for the Arch akmods cache (OGC linux-ogc kernel).
 # Self-contained sub-project; run recipes from this directory.
 
-podman := which('podman')
+podman := 'podman'
 reg := 'ghcr.io/huntedraven7'
 akmods_name := 'akmods'
 
