@@ -298,6 +298,7 @@ build-containerfile $target_image="" $tag="stable":
         --build-arg "IMAGE_NAME=${target_image}" \
         --build-arg "UBLUE_IMAGE_TAG=${tag}" \
         --pull=newer \
+        --no-cache \
         --tag "${target_image}:${tag}" \
         --file "${CONTAINERFILE}" \
         .
