@@ -28,7 +28,7 @@ echo "=== Preparing build environment ==="
 pacman -Syu --noconfirm
 
 BASE_PKGS=(base-devel dkms git jq linux-firmware sudo)
-ZFS_MK_PKGS=(autoconf automake libtool pkgconfig libtirpc libblkid libudev openssl libaio libattr libelf python python-cffi ncompress)
+ZFS_MK_PKGS=(autoconf automake libtool pkgconf libtirpc util-linux systemd openssl aio attr libelf python python-cffi ncompress)
 pacman -S --noconfirm --needed "${BASE_PKGS[@]}" "${ZFS_MK_PKGS[@]}"
 
 # Determine the exact installed OGC kernel version (dir under /usr/lib/modules).
