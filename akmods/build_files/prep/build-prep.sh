@@ -31,10 +31,14 @@ BASE_PKGS=(base-devel dkms git jq linux-firmware sudo)
 ZFS_MK_PKGS=(autoconf automake libtool pkgconf libtirpc util-linux systemd openssl libaio attr libelf python python-cffi ncompress)
 pacman -S --noconfirm --needed "${BASE_PKGS[@]}" "${ZFS_MK_PKGS[@]}"
 
-# Determine the exact installed OGC kernel version (dir under /usr/lib/modules).
+# Determine the exact installed OGC kernel module directory.
 KERNEL_VERSION="$(cat "${KERNEL_CACHE}/kernel-version" 2>/dev/null || true)"
-if [ -z "${KERNEL_VERSION}" ]; then
+if [ -z "${KERNEL_VERSION}" ] || [ ! -d "/usr/lib/modules/${KERNEL_VERSION}" ]; then
 	KERNEL_VERSION="$(find /usr/lib/modules -maxdepth 1 -type d -name '*ogc*' -printf '%f\n' | head -n1)"
+	[ -n "${KERNEL_VERSION}" ] || {
+		echo "error: no OGC kernel modules found in /usr/lib/modules" >&2
+		exit 1
+	}
 	printf '%s' "${KERNEL_VERSION}" >"${KERNEL_CACHE}/kernel-version"
 fi
 echo "building against kernel: ${KERNEL_VERSION}"
