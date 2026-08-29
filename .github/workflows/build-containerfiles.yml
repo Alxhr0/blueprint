@@ -33,7 +33,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [server, aira, edward, ai]
+        variant: [server, aira, robin, ai]
 
     steps:
       - name: Prepare environment

@@ -78,13 +78,13 @@ FROM ${BASE_IMAGE}
 `FROM` lines). To change an image or tag, edit its `FROM` line; to bump a base
 release, update the matching arg and the digest together.
 
-## Consuming the akmods cache (Arch GNOME images)
+## Consuming the akmods cache (Arch gaming images)
 
 The `akmods/` sub-project publishes a scratch cache image
 `ghcr.io/huntedraven7/akmods:<ogc-tag>` carrying the pinned OGC `linux-ogc`
 kernel + headers packages and the nvidia modules built against them (see
-`blueprint-akmods`). A desktop variant like `edward` consumes it from a
-`containerfiles/<variant>/` standalone Containerfile:
+`blueprint-akmods`). The Arch gaming variants `holo-amd` and `holo-nvidia`
+consume it from a `containerfiles/<variant>/` standalone Containerfile:
 
 ```dockerfile
 FROM ghcr.io/huntedraven7/akmods:ogc-x86_64 AS akmods
@@ -98,7 +98,7 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx /ctx/build/10-build.sh
 The build script then (in this order — run `pacman -Syu` FIRST so the kernel
 install resolves deps):
 1. `pacman -U` the `linux-ogc` + `linux-ogc-headers` packages from `/ctx/oci/akmods/kernel/`.
-2. Install the rest (e.g. `gnome` + `gdm` via pacman).
+2. Install the rest (e.g. `plasma` + `sddm` via pacman for holo variants).
 3. Drop the base's stock `linux` so linux-ogc is active:
    `if pacman -Q linux; then pacman -Rdd --noconfirm linux; fi`.
 4. Copy the cached `.ko` into `/usr/lib/modules/<kver>/extra/nvidia/`, then
@@ -109,7 +109,7 @@ Two Arch-specific gotchas that matter for a non-stock kernel build:
 
 - **arch-bootc boots via dracut, but custom kernels use mkinitcpio.** Install
   `mkinitcpio` *before* `pacman -U` of the OGC kernel (the kernel's install hook
-  regenerates the initramfs and fails if mkinitcpio is absent). holo and edward
+   regenerates the initramfs and fails if mkinitcpio is absent). holo-amd and holo-nvidia
   both call `mkinitcpio -P` at the end.
 - **XFS must survive a `bootc switch`.** If the existing root `/` is XFS, verify
   the active kernel has XFS support (module file or `CONFIG_XFS_FS=y/m`), fail

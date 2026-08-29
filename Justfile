@@ -316,7 +316,7 @@ build-all:
     just build-fsdk
     just build-containerfile server
     just build-containerfile aira
-    just build-containerfile edward
+    just build-containerfile robin
     just build-containerfile ai
 
 # Build an image then rechunk it for smaller bootc delta updates
@@ -484,7 +484,7 @@ variant-env $target_image=image_name:
         fsdk*)        IMAGE_NAME="blueprint";    DEFAULT_TAG="fsdk" ;;
         server*)      IMAGE_NAME="server";       DEFAULT_TAG="testing" ;;
         aira*)        IMAGE_NAME="aira";         DEFAULT_TAG="testing" ;;
-        edward*)      IMAGE_NAME="edward";       DEFAULT_TAG="testing" ;;
+        robin*)      IMAGE_NAME="robin";       DEFAULT_TAG="testing" ;;
         ai*)          IMAGE_NAME="ai";           DEFAULT_TAG="testing" ;;
         *)
             echo "Unknown variant: '${target_image}'" >&2
@@ -606,7 +606,7 @@ build-iso $target_image=("localhost/" + image_name) $tag=default_tag: && (_build
 
 # Build an installer ISO using bootc-installer
 [group('Build Virtal Machine Image')]
-build-iso-gnome: && (_rebuild-bib "ghcr.io/huntedraven7/blueprint" "edward" "iso" "disk_config/iso-gnome.toml")
+build-iso-kde: && (_rebuild-bib "ghcr.io/huntedraven7/blueprint" "robin" "iso" "disk_config/iso-kde.toml")
 
 # Build a server installer ISO using BIB (Anaconda-based)
 [group('Build Virtal Machine Image')]

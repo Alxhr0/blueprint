@@ -1,7 +1,7 @@
 # Unified Containerfile for the "other" blueprint images:
 #   arch, debian, ubuntu, opensuse, gentoo, nixos, holo-amd, holo-nvidia
 #
-# edward, aira, server, crmy, ai keep their own containerfiles/Containerfile.<variant>.
+# robin, aira, server, crmy, ai keep their own containerfiles/Containerfile.<variant>.
 #
 # Select the target and base with build args (the Justfile `build` recipe does
 # this for you):

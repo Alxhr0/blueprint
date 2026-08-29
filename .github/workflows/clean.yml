@@ -33,7 +33,7 @@ jobs:
               "ubuntu-bootc",
               "server",
               "aira",
-              "edward",
+              "robin",
               "ai"
             ]
           older-than: 90 days
