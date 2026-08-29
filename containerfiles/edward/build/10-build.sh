@@ -65,17 +65,9 @@ else
 fi
 
 if [[ -d "${AKMODS_CACHE}/kernel" ]]; then
-    if [[ -n "${KERNEL_VERSION:-}" ]]; then
-        pacman -U --noconfirm \
-            "${AKMODS_CACHE}/kernel/linux-ogc-${KERNEL_VERSION}.pkg.tar.zst" \
-            "${AKMODS_CACHE}/kernel/linux-ogc-headers-${KERNEL_VERSION}.pkg.tar.zst"
-    else
-        # Fallback to broad globs if kernel-info is missing. Use a pattern
-        # that only matches the kernel package (not headers) to avoid
-        # "duplicate target" when the same file matches both patterns.
-        pacman -U --noconfirm "${AKMODS_CACHE}"/kernel/linux-ogc-[0-9]*.pkg.tar.zst \
-            "${AKMODS_CACHE}"/kernel/linux-ogc-headers-*.pkg.tar.zst
-    fi
+    pacman -U --noconfirm \
+        "${AKMODS_CACHE}"/kernel/linux-ogc-[0-9]*.pkg.tar.zst \
+        "${AKMODS_CACHE}"/kernel/linux-ogc-headers-*.pkg.tar.zst
 else
     echo "WARNING: akmods cache kernel packages not found at ${AKMODS_CACHE}/kernel" >&2
 fi
