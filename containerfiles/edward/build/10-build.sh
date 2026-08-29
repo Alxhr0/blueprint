@@ -43,7 +43,7 @@ if pacman -Q linux >/dev/null 2>&1; then
     pacman -Rdd --noconfirm linux
 fi
 
-pacman -Syu --noconfirm
+pacman -Syu --noconfirm --overwrite /var/log
 
 # mkinitcpio must be installed before the OGC kernel below (its install hook
 # regenerates the initramfs); the arch-bootc base uses dracut instead.
