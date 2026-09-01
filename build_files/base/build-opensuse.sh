@@ -4,8 +4,9 @@ set -ouex pipefail
 cp -avf "/ctx/system_files/global"/. /
 cp -avf "/ctx/system_files/opensuse"/. /
 
-zypper refresh
+zypper dup -y
 zypper install -y \
+    patterns-base-base \
     kernel-default \
     kernel-firmware-all \
     systemd \
